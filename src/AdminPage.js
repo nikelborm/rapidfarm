@@ -9,7 +9,7 @@ class AdminPage extends Component {
         }
         return (
             <div>
-                {/* какие-то кнопки для управления графиками */}
+                {/* какие-то кнопки для управления фермой */}
                 <PublicPage/>
             </div>
         );

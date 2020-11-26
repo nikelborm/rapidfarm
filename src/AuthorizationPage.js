@@ -14,12 +14,13 @@ class AuthForm extends Component {
         this.setState({
             isSendingNow: true
         });
-        const { email, password, name } = event.target.elements;
+        const { email, password, confirmPassword, fullName } = event.target.elements;
 
         this.context.formSubmittingHandler(
             email.value,
             password.value,
-            name?.value
+            confirmPassword?.value,
+            fullName?.value
         ).catch((error) => {
             // TODO: Красиво уведомить пользователя об ошибке, а не через alert
             alert(error);
@@ -39,18 +40,24 @@ class AuthForm extends Component {
                 <Form onSubmit={this.onSubmit}>
                     {!isLogin && (
                         <Form.Group controlId="nameInput">
-                            <Form.Label>Имя</Form.Label>
-                            <Form.Control type="text" name="name" required placeholder="Введите своё имя" />
+                            <Form.Label>Введите полное имя:</Form.Label>
+                            <Form.Control type="text" name="fullName" required placeholder="Иванов Иван" />
                         </Form.Group>
                     )}
                     <Form.Group controlId="emailInput">
-                        <Form.Label>Email адрес</Form.Label>
-                        <Form.Control type="email" name="email" required placeholder="Введите email"  />
+                        <Form.Label>Введите email адрес:</Form.Label>
+                        <Form.Control type="email" name="email" required placeholder="ivan@mail.ru" />
                     </Form.Group>
                     <Form.Group controlId="passwordInput">
-                        <Form.Label>Password</Form.Label>
-                        <Form.Control type="password" name="password" required placeholder="Введите пароль" />
+                        <Form.Label>Введите пароль:</Form.Label>
+                        <Form.Control type="password" name="password" required placeholder="********" />
                     </Form.Group>
+                    {!isLogin && (
+                        <Form.Group controlId="confirmPasswordInput">
+                            <Form.Label>Повторите пароль:</Form.Label>
+                            <Form.Control type="password" name="confirmPassword" required placeholder="********" />
+                        </Form.Group>
+                    )}
                     <Button variant="primary" type="submit" disabled={ this.state.isSendingNow }>
                         { this.state.isSendingNow
                             ? (isLogin ? "Вход..." : "Создание аккаунта...")
