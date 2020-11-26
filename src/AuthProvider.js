@@ -5,7 +5,7 @@ export const AuthContext = React.createContext({
     isAuthorized: false,
     formType: getCookie("isRegistrationStage") ? "register" : "login",
     formSubmittingHandler: async()=>{},
-    name: "",
+    fullName: "",
     logout: async()=>{},
 });
 
@@ -16,8 +16,8 @@ class AuthProvider extends Component {
     login = async ( email, password ) => {
         // Запрос на авторизацию
     }
-    register = async ( email, password, name ) => {
-        console.log('email, password, name: ', email, password, name);
+    register = async ( email, password, confirmPassword, fullName ) => {
+        console.log('email, password, confirmPassword, fullName: ', email, password, confirmPassword, fullName);
         // Запрос на авторизацию
 
         // Если всё проходит успешно:
@@ -26,14 +26,14 @@ class AuthProvider extends Component {
             isAuthorized: true,
             formType: "login",
             formSubmittingHandler: this.login,
-            name
+            fullName
         }); */
     }
     state = {
         isAuthorized: false,
         formType: getCookie("isRegistrationStage") ? "register" : "login",
         formSubmittingHandler: getCookie("isRegistrationStage") ? this.register : this.login,
-        name: ""
+        fullName: ""
     }
     componentWillUnmount() {
         this.logout();
