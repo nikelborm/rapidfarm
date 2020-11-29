@@ -96,9 +96,9 @@ app.post("/loginAsFarm", function (request, response) {
     const { secret, name } = request.body;
     let { resdata, rp } = createEmptyResponseData();
 
-    if ( secret?.length !== 64 ) {
+    if ( typeof secret !== "string" || secret.length !== 64 ) {
         rp.info = "Incorrect key format";
-    } else if ( name?.length ) {
+    } else if ( typeof name !== "string" || name.length ) {
         rp.info = "Farm unnamed";
     } else if ( sha256( secret ) in farmSecrets === false ) {
         rp.info = "Farm not registered";
