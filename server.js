@@ -38,10 +38,10 @@ const mongoLink = process.env.MONGODB_URI || "mongodb://myUserAdmin:0000@localho
 const redisLink = process.env.REDIS_URL || "redis://admin:foobared@127.0.0.1:6379";
 const sessionSecretKey = process.env.SESSION_SECRET || "wHaTeVeR123";
 const cookieSecretKey = process.env.COOKIE_SECRET || "wHaTeVeR123";
-const farmSecrets = JSON.parse(process.env.FARM_SECRETS) || {
+const farmSecrets = JSON.parse(process.env.FARM_SECRETS || `{
     "ec5d48de1fea693990a7f5eebd52c632c744d473d595d0eb883e55b7dec14327" : "Лондонская ферма",
-    "d8a928b2043db77e340b523547bf16cb4aa483f0645fe0a290ed1f20aab76257" /* asdasdasd */: "Команда 2"
-};
+    "d8a928b2043db77e340b523547bf16cb4aa483f0645fe0a290ed1f20aab76257" : "Команда 2"
+}`); /* Команда 2 - asdasdasd */
 
 
 let dbClient;
