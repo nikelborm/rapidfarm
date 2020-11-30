@@ -15,7 +15,6 @@ const sha256 = require("sha256");
 function createEmptyResponseData() {
     // * Создаёт базовый объект ответа на запрос
     const resdata = {
-        handlerType: "logs",
         report: {
             isError: true,
             info: ""
@@ -31,11 +30,23 @@ function closeConnection( wsConnection, reason ) {
     wsConnection.terminate();
 }
 function setMainFarm( name ) {
-    
+
+}
+function sendToMainFarm() {
+
+}
+function sendToUsers( message ) {
+    //* Отправляет сообщение онлайн пользователям
+    for (const client of WSServer.clients) {
+        if ( !client.isFarm ) {
+            client.send(JSON.stringify(message));
+        }
+    }
 }
 const port = process.env.PORT || 3000;
-const mongoLink = process.env.MONGODB_URI || "mongodb://myUserAdmin:0000@localhost:27017/admin";
+const mongoLink = process.env.MONGODB_URI || "mongodb://Admin:0000@localhost:27017/admin";
 const redisLink = process.env.REDIS_URL || "redis://admin:foobared@127.0.0.1:6379";
+const isRegistrationAllowed = process.env.IS_REGISTRATION_ALLOWED;
 const sessionSecretKey = process.env.SESSION_SECRET || "wHaTeVeR123";
 const cookieSecretKey = process.env.COOKIE_SECRET || "wHaTeVeR123";
 const farmSecrets = JSON.parse(process.env.FARM_SECRETS || `{
@@ -48,6 +59,7 @@ let dbClient;
 let users = {};
 let mainFarm;
 let sensorsLogs = {};
+let webCommandsLogs = {};
 
 const app = express();
 const redisClient = redis.createClient(redisLink);
@@ -146,8 +158,12 @@ app.post("/loginAsUser", function (request, response) {
 });
 
 app.post("/registerAsUser", function (request, response) {
-    const { password, confirmPassword, fullName, email } = request.body;
     let { resdata, rp } = createEmptyResponseData();
+    if ( !isRegistrationAllowed ) {
+        rp.info = "Регистрация запрещена"
+        return response.json(resdata);
+    }
+    const { password, confirmPassword, fullName, email } = request.body;
     resdata.reply.errorField = !email ? "email" : !password ? "password" : !fullName ? "fullName" : "";
     rp.info = !email ? "Вы не ввели почту" : !password ? "Вы не ввели пароль" : !fullName ? "Вы не ввели ваше имя" : "";
 
@@ -215,12 +231,12 @@ WSServer.on("connection", (connection, request) => {
         }
         if ( session.isFarm ) {
             // Описание того что ферма может отправить на сервер:
-                // {"messageType": "event", "process": "oxidation",     "state": "started" }
-                // {"messageType": "event", "process": "oxidation",     "state": "finished"}
-                // {"messageType": "event", "process": "watering",      "state": "started" }
-                // {"messageType": "event", "process": "watering",      "state": "finished"}
-                // {"messageType": "event", "process": "lighting",      "state": "started" }
-                // {"messageType": "event", "process": "lighting",      "state": "finished"}
+                //* {"messageType": "event", "process": "oxidation",     "state": "started" }
+                //* {"messageType": "event", "process": "oxidation",     "state": "finished"}
+                //* {"messageType": "event", "process": "watering",      "state": "started" }
+                //* {"messageType": "event", "process": "watering",      "state": "finished"}
+                //* {"messageType": "event", "process": "lighting",      "state": "started" }
+                //* {"messageType": "event", "process": "lighting",      "state": "finished"}
                 // {"messageType": "event", "process": "groundHeating", "state": "started" }
                 // {"messageType": "event", "process": "groundHeating", "state": "finished"}
                 // {"messageType": "event", "process": "waterHeating",  "state": "started" }
@@ -233,32 +249,71 @@ WSServer.on("connection", (connection, request) => {
                 // {"messageType": "criticalEvent", "problemWith": "groundHumidity",       "valueNow": Число, "criticalValue": Число }
                 // {"messageType": "criticalEvent", "problemWith": "airHumidity",          "valueNow": Число, "criticalValue": Число }
                 // {"messageType": "criticalEvent", "problemWith": "groundOxidationState", "valueNow": Число, "criticalValue": Число }
-                // {"messageType": "criticalEvent", "problemWith": "waterOxidationState",  "valueNow": Число, "criticalValue": Число }
+                //* {"messageType": "criticalEvent", "problemWith": "waterOxidationState",  "valueNow": Число, "criticalValue": Число }
                 // {"messageType": "criticalEvent", "problemWith": "groundSaltState",      "valueNow": Число, "criticalValue": Число }
-                // {"messageType": "criticalEvent", "problemWith": "waterSaltState",       "valueNow": Число, "criticalValue": Число }
+                //* {"messageType": "criticalEvent", "problemWith": "waterSaltState",       "valueNow": Число, "criticalValue": Число }
                 // {"messageType": "sensorLogs", "sensor": "groundTemperature",    "value": Число }
                 // {"messageType": "sensorLogs", "sensor": "waterTemperature",     "value": Число }
                 // {"messageType": "sensorLogs", "sensor": "airTemperature",       "value": Число }
                 // {"messageType": "sensorLogs", "sensor": "groundHumidity",       "value": Число }
                 // {"messageType": "sensorLogs", "sensor": "airHumidity",          "value": Число }
                 // {"messageType": "sensorLogs", "sensor": "groundOxidationState", "value": Число }
-                // {"messageType": "sensorLogs", "sensor": "waterOxidationState",  "value": Число }
+                //* {"messageType": "sensorLogs", "sensor": "waterOxidationState",  "value": Число }
                 // {"messageType": "sensorLogs", "sensor": "groundSaltState",      "value": Число }
-                // {"messageType": "sensorLogs", "sensor": "waterSaltState",       "value": Число }
+                //* {"messageType": "sensorLogs", "sensor": "waterSaltState",       "value": Число }
             connection.isFarm = session.isFarm;
             connection.name = session.name;
+            if( !mainFarm ) mainFarm = connection;
             connection.on("message", (input) => {
+                const data = JSON.parse(input.toString());
+                // eslint-disable-next-line default-case
+                switch (data.messageType) {
+                    case "event":
+                        // просто переслать всем онлайн пользователям
+                        if ( connection.name === mainFarm.name ) sendToUsers(data); // и ещё имя фермы
+                        break;
+                    case "criticalEvent":
+                        // переслать всем онлайн пользователям и уведомить их ещё как-то (по почте, через пуш уведомления, в слак, в вк, в телегу, в дискорд)
+                        if ( connection.name === mainFarm.name ) sendToUsers(data);
+                        break;
+                    case "sensorLogs":
+                        // переслать всем онлайн пользователям и сохранить в бд с датой
+                        if ( connection.name === mainFarm.name ) sendToUsers(data);
+                        sensorsLogs.insertOne({
+                            sensor: data.sensor,
+                            value: data.value,
+                            date: new Date(),
+                            farmName: connection.name
+                        });
+                }
                 // TODO: сделать функцию обработчик для добавления новой фермы
                 // TODO: сделать функцию обработчик для установки активной фермы
                 // Все команды, что прилетают идут главной ферме. А чтобы отдать другой - нужно сначала переключить
-                // const { authInfo } = connection;
-                // TODO: Проверять не слишком ли большие данные, чтобы долго их не обрабатывать
-                console.log('Пришло в ws: ', JSON.parse(input.toString()));
+                console.log('Пришло в ws: ', data);
                 // if (rp.info) return connection.send(JSON.stringify(resdata));
             });
         } else {
             // обработчики для команд и запросов пользователя
-
+                // {"command": "start", "process": "oxidation"    }
+                // {"command": "start", "process": "watering"     }
+                // {"command": "start", "process": "lighting"     }
+                // {"command": "start", "process": "groundHeating"}
+                // {"command": "start", "process": "waterHeating" }
+                // {"command": "start", "process": "airHeating"   }
+                // {"command": "startWithTiming", seconds: Число, "process": "oxidation"    }
+                // {"command": "startWithTiming", seconds: Число, "process": "watering"     }
+                // {"command": "startWithTiming", seconds: Число, "process": "lighting"     }
+                // {"command": "startWithTiming", seconds: Число, "process": "groundHeating"}
+                // {"command": "startWithTiming", seconds: Число, "process": "waterHeating" }
+                // {"command": "startWithTiming", seconds: Число, "process": "airHeating"   }
+                // {"command": "finish", "process": "oxidation"    }
+                // {"command": "finish", "process": "watering"     }
+                // {"command": "finish", "process": "lighting"     }
+                // {"command": "finish", "process": "groundHeating"}
+                // {"command": "finish", "process": "waterHeating" }
+                // {"command": "finish", "process": "airHeating"   }
+                // {"command": "setMainFarm", name: "asdasdasd"   }
+                // {"command": "stopAllSystems", name: "asdasdasd"   }
             connection.authInfo = session.authInfo;
             connection.on("message", (input) => {
                 // TODO: сделать функцию обработчик для добавления новой фермы
@@ -279,7 +334,13 @@ const cleaner = setInterval(() => {
         if (!connection.isAlive) {
             if (connection.isFarm) {
                 // TODO: Если отключилась ферма - уведомить всех по почте или как-то ещё, а то пиздец. Это либо отключение интернета либо электричества блять либо пожар нахуй и ферма горит либо залило водой плату или короткое замыкание от этого. Что бы ни было причиной - это пиздец. А на ферме кстати нужно сделать чтобы автоподключение происходило
-                // TODO: Сделать разустановку главной фермы, если подключена единственная
+                mainFarm = null;
+                for (const client of WSServer.clients) {
+                    if ( client.isFarm ) {
+                        mainFarm = client;
+                        break;
+                    }
+                }
             }
             return connection.terminate();
         }
@@ -298,6 +359,7 @@ mongoClient.connect((err, client) => {
     dbClient = client;
     users = client.db().collection("users");
     sensorsLogs = client.db().collection("sensorsLogs");
+    webCommandsLogs = client.db().collection("webCommandsLogs");
     server.listen(port, function(){
         console.log("Сервер слушает");
     });
