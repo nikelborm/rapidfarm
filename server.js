@@ -45,7 +45,7 @@ function sendToUsers( message ) {
 }
 const port = process.env.PORT || 3000;
 const mongoLink = process.env.MONGODB_URI || "mongodb://Admin:0000@localhost:27017/admin";
-const redisLink = process.env.REDIS_URL || "redis://admin:foobared@127.0.0.1:6379";
+const redisLink = process.env.REDIS_TLS_URL || "redis://admin:foobared@127.0.0.1:6379";
 const isRegistrationAllowed = process.env.IS_REGISTRATION_ALLOWED;
 const sessionSecretKey = process.env.SESSION_SECRET || "wHaTeVeR123";
 const cookieSecretKey = process.env.COOKIE_SECRET || "wHaTeVeR123";
@@ -60,6 +60,8 @@ let users = {};
 let mainFarm;
 let sensorsLogs = {};
 let webCommandsLogs = {};
+let farmState = {};
+let farmConfigs = {};
 
 const app = express();
 const redisClient = redis.createClient(redisLink);
@@ -213,6 +215,7 @@ app.post("/registerAsUser", function (request, response) {
 });
 
 
+
 WSServer.on("connection", (connection, request) => {
     connection.isAlive = true;
     connection.on("pong", () => {
@@ -230,37 +233,6 @@ WSServer.on("connection", (connection, request) => {
             return closeConnection(connection, "Вы не авторизованы!");
         }
         if ( session.isFarm ) {
-            // Описание того что ферма может отправить на сервер:
-                //* {"messageType": "event", "process": "oxidation",     "state": "started" }
-                //* {"messageType": "event", "process": "oxidation",     "state": "finished"}
-                //* {"messageType": "event", "process": "watering",      "state": "started" }
-                //* {"messageType": "event", "process": "watering",      "state": "finished"}
-                //* {"messageType": "event", "process": "lighting",      "state": "started" }
-                //* {"messageType": "event", "process": "lighting",      "state": "finished"}
-                // {"messageType": "event", "process": "groundHeating", "state": "started" }
-                // {"messageType": "event", "process": "groundHeating", "state": "finished"}
-                // {"messageType": "event", "process": "waterHeating",  "state": "started" }
-                // {"messageType": "event", "process": "waterHeating",  "state": "finished"}
-                // {"messageType": "event", "process": "airHeating",    "state": "started" }
-                // {"messageType": "event", "process": "airHeating",    "state": "finished"}
-                // {"messageType": "criticalEvent", "problemWith": "groundTemperature",    "valueNow": Число, "criticalValue": Число }
-                // {"messageType": "criticalEvent", "problemWith": "waterTemperature",     "valueNow": Число, "criticalValue": Число }
-                // {"messageType": "criticalEvent", "problemWith": "airTemperature",       "valueNow": Число, "criticalValue": Число }
-                // {"messageType": "criticalEvent", "problemWith": "groundHumidity",       "valueNow": Число, "criticalValue": Число }
-                // {"messageType": "criticalEvent", "problemWith": "airHumidity",          "valueNow": Число, "criticalValue": Число }
-                // {"messageType": "criticalEvent", "problemWith": "groundOxidationState", "valueNow": Число, "criticalValue": Число }
-                //* {"messageType": "criticalEvent", "problemWith": "waterOxidationState",  "valueNow": Число, "criticalValue": Число }
-                // {"messageType": "criticalEvent", "problemWith": "groundSaltState",      "valueNow": Число, "criticalValue": Число }
-                //* {"messageType": "criticalEvent", "problemWith": "waterSaltState",       "valueNow": Число, "criticalValue": Число }
-                // {"messageType": "sensorLogs", "sensor": "groundTemperature",    "value": Число }
-                // {"messageType": "sensorLogs", "sensor": "waterTemperature",     "value": Число }
-                // {"messageType": "sensorLogs", "sensor": "airTemperature",       "value": Число }
-                // {"messageType": "sensorLogs", "sensor": "groundHumidity",       "value": Число }
-                // {"messageType": "sensorLogs", "sensor": "airHumidity",          "value": Число }
-                // {"messageType": "sensorLogs", "sensor": "groundOxidationState", "value": Число }
-                //* {"messageType": "sensorLogs", "sensor": "waterOxidationState",  "value": Число }
-                // {"messageType": "sensorLogs", "sensor": "groundSaltState",      "value": Число }
-                //* {"messageType": "sensorLogs", "sensor": "waterSaltState",       "value": Число }
             connection.isFarm = session.isFarm;
             connection.name = session.name;
             if( !mainFarm ) mainFarm = connection;
@@ -288,32 +260,16 @@ WSServer.on("connection", (connection, request) => {
                 }
                 // TODO: сделать функцию обработчик для добавления новой фермы
                 // TODO: сделать функцию обработчик для установки активной фермы
+                // TODO: Добавить возможность изменить тайминги полива освещения и кислорирования
                 // Все команды, что прилетают идут главной ферме. А чтобы отдать другой - нужно сначала переключить
                 console.log('Пришло в ws: ', data);
                 // if (rp.info) return connection.send(JSON.stringify(resdata));
             });
         } else {
-            // обработчики для команд и запросов пользователя
-                // {"command": "start", "process": "oxidation"    }
-                // {"command": "start", "process": "watering"     }
-                // {"command": "start", "process": "lighting"     }
-                // {"command": "start", "process": "groundHeating"}
-                // {"command": "start", "process": "waterHeating" }
-                // {"command": "start", "process": "airHeating"   }
-                // {"command": "startWithTiming", seconds: Число, "process": "oxidation"    }
-                // {"command": "startWithTiming", seconds: Число, "process": "watering"     }
-                // {"command": "startWithTiming", seconds: Число, "process": "lighting"     }
-                // {"command": "startWithTiming", seconds: Число, "process": "groundHeating"}
-                // {"command": "startWithTiming", seconds: Число, "process": "waterHeating" }
-                // {"command": "startWithTiming", seconds: Число, "process": "airHeating"   }
-                // {"command": "finish", "process": "oxidation"    }
-                // {"command": "finish", "process": "watering"     }
-                // {"command": "finish", "process": "lighting"     }
-                // {"command": "finish", "process": "groundHeating"}
-                // {"command": "finish", "process": "waterHeating" }
-                // {"command": "finish", "process": "airHeating"   }
-                // {"command": "setMainFarm", name: "asdasdasd"   }
-                // {"command": "stopAllSystems", name: "asdasdasd"   }
+            if( mainFarm ) {
+                // Прислать целый пакет данных со всеми показателями фермы (а для этого сначала их надо получить)
+                mainFarm.send(JSON.stringify(resdata))
+            }
             connection.authInfo = session.authInfo;
             connection.on("message", (input) => {
                 // TODO: сделать функцию обработчик для добавления новой фермы
@@ -360,6 +316,7 @@ mongoClient.connect((err, client) => {
     users = client.db().collection("users");
     sensorsLogs = client.db().collection("sensorsLogs");
     webCommandsLogs = client.db().collection("webCommandsLogs");
+    farmConfigs = client.db().collection("farmConfigs");
     server.listen(port, function(){
         console.log("Сервер слушает");
     });

@@ -1,10 +1,10 @@
 import React, { Component } from "react";
 import { AuthContext } from "./AuthProvider.js";
-import { Redirect, withRouter } from "react-router-dom";
+import { Redirect } from "react-router-dom";
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 
-class AuthForm extends Component {
+export class AuthForm extends Component {
     static contextType = AuthContext;
     state = {
         isSendingNow: false
@@ -16,7 +16,7 @@ class AuthForm extends Component {
         });
         const { email, password, confirmPassword, fullName } = event.target.elements;
 
-        this.context.formSubmittingHandler(
+        this.context[this.props.formType](
             email.value,
             password.value,
             confirmPassword?.value,
@@ -30,7 +30,7 @@ class AuthForm extends Component {
         });
     };
     render() {
-        const isLogin = this.context.formType === "login";
+        const isLogin = this.props.formType === "login";
         if ( isLogin && this.context.isAuthorized ) {
             return <Redirect to="/admin" />;
         }
@@ -69,5 +69,4 @@ class AuthForm extends Component {
         );
     }
 }
-
-export default withRouter(AuthForm);
+export default AuthForm;

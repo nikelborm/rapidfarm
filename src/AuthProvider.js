@@ -1,18 +1,20 @@
 import React, { Component } from "react";
 import getCookie from "./getCookie";
 import loader from "./loader";
+export let isRegistrationAllowed = getCookie("isRegistrationAllowed");
 
 export const AuthContext = React.createContext({
     isAuthorized: false,
-    formType: getCookie("isRegistrationStage") ? "register" : "login",
-    formSubmittingHandler: async()=>{},
     fullName: "",
     logout: async()=>{},
+    register: async()=>{},
+    login: async()=>{},
 });
 
 class AuthProvider extends Component {
-    logout = async (  ) => {
+    logout = async () => {
         // запрос на выход чтобы сервер стёр сессию
+        await loader({}, "/logout");
     }
     login = async ( email, password ) => {
         // Запрос на авторизацию
@@ -29,8 +31,6 @@ class AuthProvider extends Component {
         // TODO: либо сервер либо клиент ставит новые куки
         this.setState({
             isAuthorized: true,
-            formType: "login",
-            formSubmittingHandler: this.login,
             fullName: responseData.reply.fullName
         });
     }
@@ -47,18 +47,14 @@ class AuthProvider extends Component {
         console.log('responseData: ', responseData);
         if ( responseData.report.isError ) return;
         // Если всё проходит успешно:
-        // TODO: либо сервер либо клиент ставит новые куки
         this.setState({
             isAuthorized: true,
-            formType: "login",
-            formSubmittingHandler: this.login,
             fullName
         });
+        isRegistrationAllowed = false;
     }
     state = {
         isAuthorized: false,
-        formType: getCookie("isRegistrationStage") ? "register" : "login",
-        formSubmittingHandler: getCookie("isRegistrationStage") ? this.register : this.login,
         fullName: ""
     }
     componentWillUnmount() {
@@ -69,7 +65,9 @@ class AuthProvider extends Component {
             <AuthContext.Provider
                 value={{
                     ...this.state,
-                    logout: this.logout
+                    logout: this.logout,
+                    register: this.register,
+                    login: this.login,
                 }}
                 children={ this.props.children }
             />
