@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
 import { Route, Switch, Redirect } from "react-router-dom";
 import AdminRoute from "./AdminPage";
 import LogoutRoute from "./LogoutPage";
@@ -9,29 +9,31 @@ import { isRegistrationAllowed } from "./AuthProvider";
 
 class App extends Component {
     render() {
-        return (<>
-            <Menu/>
-            <Switch>
-                <Route exact path="/login">
-                    <AuthForm formType="login"/>
-                </Route>
-                <Route
-                    exact
-                    path="/register"
-                    render={() =>
-                        isRegistrationAllowed()
-                            ? <AuthForm formType="register"/>
-                            : <Redirect to="/"/>
-                    }
-                />
-                <LogoutRoute exact path="/logout"/>
-                <AdminRoute  exact path="/admin" />
-                <PublicRoute exact path="/"      />
-                <Route path="*">
-                    <Redirect to="/"/>
-                </Route>
-            </Switch>
-        </>);
+        return (
+            <>
+                <Menu/>
+                <Switch>
+                    <Route exact path="/login">
+                        <AuthForm formType="login"/>
+                    </Route>
+                    <Route
+                        exact
+                        path="/register"
+                        render={ () =>
+                            isRegistrationAllowed()
+                                ? <AuthForm formType="register"/>
+                                : <Redirect to="/"/>
+                        }
+                    />
+                    <LogoutRoute exact path="/logout"/>
+                    <AdminRoute  exact path="/admin" />
+                    <PublicRoute exact path="/"      />
+                    <Route path="*">
+                        <Redirect to="/"/>
+                    </Route>
+                </Switch>
+            </>
+        );
     }
 }
 

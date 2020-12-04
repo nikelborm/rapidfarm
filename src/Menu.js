@@ -1,7 +1,7 @@
 import React, { PureComponent, Component } from "react";
 import { withRouter } from "react-router";
 import { isRegistrationAllowed } from "./AuthProvider";
-import Nav from 'react-bootstrap/Nav';
+import Nav from "react-bootstrap/Nav";
 import LinkContainer from "react-router-bootstrap/lib/LinkContainer";
 
 class MenuPoint extends PureComponent {
@@ -9,8 +9,8 @@ class MenuPoint extends PureComponent {
         const { to, text } = this.props;
         return (
             <Nav.Item>
-                <LinkContainer to={to}>
-                    <Nav.Link children={text}/>
+                <LinkContainer to={ to }>
+                    <Nav.Link children={ text }/>
                 </LinkContainer>
             </Nav.Item>
         );
@@ -21,16 +21,16 @@ const register = <MenuPoint to="/register" text="Создать аккаунт..
 const login =    <MenuPoint to="/login"    text="Войти в аккаунт..."  />;
 const main =     <MenuPoint to="/"         text="На главную..."       />;
 class Menu extends Component {
-    constructor(props) {
-        super(props);
+    constructor( props ) {
+        super( props );
 
         this.dynamicRenders = {
-            "/login": () => <> {main} {isRegistrationAllowed() && register} </>,
-            "/": () => <> {login} {isRegistrationAllowed() && register}  </>
+            "/login": () => <> { main }  { isRegistrationAllowed() && register } </>,
+            "/":      () => <> { login } { isRegistrationAllowed() && register } </>
         };
         this.staticRenders = {
-            "/register": <> {main} {login} </>,
-            "/admin": <> {logout} </>
+            "/register": <> { main } { login } </>,
+            "/admin": <> { logout } </>
         };
     }
     render() {
@@ -40,9 +40,9 @@ class Menu extends Component {
                 className="justify-content-center"
                 children={
                     path in this.dynamicRenders
-                        ? this.dynamicRenders[path]()
+                        ? this.dynamicRenders[ path ]()
                         : path in this.staticRenders
-                            ? this.staticRenders[path]
+                            ? this.staticRenders[ path ]
                             : ""
                 }
             />
@@ -50,4 +50,4 @@ class Menu extends Component {
     }
 }
 
-export default withRouter(Menu);
+export default withRouter( Menu );

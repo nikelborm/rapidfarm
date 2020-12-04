@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
 import { PublicPage } from "./PublicPage";
 import { withRouter, Redirect } from "react-router-dom";
 
@@ -9,11 +9,11 @@ class AdminPage extends Component {
         }
         return (
             <div>
-                {/* какие-то кнопки для управления фермой */}
                 <PublicPage/>
+                {/* какие-то кнопки для управления фермой */}
             </div>
         );
     }
 }
 
-export default withRouter(AdminPage);
+export default withRouter( AdminPage );

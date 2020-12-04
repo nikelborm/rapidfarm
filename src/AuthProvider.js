@@ -1,57 +1,62 @@
 import React, { Component } from "react";
 import getCookie from "./getCookie";
 import loader from "./loader";
-export let isRegistrationAllowed = () => JSON.parse(getCookie("isRegistrationAllowed"));
+export let isRegistrationAllowed = () => JSON.parse( getCookie( "isRegistrationAllowed" ) );
 
-export const AuthContext = React.createContext({
+export const AuthContext = React.createContext( {
     isAuthorized: false,
     fullName: "",
-    logout: async()=>{},
-    register: async()=>{},
-    login: async()=>{},
+    logout: async () => {},
+    register: async () => {},
+    login: async () => {},
 });
 
 class AuthProvider extends Component {
     logout = async () => {
         // запрос на выход чтобы сервер стёр сессию
-        await loader({}, "/logout");
+        await loader( {}, "/logout" );
+        this.setState( {
+            isAuthorized: false,
+            fullName: ""
+        } );
     }
     login = async ( email, password ) => {
         // Запрос на авторизацию
-        console.log('email, password: ', email, password );
-        // Запрос на авторизацию
+        console.log( "email, password: ", email, password );
         const body = {
             email,
             password,
         };
-        const responseData = await loader(body, "/loginAsUser");
-        console.log('responseData: ', responseData);
+        const responseData = await loader( body, "/loginAsUser" );
+        console.log( "responseData: ", responseData );
         if ( responseData.report.isError ) return;
         // Если всё проходит успешно:
         // TODO: либо сервер либо клиент ставит новые куки
-        this.setState({
+        this.setState( {
             isAuthorized: true,
             fullName: responseData.reply.fullName
-        });
+        } );
     }
     register = async ( email, password, confirmPassword, fullName ) => {
-        console.log('email, password, confirmPassword, fullName: ', email, password, confirmPassword, fullName);
-        // Запрос на авторизацию
+        console.log( "email, password, confirmPassword, fullName: ", email, password, confirmPassword, fullName );
         const body = {
             email,
             password,
             confirmPassword,
             fullName
         };
-        const responseData = await loader(body, "/registerAsUser");
-        console.log('responseData: ', responseData);
+        const responseData = await loader( body, "/registerAsUser" );
+        console.log( "responseData: ", responseData );
         if ( responseData.report.isError ) return;
         // Если всё проходит успешно:
-        this.setState({
+        this.setState( {
             isAuthorized: true,
             fullName
-        });
-        isRegistrationAllowed = ()=>false;
+        } );
+        isRegistrationAllowed = () => false;
+    }
+    startWebsocketConnection = () => {
+
     }
     state = {
         isAuthorized: false,
@@ -63,15 +68,16 @@ class AuthProvider extends Component {
     render() {
         return (
             <AuthContext.Provider
-                value={{
+                value={ {
                     ...this.state,
                     logout: this.logout,
                     register: this.register,
                     login: this.login,
-                }}
+                } }
                 children={ this.props.children }
             />
         );
     }
 }
+
 export default AuthProvider;

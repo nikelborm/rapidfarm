@@ -1,17 +1,17 @@
 Что ферма может прислать на сервер?
 
-{"messageType": "event", "process": "oxidation",     "state": "started" }
-{"messageType": "event", "process": "oxidation",     "state": "finished"}
-{"messageType": "event", "process": "watering",      "state": "started" }
-{"messageType": "event", "process": "watering",      "state": "finished"}
-{"messageType": "event", "process": "lighting",      "state": "started" }
-{"messageType": "event", "process": "lighting",      "state": "finished"}
-{"messageType": "event", "process": "groundHeating", "state": "started" }
-{"messageType": "event", "process": "groundHeating", "state": "finished"}
-{"messageType": "event", "process": "waterHeating",  "state": "started" }
-{"messageType": "event", "process": "waterHeating",  "state": "finished"}
-{"messageType": "event", "process": "airHeating",    "state": "started" }
-{"messageType": "event", "process": "airHeating",    "state": "finished"}
+{"messageType": "event", "process": "oxidation",     isActive: true  }
+{"messageType": "event", "process": "oxidation",     isActive: false }
+{"messageType": "event", "process": "watering",      isActive: true  }
+{"messageType": "event", "process": "watering",      isActive: false }
+{"messageType": "event", "process": "lighting",      isActive: true  }
+{"messageType": "event", "process": "lighting",      isActive: false }
+{"messageType": "event", "process": "groundHeating", isActive: true  }
+{"messageType": "event", "process": "groundHeating", isActive: false }
+{"messageType": "event", "process": "waterHeating",  isActive: true  }
+{"messageType": "event", "process": "waterHeating",  isActive: false }
+{"messageType": "event", "process": "airHeating",    isActive: true  }
+{"messageType": "event", "process": "airHeating",    isActive: false }
 {"messageType": "criticalEvent", "problemWith": "groundTemperature",    "valueNow": Число, "criticalValue": Число }
 {"messageType": "criticalEvent", "problemWith": "waterTemperature",     "valueNow": Число, "criticalValue": Число }
 {"messageType": "criticalEvent", "problemWith": "airTemperature",       "valueNow": Число, "criticalValue": Число }
@@ -87,18 +87,18 @@
 
 Что сервер может прислать пользователю?
 
-{"messageType": "event", "process": "oxidation",     "state": "started" }
-{"messageType": "event", "process": "oxidation",     "state": "finished"}
-{"messageType": "event", "process": "watering",      "state": "started" }
-{"messageType": "event", "process": "watering",      "state": "finished"}
-{"messageType": "event", "process": "lighting",      "state": "started" }
-{"messageType": "event", "process": "lighting",      "state": "finished"}
-{"messageType": "event", "process": "groundHeating", "state": "started" }
-{"messageType": "event", "process": "groundHeating", "state": "finished"}
-{"messageType": "event", "process": "waterHeating",  "state": "started" }
-{"messageType": "event", "process": "waterHeating",  "state": "finished"}
-{"messageType": "event", "process": "airHeating",    "state": "started" }
-{"messageType": "event", "process": "airHeating",    "state": "finished"}
+{"messageType": "event", "process": "oxidation",     isActive: true  }
+{"messageType": "event", "process": "oxidation",     isActive: false }
+{"messageType": "event", "process": "watering",      isActive: true  }
+{"messageType": "event", "process": "watering",      isActive: false }
+{"messageType": "event", "process": "lighting",      isActive: true  }
+{"messageType": "event", "process": "lighting",      isActive: false }
+{"messageType": "event", "process": "groundHeating", isActive: true  }
+{"messageType": "event", "process": "groundHeating", isActive: false }
+{"messageType": "event", "process": "waterHeating",  isActive: true  }
+{"messageType": "event", "process": "waterHeating",  isActive: false }
+{"messageType": "event", "process": "airHeating",    isActive: true  }
+{"messageType": "event", "process": "airHeating",    isActive: false }
 {"messageType": "criticalEvent", "problemWith": "groundTemperature",    "valueNow": Число, "criticalValue": Число }
 {"messageType": "criticalEvent", "problemWith": "waterTemperature",     "valueNow": Число, "criticalValue": Число }
 {"messageType": "criticalEvent", "problemWith": "airTemperature",       "valueNow": Число, "criticalValue": Число }
