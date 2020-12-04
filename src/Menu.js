@@ -16,7 +16,7 @@ class Menu extends Component {
         super(props);
 
         const logout = <MenuPoint to="/logout" text="Выйти из аккаунта..."/>;
-        const register = isRegistrationAllowed && <MenuPoint to="/register" text="Создать аккаунт..."/>;
+        const register = isRegistrationAllowed() && <MenuPoint to="/register" text="Создать аккаунт..."/>;
         const login = <MenuPoint to="/login" text="Войти в аккаунт..."/>;
         const main = <MenuPoint to="/" text="На главную..."/>;
 
