@@ -99,6 +99,10 @@ function logout(request, response) {
         response.redirect("/");
     });
 }
+app.use(function(request, response, next){
+    response.cookie("isRegistrationAllowed", isRegistrationAllowed);
+    next();
+});
 app.get("/logout", logout);
 app.use(express.static(path.join(__dirname, "build")));
 app.get("/*", (request, response) => {

@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import getCookie from "./getCookie";
 import loader from "./loader";
-export let isRegistrationAllowed = getCookie("isRegistrationAllowed");
+export let isRegistrationAllowed = () => JSON.parse(getCookie("isRegistrationAllowed"));
 
 export const AuthContext = React.createContext({
     isAuthorized: false,
@@ -51,7 +51,7 @@ class AuthProvider extends Component {
             isAuthorized: true,
             fullName
         });
-        isRegistrationAllowed = false;
+        isRegistrationAllowed = ()=>false;
     }
     state = {
         isAuthorized: false,
