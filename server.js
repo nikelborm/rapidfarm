@@ -103,12 +103,12 @@ app.use(function(request, response, next){
     response.cookie("isRegistrationAllowed", isRegistrationAllowed);
     next();
 });
-app.get("/logout", logout);
 app.use(express.static(path.join(__dirname, "build")));
 app.get("/*", (request, response) => {
     response.sendFile(path.join(__dirname, "build", "index.html"));
 });
 
+app.post("/logout", logout);
 
 app.post("/loginAsFarm", function (request, response) {
     const { secret, name } = request.body;
