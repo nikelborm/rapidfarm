@@ -20,8 +20,8 @@ class App extends Component {
                     path="/register"
                     render={() =>
                         isRegistrationAllowed()
-                            ? <Redirect to="/"/>
-                            : <AuthForm formType="register"/>
+                            ? <AuthForm formType="register"/>
+                            : <Redirect to="/"/>
                     }
                 />
                 <LogoutRoute exact path="/logout"/>
