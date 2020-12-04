@@ -1,6 +1,6 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import React from "react";
+import ReactDOM from "react-dom";
+import "bootstrap/dist/css/bootstrap.min.css";
 import { BrowserRouter } from "react-router-dom";
 import AuthProvider from "./AuthProvider";
 import App from "./App";
@@ -13,5 +13,5 @@ ReactDOM.render(
             </AuthProvider>
         </BrowserRouter>
     </React.StrictMode>,
-    document.getElementById('root')
+    document.getElementById( "root" )
 );

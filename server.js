@@ -227,8 +227,6 @@ WSServer.on("connection", (connection, request) => {
     });
     const cookies = cookie.parse(request.headers.cookie);
     const sid = cookieParser.signedCookie(cookies["connect.sid"], sessionSecretKey);
-    console.log('sid: ', sid);
-    console.log('cookies["connect.sid"]: ', cookies["connect.sid"]);
     if ( !sid ) return closeConnection(connection, "Вы не авторизованы!");
 
     store.get(sid, (err, session) => {
@@ -239,7 +237,7 @@ WSServer.on("connection", (connection, request) => {
         if ( session.isFarm ) {
             connection.isFarm = session.isFarm;
             connection.name = session.name;
-            if( !mainFarm ) mainFarm = connection;
+            if ( !mainFarm ) mainFarm = connection;
             connection.on("message", (input) => {
                 const data = JSON.parse(input.toString());
                 // eslint-disable-next-line default-case
@@ -266,11 +264,11 @@ WSServer.on("connection", (connection, request) => {
                 // TODO: сделать функцию обработчик для установки активной фермы
                 // TODO: Добавить возможность изменить тайминги полива освещения и кислорирования
                 // Все команды, что прилетают идут главной ферме. А чтобы отдать другой - нужно сначала переключить
-                console.log('Пришло в ws: ', data);
+                console.log("Пришло в ws: ", data);
                 // if (rp.info) return connection.send(JSON.stringify(resdata));
             });
         } else {
-            if( mainFarm ) {
+            if ( mainFarm ) {
                 // Прислать целый пакет данных со всеми показателями фермы (а для этого сначала их надо получить)
                 mainFarm.send(JSON.stringify(resdata))
             }
@@ -281,7 +279,7 @@ WSServer.on("connection", (connection, request) => {
                 // Все команды, что прилетают идут главной ферме. А чтобы отдать другой - нужно сначала переключить
                 // const { authInfo } = connection;
                 // TODO: Проверять не слишком ли большие данные, чтобы долго их не обрабатывать
-                console.log('Пришло в ws: ', JSON.parse(input.toString()));
+                console.log("Пришло в ws: ", JSON.parse(input.toString()));
                 // if (rp.info) return connection.send(JSON.stringify(resdata));
             });
         }
@@ -335,24 +333,24 @@ function shutdown() {
         console.log("WebSocket server closed.\n\nClosing Redis connection...");
         redisClient.quit((err) => {
             if (err) {console.log(err);haveErrors = true;}
-            console.log('Redis connection closed.\n\nClosing MongoDb connection...');
+            console.log("Redis connection closed.\n\nClosing MongoDb connection...");
             if (dbClient) {
                 dbClient.close(false, (err) => {
                     if (err) {console.log(err);haveErrors = true;}
-                    console.log('MongoDb connection closed.\n\nClosing http server...');
+                    console.log("MongoDb connection closed.\n\nClosing http server...");
                     if (server.listening) {
                         server.close((err) => {
                             if (err) {console.log(err);haveErrors = true;}
-                            console.log('Http server closed.\n');
+                            console.log("Http server closed.\n");
                             process.exit(~~haveErrors);
                         });
                     } else {
-                        console.log('Http server not started.\n');
+                        console.log("Http server not started.\n");
                         process.exit(1);
                     }
                 });
             } else {
-                console.log('MongoDb not started.\n\nClosing http server...\nHttp server not started.');
+                console.log("MongoDb not started.\n\nClosing http server...\nHttp server not started.");
                 process.exit(1);
             }
         });
