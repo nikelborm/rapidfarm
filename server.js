@@ -205,9 +205,10 @@ app.post("/registerAsUser", function (request, response) {
             email,
             fullName
         };
-        if (result.email === email) {
+        if ( result ) {
             resdata.reply.errorField = "email";
             rp.info = "Эта почта занята. Если вы владелец, попробуйте <a href='/restore' style='color: #FFFFFF;'>восстановить аккаунт</a>.";
+            return;
         }
         return users.insertOne(userProfile)
         .then((result) => {
