@@ -1,10 +1,10 @@
 import React, { Component } from "react";
-import { AuthContext } from "./AuthProvider.js";
+import AuthContext from "../tools/AuthContext";
 import { Redirect } from "react-router-dom";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 
-export class AuthForm extends Component {
+class AuthForm extends Component {
     static contextType = AuthContext;
     state = {
         isSendingNow: false

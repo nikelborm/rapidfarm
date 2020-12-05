@@ -1,8 +1,8 @@
 import React, { PureComponent, Component } from "react";
 import { withRouter } from "react-router";
-import { isRegistrationAllowed } from "./AuthProvider";
 import Nav from "react-bootstrap/Nav";
 import LinkContainer from "react-router-bootstrap/lib/LinkContainer";
+import { isRegistrationAllowed } from "./AuthProvider";
 
 class MenuPoint extends PureComponent {
     render() {

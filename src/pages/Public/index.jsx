@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Redirect, withRouter } from "react-router-dom";
-import { AuthContext } from "./AuthProvider";
+import AuthContext from "../../tools/AuthContext";
 import Container from "react-bootstrap/Container";
 import Process from "./Process";
 
@@ -20,4 +20,4 @@ export class PublicPage extends Component {
     }
 }
 
-export const PublicRoute = withRouter( PublicPage );
+export default withRouter( PublicPage );

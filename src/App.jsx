@@ -1,11 +1,11 @@
 import React, { Component } from "react";
 import { Route, Switch, Redirect } from "react-router-dom";
-import AdminRoute from "./AdminPage";
-import LogoutRoute from "./LogoutPage";
-import { AuthForm } from "./AuthForm";
-import { PublicRoute } from "./PublicPage";
-import Menu from "./Menu";
-import { isRegistrationAllowed } from "./AuthProvider";
+import AdminRoute from "./pages/Admin";
+import LogoutRoute from "./pages/Logout";
+import PublicRoute from "./pages/Public";
+import LoginRoute from "./pages/Login";
+import RegisterRoute from "./pages/Register";
+import Menu from "./components/Menu";
 
 class App extends Component {
     render() {
@@ -13,18 +13,8 @@ class App extends Component {
             <>
                 <Menu/>
                 <Switch>
-                    <Route exact path="/login">
-                        <AuthForm formType="login"/>
-                    </Route>
-                    <Route
-                        exact
-                        path="/register"
-                        render={ () =>
-                            isRegistrationAllowed()
-                                ? <AuthForm formType="register"/>
-                                : <Redirect to="/"/>
-                        }
-                    />
+                    <LoginRoute exact path="/login"/>
+                    <RegisterRoute exact path="/register"/>
                     <LogoutRoute exact path="/logout"/>
                     <AdminRoute  exact path="/admin" />
                     <PublicRoute exact path="/"      />
