@@ -12,10 +12,10 @@ export class PublicPage extends Component {
         }
         // return "Страница с графиками и инфой о состоянии теплицы";
         return <Container>
-            <Process title="Полив" activity={true}></Process>
-            <Process title="Аэрация" activity={true}></Process>
-            <Process title="Свет" activity={false}></Process>
-            <Process title="Подогрев почвы"></Process>
+            <Process title="Полив" activity={true}/>
+            <Process title="Аэрация" activity={true}/>
+            <Process title="Свет" activity={false}/>
+            <Process title="Подогрев почвы"/>
         </Container>;
     }
 }
