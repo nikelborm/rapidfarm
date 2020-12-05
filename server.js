@@ -141,6 +141,7 @@ app.post("/loginAsUser", function (request, response) {
 
     users.findOne({ email })
     .then((result) => {
+        console.log('result: ', result);
         if (!result) {
             resdata.reply.errorField = "email";
             rp.info = "Пользователь с указанной почтой не найден";
