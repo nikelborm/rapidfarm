@@ -99,9 +99,8 @@ app.use(favicon(__dirname + "/build/favicon.ico"));
 
 function logout(request, response) {
     request.session.destroy((err) => {
-        if (err)
-            return console.log(err);
-        response.redirect("/");
+        if (err) console.log(err);
+        response.json({});
     });
 }
 app.use(function(request, response, next){
@@ -285,7 +284,6 @@ WSServer.on("connection", (connection, request) => {
             connection.send(JSON.stringify({ class: "activitySyncPackage", package: farmActivity }));
         }
         connection.on("message", (input) => {
-            // TODO: Проверять не слишком ли большие данные, чтобы долго их не обрабатывать
             const data = JSON.parse(input.toString());
             console.log("Пришло в ws: ", data);
             //* Пользовательские запросы которые можно обработать и без авторизации
