@@ -1,135 +1,140 @@
 Что ферма может прислать на сервер?
 
-{"messageType": "event", "process": "oxidation",     isActive: true  }
-{"messageType": "event", "process": "oxidation",     isActive: false }
-{"messageType": "event", "process": "watering",      isActive: true  }
-{"messageType": "event", "process": "watering",      isActive: false }
-{"messageType": "event", "process": "lighting",      isActive: true  }
-{"messageType": "event", "process": "lighting",      isActive: false }
-{"messageType": "event", "process": "groundHeating", isActive: true  }
-{"messageType": "event", "process": "groundHeating", isActive: false }
-{"messageType": "event", "process": "waterHeating",  isActive: true  }
-{"messageType": "event", "process": "waterHeating",  isActive: false }
-{"messageType": "event", "process": "airHeating",    isActive: true  }
-{"messageType": "event", "process": "airHeating",    isActive: false }
-{"messageType": "criticalEvent", "problemWith": "groundTemperature",    "valueNow": Число, "criticalValue": Число }
-{"messageType": "criticalEvent", "problemWith": "waterTemperature",     "valueNow": Число, "criticalValue": Число }
-{"messageType": "criticalEvent", "problemWith": "airTemperature",       "valueNow": Число, "criticalValue": Число }
-{"messageType": "criticalEvent", "problemWith": "groundHumidity",       "valueNow": Число, "criticalValue": Число }
-{"messageType": "criticalEvent", "problemWith": "airHumidity",          "valueNow": Число, "criticalValue": Число }
-{"messageType": "criticalEvent", "problemWith": "groundOxidationState", "valueNow": Число, "criticalValue": Число }
-{"messageType": "criticalEvent", "problemWith": "waterOxidationState",  "valueNow": Число, "criticalValue": Число }
-{"messageType": "criticalEvent", "problemWith": "groundSaltState",      "valueNow": Число, "criticalValue": Число }
-{"messageType": "criticalEvent", "problemWith": "waterSaltState",       "valueNow": Число, "criticalValue": Число }
-{"messageType": "sensorLogs", "sensor": "groundTemperature",    "value": Число }
-{"messageType": "sensorLogs", "sensor": "waterTemperature",     "value": Число }
-{"messageType": "sensorLogs", "sensor": "airTemperature",       "value": Число }
-{"messageType": "sensorLogs", "sensor": "groundHumidity",       "value": Число }
-{"messageType": "sensorLogs", "sensor": "airHumidity",          "value": Число }
-{"messageType": "sensorLogs", "sensor": "groundOxidationState", "value": Число }
-{"messageType": "sensorLogs", "sensor": "waterOxidationState",  "value": Число }
-{"messageType": "sensorLogs", "sensor": "groundSaltState",      "value": Число }
-{"messageType": "sensorLogs", "sensor": "waterSaltState",       "value": Число }
-{"messageType": "stateSyncPackage", "state": {
-    "oxidation":    "started",
-    "watering":     "started",
-    "lighting":     "started",
-    "groundHeating":"started",
-    "waterHeating": "started",
-    "airHeating":   "started",
+{ "class": "event", "process": "watering",      isActive: true  }
+{ "class": "event", "process": "lighting",      isActive: true  }
+{ "class": "event", "process": "oxidation",     isActive: true  }
+{ "class": "event", "process": "groundHeating", isActive: true  }
+{ "class": "event", "process": "waterHeating",  isActive: true  }
+{ "class": "event", "process": "airHeating",    isActive: true  }
+{ "class": "event", "process": "oxidation",     isActive: false }
+{ "class": "event", "process": "watering",      isActive: false }
+{ "class": "event", "process": "lighting",      isActive: false }
+{ "class": "event", "process": "groundHeating", isActive: false }
+{ "class": "event", "process": "waterHeating",  isActive: false }
+{ "class": "event", "process": "airHeating",    isActive: false }
+{ "class": "records", "sensor": "groundTemperature",    "value": Число }
+{ "class": "records", "sensor": "waterTemperature",     "value": Число }
+{ "class": "records", "sensor": "airTemperature",       "value": Число }
+{ "class": "records", "sensor": "groundHumidity",       "value": Число }
+{ "class": "records", "sensor": "airHumidity",          "value": Число }
+{ "class": "records", "sensor": "groundOxidationState", "value": Число }
+{ "class": "records", "sensor": "waterOxidationState",  "value": Число }
+{ "class": "records", "sensor": "groundSaltState",      "value": Число }
+{ "class": "records", "sensor": "waterSaltState",       "value": Число }
+{ "class": "warning", "sensor": "groundTemperature",    "value": Число, "lowerBorder": Число, "upperBorder": Число }
+{ "class": "warning", "sensor": "waterTemperature",     "value": Число, "lowerBorder": Число, "upperBorder": Число }
+{ "class": "warning", "sensor": "airTemperature",       "value": Число, "lowerBorder": Число, "upperBorder": Число }
+{ "class": "warning", "sensor": "groundHumidity",       "value": Число, "lowerBorder": Число, "upperBorder": Число }
+{ "class": "warning", "sensor": "airHumidity",          "value": Число, "lowerBorder": Число, "upperBorder": Число }
+{ "class": "warning", "sensor": "groundOxidationState", "value": Число, "lowerBorder": Число, "upperBorder": Число }
+{ "class": "warning", "sensor": "waterOxidationState",  "value": Число, "lowerBorder": Число, "upperBorder": Число }
+{ "class": "warning", "sensor": "groundSaltState",      "value": Число, "lowerBorder": Число, "upperBorder": Число }
+{ "class": "warning", "sensor": "waterSaltState",       "value": Число, "lowerBorder": Число, "upperBorder": Число }
+{ "class": "activitySyncPackage", "package": {
+    "oxidation":     true,
+    "watering":      true,
+    "lighting":      true,
+    "groundHeating": true,
+    "waterHeating":  true,
+    "airHeating":    true,
 }
-{"messageType": "stateSyncPackage", "state": {
-    "oxidation":    "finished",
-    "watering":     "finished",
-    "lighting":     "finished",
-    "groundHeating":"finished",
-    "waterHeating": "finished",
-    "airHeating":   "finished",
+{ "class": "activitySyncPackage", "package": {
+    "oxidation":     false,
+    "watering":      false,
+    "lighting":      false,
+    "groundHeating": false,
+    "waterHeating":  false,
+    "airHeating":    false,
 }
 
 Что пользователь может прислать на сервер?
 
-{"command": "set", "what": "ProcessTimings",      "process": "oxidation",     timings: []} // TODO: Подумать как реализовать временной конфиг процесса
-{"command": "set", "what": "ProcessTimings",      "process": "watering",      timings: []}
-{"command": "set", "what": "ProcessTimings",      "process": "lighting",      timings: []}
-{"command": "set", "what": "ProcessTimings",      "process": "groundHeating", timings: []}
-{"command": "set", "what": "ProcessTimings",      "process": "waterHeating",  timings: []}
-{"command": "set", "what": "ProcessTimings",      "process": "airHeating",    timings: []}
-{"command": "set", "what": "TodayProcessTimings", "process": "oxidation",     timings: []} // в интерфейсе показывать временную линию текущего времени
-{"command": "set", "what": "TodayProcessTimings", "process": "watering",      timings: []}
-{"command": "set", "what": "TodayProcessTimings", "process": "lighting",      timings: []}
-{"command": "set", "what": "TodayProcessTimings", "process": "groundHeating", timings: []}
-{"command": "set", "what": "TodayProcessTimings", "process": "waterHeating",  timings: []}
-{"command": "set", "what": "TodayProcessTimings", "process": "airHeating",    timings: []}
-{"command": "set", "what": "config"  }
-{"command": "get", "what": "stateSyncPackage"  }
-{"command": "stopAllSystemsInFarm" }
-{"command": "workWithThisFarm", name: "asdasdasd" }
+{ "class": "set", "what": "ProcessTimings",      "process": "oxidation",     timings: [] } // TODO: Подумать как реализовать временной конфиг процесса
+{ "class": "set", "what": "ProcessTimings",      "process": "watering",      timings: [] }
+{ "class": "set", "what": "ProcessTimings",      "process": "lighting",      timings: [] }
+{ "class": "set", "what": "ProcessTimings",      "process": "groundHeating", timings: [] }
+{ "class": "set", "what": "ProcessTimings",      "process": "waterHeating",  timings: [] }
+{ "class": "set", "what": "ProcessTimings",      "process": "airHeating",    timings: [] }
+{ "class": "set", "what": "TodayProcessTimings", "process": "oxidation",     timings: [] } // в интерфейсе показывать временную линию текущего времени
+{ "class": "set", "what": "TodayProcessTimings", "process": "watering",      timings: [] }
+{ "class": "set", "what": "TodayProcessTimings", "process": "lighting",      timings: [] }
+{ "class": "set", "what": "TodayProcessTimings", "process": "groundHeating", timings: [] }
+{ "class": "set", "what": "TodayProcessTimings", "process": "waterHeating",  timings: [] }
+{ "class": "set", "what": "TodayProcessTimings", "process": "airHeating",    timings: [] }
+
+{ "class": "get", "what": "activitySyncPackage"  }
+{ "class": "set", "what": "config"  }
+{ "class": "execute", "what": "shutDownFarm"  }
+{ "command": "workWithThisFarm", name: "asdasdasd" }
 
 Что сервер может прислать на ферму?
 
-{"command": "set", "what": "ProcessTimings",      "process": "oxidation",     timings: []} // TODO: Подумать как реализовать временной конфиг процесса
-{"command": "set", "what": "ProcessTimings",      "process": "watering",      timings: []}
-{"command": "set", "what": "ProcessTimings",      "process": "lighting",      timings: []}
-{"command": "set", "what": "ProcessTimings",      "process": "groundHeating", timings: []}
-{"command": "set", "what": "ProcessTimings",      "process": "waterHeating",  timings: []}
-{"command": "set", "what": "ProcessTimings",      "process": "airHeating",    timings: []}
-{"command": "set", "what": "TodayProcessTimings", "process": "oxidation",     timings: []} // в интерфейсе показывать временную линию текущего времени
-{"command": "set", "what": "TodayProcessTimings", "process": "watering",      timings: []}
-{"command": "set", "what": "TodayProcessTimings", "process": "lighting",      timings: []}
-{"command": "set", "what": "TodayProcessTimings", "process": "groundHeating", timings: []}
-{"command": "set", "what": "TodayProcessTimings", "process": "waterHeating",  timings: []}
-{"command": "set", "what": "TodayProcessTimings", "process": "airHeating",    timings: []}
+{ "class": "set", "what": "ProcessTimings",      "process": "oxidation",     timings: [] } // TODO: Подумать как реализовать временной конфиг процесса
+{ "class": "set", "what": "ProcessTimings",      "process": "watering",      timings: [] }
+{ "class": "set", "what": "ProcessTimings",      "process": "lighting",      timings: [] }
+{ "class": "set", "what": "ProcessTimings",      "process": "groundHeating", timings: [] }
+{ "class": "set", "what": "ProcessTimings",      "process": "waterHeating",  timings: [] }
+{ "class": "set", "what": "ProcessTimings",      "process": "airHeating",    timings: [] }
+{ "class": "set", "what": "TodayProcessTimings", "process": "oxidation",     timings: [] } // в интерфейсе показывать временную линию текущего времени
+{ "class": "set", "what": "TodayProcessTimings", "process": "watering",      timings: [] }
+{ "class": "set", "what": "TodayProcessTimings", "process": "lighting",      timings: [] }
+{ "class": "set", "what": "TodayProcessTimings", "process": "groundHeating", timings: [] }
+{ "class": "set", "what": "TodayProcessTimings", "process": "waterHeating",  timings: [] }
+{ "class": "set", "what": "TodayProcessTimings", "process": "airHeating",    timings: [] }
 
-{"command": "shutDownFarm" }
-{"command": "getStateSyncPackage" }
+{ "class": "get", "what": "activitySyncPackage"  }
+{ "class": "set", "what": "config"  }
+{ "class": "execute", "what": "shutDownFarm"  }
 
 
 Что сервер может прислать пользователю?
 
-{"messageType": "event", "process": "oxidation",     isActive: true  }
-{"messageType": "event", "process": "oxidation",     isActive: false }
-{"messageType": "event", "process": "watering",      isActive: true  }
-{"messageType": "event", "process": "watering",      isActive: false }
-{"messageType": "event", "process": "lighting",      isActive: true  }
-{"messageType": "event", "process": "lighting",      isActive: false }
-{"messageType": "event", "process": "groundHeating", isActive: true  }
-{"messageType": "event", "process": "groundHeating", isActive: false }
-{"messageType": "event", "process": "waterHeating",  isActive: true  }
-{"messageType": "event", "process": "waterHeating",  isActive: false }
-{"messageType": "event", "process": "airHeating",    isActive: true  }
-{"messageType": "event", "process": "airHeating",    isActive: false }
-{"messageType": "criticalEvent", "problemWith": "groundTemperature",    "valueNow": Число, "criticalValue": Число }
-{"messageType": "criticalEvent", "problemWith": "waterTemperature",     "valueNow": Число, "criticalValue": Число }
-{"messageType": "criticalEvent", "problemWith": "airTemperature",       "valueNow": Число, "criticalValue": Число }
-{"messageType": "criticalEvent", "problemWith": "groundHumidity",       "valueNow": Число, "criticalValue": Число }
-{"messageType": "criticalEvent", "problemWith": "airHumidity",          "valueNow": Число, "criticalValue": Число }
-{"messageType": "criticalEvent", "problemWith": "groundOxidationState", "valueNow": Число, "criticalValue": Число }
-{"messageType": "criticalEvent", "problemWith": "waterOxidationState",  "valueNow": Число, "criticalValue": Число }
-{"messageType": "criticalEvent", "problemWith": "groundSaltState",      "valueNow": Число, "criticalValue": Число }
-{"messageType": "criticalEvent", "problemWith": "waterSaltState",       "valueNow": Число, "criticalValue": Число }
-{"messageType": "sensorLogs", "sensor": "groundTemperature",    "value": Число }
-{"messageType": "sensorLogs", "sensor": "waterTemperature",     "value": Число }
-{"messageType": "sensorLogs", "sensor": "airTemperature",       "value": Число }
-{"messageType": "sensorLogs", "sensor": "groundHumidity",       "value": Число }
-{"messageType": "sensorLogs", "sensor": "airHumidity",          "value": Число }
-{"messageType": "sensorLogs", "sensor": "groundOxidationState", "value": Число }
-{"messageType": "sensorLogs", "sensor": "waterOxidationState",  "value": Число }
-{"messageType": "sensorLogs", "sensor": "groundSaltState",      "value": Число }
-{"messageType": "sensorLogs", "sensor": "waterSaltState",       "value": Число }
-{"messageType": "stateSyncPackage", "state": {
-    "oxidation":    "started",
-    "watering":     "started",
-    "lighting":     "started",
-    "groundHeating":"started",
-    "waterHeating": "started",
-    "airHeating":   "started",
+{ "class": "event", "process": "watering",      isActive: true  }
+{ "class": "event", "process": "lighting",      isActive: true  }
+{ "class": "event", "process": "oxidation",     isActive: true  }
+{ "class": "event", "process": "groundHeating", isActive: true  }
+{ "class": "event", "process": "waterHeating",  isActive: true  }
+{ "class": "event", "process": "airHeating",    isActive: true  }
+{ "class": "event", "process": "oxidation",     isActive: false }
+{ "class": "event", "process": "watering",      isActive: false }
+{ "class": "event", "process": "lighting",      isActive: false }
+{ "class": "event", "process": "groundHeating", isActive: false }
+{ "class": "event", "process": "waterHeating",  isActive: false }
+{ "class": "event", "process": "airHeating",    isActive: false }
+
+{ "class": "records", "sensor": "groundTemperature",    "value": Число }
+{ "class": "records", "sensor": "waterTemperature",     "value": Число }
+{ "class": "records", "sensor": "airTemperature",       "value": Число }
+{ "class": "records", "sensor": "groundHumidity",       "value": Число }
+{ "class": "records", "sensor": "airHumidity",          "value": Число }
+{ "class": "records", "sensor": "groundOxidationState", "value": Число }
+{ "class": "records", "sensor": "waterOxidationState",  "value": Число }
+{ "class": "records", "sensor": "groundSaltState",      "value": Число }
+{ "class": "records", "sensor": "waterSaltState",       "value": Число }
+
+{ "class": "warning", "sensor": "groundTemperature",    "value": Число, "lowerBorder": Число, "upperBorder": Число }
+{ "class": "warning", "sensor": "waterTemperature",     "value": Число, "lowerBorder": Число, "upperBorder": Число }
+{ "class": "warning", "sensor": "airTemperature",       "value": Число, "lowerBorder": Число, "upperBorder": Число }
+{ "class": "warning", "sensor": "groundHumidity",       "value": Число, "lowerBorder": Число, "upperBorder": Число }
+{ "class": "warning", "sensor": "airHumidity",          "value": Число, "lowerBorder": Число, "upperBorder": Число }
+{ "class": "warning", "sensor": "groundOxidationState", "value": Число, "lowerBorder": Число, "upperBorder": Число }
+{ "class": "warning", "sensor": "waterOxidationState",  "value": Число, "lowerBorder": Число, "upperBorder": Число }
+{ "class": "warning", "sensor": "groundSaltState",      "value": Число, "lowerBorder": Число, "upperBorder": Число }
+{ "class": "warning", "sensor": "waterSaltState",       "value": Число, "lowerBorder": Число, "upperBorder": Число }
+
+{ "class": "activitySyncPackage", "package": {
+    "oxidation":     true,
+    "watering":      true,
+    "lighting":      true,
+    "groundHeating": true,
+    "waterHeating":  true,
+    "airHeating":    true,
 }
-{"messageType": "stateSyncPackage", "state": {
-    "oxidation":    "finished",
-    "watering":     "finished",
-    "lighting":     "finished",
-    "groundHeating":"finished",
-    "waterHeating": "finished",
-    "airHeating":   "finished",
+{ "class": "activitySyncPackage", "package": {
+    "oxidation":     false,
+    "watering":      false,
+    "lighting":      false,
+    "groundHeating": false,
+    "waterHeating":  false,
+    "airHeating":    false,
 }

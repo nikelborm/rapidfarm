@@ -1,13 +1,12 @@
 const loc = document.location;
 const WSAdress = (loc.protocol[4] === "s" ? "wss://": "ws://") + (loc.port === "3001" ? loc.hostname + ":3000" : loc.host);
-export let WSConnection = null;
-export let isSocketAvailable = false;
+let customMessageListeners = new Set();
+
 const closeEL = event => {
-    isSocketAvailable = false;
     console.log("[close] Соединение закрыто. Отчёт: ", event);
     WSConnection = null;
     // this.componentDidMount();
-    setTimeout(createOrRespawnWebSocket, 3000);
+    setTimeout(createNewWebSocket, 3000);
     // TODO: Добавить нарастающую задержку перед следующим переподключением
 };
 const errorEL = function (error) {
@@ -20,15 +19,24 @@ const messageEL = function( event ) {
     console.log("[message] Данные: ", data);
 };
 const openEL = function() {
-    isSocketAvailable = true;
     console.log("[open] Соединение установлено");
 };
-const createOrRespawnWebSocket = () => {
+export const createNewWebSocket = () => {
     WSConnection = new WebSocket(WSAdress);
+    WSConnection.addEventListener( "error", errorEL );
     WSConnection.addEventListener( "open", openEL );
     WSConnection.addEventListener( "message", messageEL );
+    for ( const messageListener of customMessageListeners ) {
+        WSConnection.addEventListener( "message", messageListener );
+    }
     WSConnection.addEventListener( "close", closeEL );
-    WSConnection.addEventListener( "error", errorEL );
 };
 
-createOrRespawnWebSocket();
+export let WSConnection = null;
+export const isSocketAvailable = () => WSConnection?.readyState === 1;
+export const addMessageListener = newListener => {
+    customMessageListeners.add( newListener );
+    if ( isSocketAvailable() ) {
+        WSConnection.addEventListener( "message", newListener );
+    }
+};

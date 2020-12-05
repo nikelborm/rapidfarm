@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import AuthContext from "../tools/AuthContext";
 import getCookie from "../tools/getCookie";
 import loader from "../tools/loader";
-
+import { createNewWebSocket } from "../tools/SocketManager";
 export let isRegistrationAllowed = () => JSON.parse( getCookie( "isRegistrationAllowed" ) );
 
 class AuthProvider extends Component {
@@ -30,6 +30,7 @@ class AuthProvider extends Component {
             isAuthorized: true,
             fullName: responseData.reply.fullName
         } );
+        createNewWebSocket();
     }
     register = async ( email, password, confirmPassword, fullName ) => {
         console.log( "email, password, confirmPassword, fullName: ", email, password, confirmPassword, fullName );
