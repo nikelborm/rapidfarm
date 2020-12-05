@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { PublicPage } from "../Public";
+import { PublicContent } from "../Public";
 import { withRouter, Redirect } from "react-router-dom";
 import AuthContext from "../../tools/AuthContext";
 
@@ -11,7 +11,7 @@ class AdminPage extends Component {
         }
         return (
             <div>
-                <PublicPage/>
+                <PublicContent/>
                 Какие-то Дополнительные кнопки для управления фермой на правах админа
             </div>
         );
