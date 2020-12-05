@@ -88,7 +88,11 @@ app.use(session({
     resave: false,
     rolling: true,
     unset: "destroy",
-    saveUninitialized: true
+    saveUninitialized: true,
+    cookie: {
+        maxAge: 172800000,
+        httpOnly: true,
+    }
 }));
 app.use(cookieParser(cookieSecretKey));
 app.use(favicon(__dirname + "/build/favicon.ico"));
