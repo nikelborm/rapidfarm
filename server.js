@@ -330,8 +330,6 @@ WSServer.on("connection", (connection, request) => {
 const cleaner = setInterval(() => {
     // Проверка на то, оставлять ли соединение активным
     WSServer.clients.forEach((connection) => {
-        console.log('connection: ', connection.authInfo);
-        // console.log('connection: ', connection.);
         // Если соединение мертво, завершить
         if (!connection.isAlive) {
             if (connection.isAuthAsFarm) {
