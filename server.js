@@ -39,7 +39,7 @@ function sendToMainFarm() {
 function sendToUsers( message ) {
     //* Отправляет сообщение онлайн пользователям
     for (const client of WSServer.clients) {
-        if ( !client.isFarm ) {
+        if ( !client.isAuthAsFarm ) {
             client.send(JSON.stringify(message));
         }
     }
@@ -61,7 +61,7 @@ let users = {};
 let mainFarm;
 let sensorsLogs = {};
 let webCommandsLogs = {};
-let farmState = {};
+let farmActivity = {};
 let farmConfigs = {};
 
 const app = express();
@@ -122,7 +122,7 @@ app.post("/loginAsFarm", function (request, response) {
     } else if ( sha256( secret ) in farmSecrets === false ) {
         rp.info = "Farm not registered";
     } else {
-        request.session.isFarm = true;
+        request.session.isAuthAsFarm = true;
         request.session.name = name;
         rp.isError = false;
         rp.info = "Success authorization";
@@ -153,6 +153,7 @@ app.post("/loginAsUser", function (request, response) {
         }
 
         const { fullName } = request.session.authInfo = result;
+        request.session.isAuthAsUser = true;
         resdata.reply = { fullName };
         rp.isError = false;
         rp.info = "Успешная авторизация";
@@ -208,6 +209,7 @@ app.post("/registerAsUser", function (request, response) {
         }
         return users.insertOne(userProfile)
         .then((result) => {
+            request.session.isAuthAsUser = true;
             request.session.authInfo = result.ops[0];
             rp.isError = false;
             rp.info = "Регистрация успешна";
@@ -218,50 +220,45 @@ app.post("/registerAsUser", function (request, response) {
         response.json(resdata);
     });
 });
-
-const isAutorized = () => {
-
-};
-
+function getSessionBySid(sid, connection, callback) {
+    store.get(sid, (err, session) => {
+        if (!session || err) { // TODO: Добавить сверку IP реального с тем что хранится в подписанной сесии, чтобы заблокировать попытку украсть сессию
+            console.log( session, err );
+            return closeConnection(connection, "Вы не авторизованы!");
+        }
+        callback(session);
+    });
+}
 WSServer.on("connection", (connection, request) => {
-    const cookies = cookie.parse(request.headers.cookie);
-    const sid = cookieParser.signedCookie(cookies["connect.sid"], sessionSecretKey);
-    console.log("sid: ", sid);
-    if (!sid) return closeConnection(connection, "Вы не авторизованы!");
     connection.isAlive = true;
     connection.on("pong", () => {
         connection.isAlive = true;
     });
-    connection.on("message", (input) => {
-        // TODO: Проверять не слишком ли большие данные, чтобы долго их не обрабатывать
-        const data = JSON.parse(input.toString());
-        //* Пользовательские запросы которые можно обработать и без авторизации
-
-// { "class": "get", "what": "activitySyncPackage"  }
-        if ( data.class === "get" && data.what === "stateSyncPackage" ) {
-
-        }
-
-        store.get(sid, (err, session) => {
-            if (!session || err) { // TODO: Добавить сверку IP реального с тем что хранится в подписанной сесии, чтобы заблокировать попытку украсть сессию
-                console.log( session, err );
-                return closeConnection(connection, "Вы не авторизованы!");
-            }
-            if ( session.isFarm ) {
-                connection.isFarm = session.isFarm;
-                connection.name = session.name;
-                if ( !mainFarm ) mainFarm = connection;
+    const cookies = cookie.parse(request.headers.cookie);
+    const sid = cookieParser.signedCookie(cookies["connect.sid"], sessionSecretKey);
+    console.log("sid: ", sid);
+    if (!sid) return closeConnection(connection, "Вы не авторизованы!");
+    getSessionBySid( sid, connection, initialSession => {
+        if ( initialSession.isAuthAsFarm ) {
+            connection.isAuthAsFarm = initialSession.isAuthAsFarm;
+            connection.name = initialSession.name;
+            if ( !mainFarm ) mainFarm = connection;
+            connection.on("message", (input) => {
+                const data = JSON.parse(input.toString());
+                console.log("Пришло в ws: ", data);
                 // eslint-disable-next-line default-case
-                switch (data.class) {
+                switch ( data.class ) {
                     case "event":
                         // просто переслать всем онлайн пользователям
-                        if ( connection.name === mainFarm.name ) sendToUsers(data); // и ещё имя фермы
+                        // if ( connection.name === mainFarm.name ) sendToUsers(data); // и ещё имя фермы
+                        sendToUsers( data );
+                        farmActivity[ data.process ] = data.isActive;
                         break;
-                    case "criticalEvent":
+                    case "warning":
                         // переслать всем онлайн пользователям и уведомить их ещё как-то (по почте, через пуш уведомления, в слак, в вк, в телегу, в дискорд)
                         if ( connection.name === mainFarm.name ) sendToUsers(data);
                         break;
-                    case "sensorLogs":
+                    case "records":
                         // переслать всем онлайн пользователям и сохранить в бд с датой
                         if ( connection.name === mainFarm.name ) sendToUsers(data);
                         sensorsLogs.insertOne({
@@ -270,15 +267,60 @@ WSServer.on("connection", (connection, request) => {
                             date: new Date(),
                             farmName: connection.name
                         });
+                        break;
+                    case "activitySyncPackage":
+                        farmActivity = data.package;
                 }
-                // TODO: сделать функцию обработчик для добавления новой фермы
-                // TODO: сделать функцию обработчик для установки активной фермы
-                // TODO: Добавить возможность изменить тайминги полива освещения и кислорирования
+            });
+            return;
+        }
+        if ( mainFarm ) {
+            connection.send(JSON.stringify({ class: "activitySyncPackage", package: farmActivity }));
+        }
+        connection.on("message", (input) => {
+            // TODO: Проверять не слишком ли большие данные, чтобы долго их не обрабатывать
+            const data = JSON.parse(input.toString());
+            console.log("Пришло в ws: ", data);
+            //* Пользовательские запросы которые можно обработать и без авторизации
+            // { "class": "execute", "what": "workWithFarm", name: "asdasdasd"  }
+            // if ( data.class === "execute" && data.what === "workWithFarm" ) {
+            // }
+            if ( data.class === "get" && data.what === "stateSyncPackage" ) {
+                connection.send(JSON.stringify({ class: "activitySyncPackage", package: farmActivity }));
+                return;
+            }
+            getSessionBySid( sid, connection, session => {
+                connection.isAuthAsUser = session.isAuthAsUser;
+                connection.authInfo = session.authInfo;
+                if ( session.isAuthAsUser ) {
+                    // Все команды, что прилетают идут главной ферме. А чтобы отдать другой - нужно сначала переключить
+                    // TODO: сделать функцию обработчик для добавления новой фермы
+                    // TODO: сделать функцию обработчик для установки активной фермы
+                    // TODO: Добавить возможность изменить тайминги полива освещения и кислорирования
+                }
+            } );
+        });
+    } );
+    connection.on("message", (input) => {
+        // TODO: Проверять не слишком ли большие данные, чтобы долго их не обрабатывать
+        const data = JSON.parse(input.toString());
+        console.log("Пришло в ws: ", data);
+        //* Пользовательские запросы которые можно обработать и без авторизации
+        // { "class": "execute", "what": "workWithFarm", name: "asdasdasd"  }
+        // if ( data.class === "execute" && data.what === "workWithFarm" ) {
+        // }
+        if ( data.class === "get" && data.what === "stateSyncPackage" ) {
+            connection.send(JSON.stringify({ class: "activitySyncPackage", package: farmActivity }));
+            return;
+        }
+        getSessionBySid( sid, connection, session => {
+            if ( session.isAuthAsFarm ) {
+                
+            }
+            if ( session.isAuthAsUser ) {
+                connection.isAuthAsUser = session.isAuthAsUser;
+                connection.authInfo = session.authInfo;
                 // Все команды, что прилетают идут главной ферме. А чтобы отдать другой - нужно сначала переключить
-                console.log("Пришло в ws: ", data);
-                // if (rp.info) return connection.send(JSON.stringify(resdata));
-
-            } else {
                 if ( mainFarm ) {
                     // Прислать целый пакет данных со всеми показателями фермы (а для этого сначала их надо получить)
                     // mainFarm.send(JSON.stringify(resdata))
@@ -286,13 +328,14 @@ WSServer.on("connection", (connection, request) => {
                 connection.authInfo = session.authInfo;
                 // TODO: сделать функцию обработчик для добавления новой фермы
                 // TODO: сделать функцию обработчик для установки активной фермы
+                // TODO: Добавить возможность изменить тайминги полива освещения и кислорирования
                 // Все команды, что прилетают идут главной ферме. А чтобы отдать другой - нужно сначала переключить
                 // const { authInfo } = connection;
                 
                 console.log("Пришло в ws: ", JSON.parse(input.toString()));
                 // if (rp.info) return connection.send(JSON.stringify(resdata));
             }
-        });
+        } );
     });
 });
 const cleaner = setInterval(() => {
@@ -300,11 +343,11 @@ const cleaner = setInterval(() => {
     WSServer.clients.forEach((connection) => {
         // Если соединение мертво, завершить
         if (!connection.isAlive) {
-            if (connection.isFarm) {
+            if (connection.isAuthAsFarm) {
                 // TODO: Если отключилась ферма - уведомить всех по почте или как-то ещё, а то пиздец. Это либо отключение интернета либо электричества блять либо пожар нахуй и ферма горит либо залило водой плату или короткое замыкание от этого. Что бы ни было причиной - это пиздец. А на ферме кстати нужно сделать чтобы автоподключение происходило
                 mainFarm = null;
                 for (const client of WSServer.clients) {
-                    if ( client.isFarm ) {
+                    if ( client.isAuthAsFarm ) {
                         mainFarm = client;
                         break;
                     }
