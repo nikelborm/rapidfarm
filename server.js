@@ -53,8 +53,8 @@ const cookieSecretKey = process.env.COOKIE_SECRET || "wHaTeVeR123";
 const farmSecrets = JSON.parse(process.env.FARM_SECRETS || `{
     "ec5d48de1fea693990a7f5eebd52c632c744d473d595d0eb883e55b7dec14327" : "Лондонская ферма",
     "d8a928b2043db77e340b523547bf16cb4aa483f0645fe0a290ed1f20aab76257" : "Команда 2"
-}`); /* Команда 2 - asdasdasd */
-
+}`);
+// sha256("spbgos5QpJkp4ghuDtKH7g1FF8M7jsW46qieRR3ZLsjRp3h2LOWbl46Mn99z4DZI"); =='ccd01e70db4df3506e98a6532a73095a83dbf0d8a1029d210fb212cfae4d230c'
 
 let dbClient;
 let users = {};
@@ -117,7 +117,7 @@ app.post("/loginAsFarm", function (request, response) {
 
     if ( typeof secret !== "string" || secret.length !== 64 ) {
         rp.info = "Incorrect key format";
-    } else if ( typeof name !== "string" || name.length ) {
+    } else if ( typeof name !== "string" || !name.length ) {
         rp.info = "Farm unnamed";
     } else if ( sha256( secret ) in farmSecrets === false ) {
         rp.info = "Farm not registered";
@@ -330,6 +330,8 @@ WSServer.on("connection", (connection, request) => {
 const cleaner = setInterval(() => {
     // Проверка на то, оставлять ли соединение активным
     WSServer.clients.forEach((connection) => {
+        console.log('connection: ', connection.authInfo);
+        // console.log('connection: ', connection.);
         // Если соединение мертво, завершить
         if (!connection.isAlive) {
             if (connection.isAuthAsFarm) {
