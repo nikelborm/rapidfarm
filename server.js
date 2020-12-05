@@ -26,6 +26,7 @@ function createEmptyResponseData() {
 function closeConnection( wsConnection, reason ) {
     let { resdata, rp } = createEmptyResponseData();
     rp.info = reason;
+    // Не вырубать, а просто деавторизовать как-то
     wsConnection.send(JSON.stringify(resdata));
     wsConnection.terminate();
 }
@@ -87,7 +88,7 @@ app.use(session({
     resave: false,
     rolling: true,
     unset: "destroy",
-    saveUninitialized: false
+    saveUninitialized: true
 }));
 app.use(cookieParser(cookieSecretKey));
 app.use(favicon(__dirname + "/build/favicon.ico"));
@@ -218,30 +219,40 @@ app.post("/registerAsUser", function (request, response) {
     });
 });
 
+const isAutorized = () => {
 
+};
 
 WSServer.on("connection", (connection, request) => {
+    const cookies = cookie.parse(request.headers.cookie);
+    const sid = cookieParser.signedCookie(cookies["connect.sid"], sessionSecretKey);
+    console.log("sid: ", sid);
+    if (!sid) return closeConnection(connection, "Вы не авторизованы!");
     connection.isAlive = true;
     connection.on("pong", () => {
         connection.isAlive = true;
     });
-    const cookies = cookie.parse(request.headers.cookie);
-    const sid = cookieParser.signedCookie(cookies["connect.sid"], sessionSecretKey);
-    if ( !sid ) return closeConnection(connection, "Вы не авторизованы!");
+    connection.on("message", (input) => {
+        // TODO: Проверять не слишком ли большие данные, чтобы долго их не обрабатывать
+        const data = JSON.parse(input.toString());
+        //* Пользовательские запросы которые можно обработать и без авторизации
 
-    store.get(sid, (err, session) => {
-        if (!session || err) {
-            console.log( session, err );
-            return closeConnection(connection, "Вы не авторизованы!");
+// { "class": "get", "what": "activitySyncPackage"  }
+        if ( data.class === "get" && data.what === "stateSyncPackage" ) {
+
         }
-        if ( session.isFarm ) {
-            connection.isFarm = session.isFarm;
-            connection.name = session.name;
-            if ( !mainFarm ) mainFarm = connection;
-            connection.on("message", (input) => {
-                const data = JSON.parse(input.toString());
+
+        store.get(sid, (err, session) => {
+            if (!session || err) { // TODO: Добавить сверку IP реального с тем что хранится в подписанной сесии, чтобы заблокировать попытку украсть сессию
+                console.log( session, err );
+                return closeConnection(connection, "Вы не авторизованы!");
+            }
+            if ( session.isFarm ) {
+                connection.isFarm = session.isFarm;
+                connection.name = session.name;
+                if ( !mainFarm ) mainFarm = connection;
                 // eslint-disable-next-line default-case
-                switch (data.messageType) {
+                switch (data.class) {
                     case "event":
                         // просто переслать всем онлайн пользователям
                         if ( connection.name === mainFarm.name ) sendToUsers(data); // и ещё имя фермы
@@ -266,23 +277,22 @@ WSServer.on("connection", (connection, request) => {
                 // Все команды, что прилетают идут главной ферме. А чтобы отдать другой - нужно сначала переключить
                 console.log("Пришло в ws: ", data);
                 // if (rp.info) return connection.send(JSON.stringify(resdata));
-            });
-        } else {
-            if ( mainFarm ) {
-                // Прислать целый пакет данных со всеми показателями фермы (а для этого сначала их надо получить)
-                mainFarm.send(JSON.stringify(resdata))
-            }
-            connection.authInfo = session.authInfo;
-            connection.on("message", (input) => {
+
+            } else {
+                if ( mainFarm ) {
+                    // Прислать целый пакет данных со всеми показателями фермы (а для этого сначала их надо получить)
+                    // mainFarm.send(JSON.stringify(resdata))
+                }
+                connection.authInfo = session.authInfo;
                 // TODO: сделать функцию обработчик для добавления новой фермы
                 // TODO: сделать функцию обработчик для установки активной фермы
                 // Все команды, что прилетают идут главной ферме. А чтобы отдать другой - нужно сначала переключить
                 // const { authInfo } = connection;
-                // TODO: Проверять не слишком ли большие данные, чтобы долго их не обрабатывать
+                
                 console.log("Пришло в ws: ", JSON.parse(input.toString()));
                 // if (rp.info) return connection.send(JSON.stringify(resdata));
-            });
-        }
+            }
+        });
     });
 });
 const cleaner = setInterval(() => {

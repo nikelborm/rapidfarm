@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { Redirect, withRouter } from "react-router-dom";
 import AuthContext from "../../tools/AuthContext";
 import Container from "react-bootstrap/Container";
-import Process from "./Process";
+import Process from "./components/Process";
 
 export class PublicPage extends Component {
     static contextType = AuthContext;
