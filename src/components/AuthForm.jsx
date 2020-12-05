@@ -31,7 +31,7 @@ class AuthForm extends Component {
     };
     render() {
         const isLogin = this.props.formType === "login";
-        if ( isLogin && this.context.isAuthorized ) {
+        if ( this.context.isAuthorized ) {
             return <Redirect to="/admin" />;
         }
         return (
