@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import AuthContext from "../tools/AuthContext";
 import getCookie from "../tools/getCookie";
 import loader from "../tools/loader";
-import { createNewWebSocket } from "../tools/SocketManager";
 export let isRegistrationAllowed = () => JSON.parse( getCookie( "isRegistrationAllowed" ) );
 
 class AuthProvider extends Component {
@@ -25,12 +24,11 @@ class AuthProvider extends Component {
         console.log( "responseData: ", responseData );
         if ( responseData.report.isError ) return;
         // Если всё проходит успешно:
-        // TODO: либо сервер либо клиент ставит новые куки
         this.setState( {
             isAuthorized: true,
             fullName: responseData.reply.fullName
         } );
-        createNewWebSocket();
+        isRegistrationAllowed = () => false;
     }
     register = async ( email, password, confirmPassword, fullName ) => {
         console.log( "email, password, confirmPassword, fullName: ", email, password, confirmPassword, fullName );
@@ -49,9 +47,6 @@ class AuthProvider extends Component {
             fullName
         } );
         isRegistrationAllowed = () => false;
-    }
-    startWebsocketConnection = () => {
-
     }
     state = {
         isAuthorized: false,
