@@ -6,13 +6,21 @@ export let isRegistrationAllowed = () => JSON.parse( getCookie( "isRegistrationA
 
 class AuthProvider extends Component {
     state = {
-        isAuthorized: false,
-        fullName: ""
+        isAuthorized: localStorage.getItem( "isAuthorized") === "true" || false,
+        fullName: localStorage.getItem( "fullName" ) || ""
+    }
+    saveAuthState = ( { isAuthorized, fullName } ) => {
+        localStorage.setItem( "isAuthorized", isAuthorized);
+        localStorage.setItem( "fullName", fullName);
+        this.setState( {
+            isAuthorized,
+            fullName
+        } );
     }
     logout = async () => {
         // запрос на выход чтобы сервер стёр сессию
         await loader( {}, "/logout" );
-        this.setState( {
+        this.saveAuthState( {
             isAuthorized: false,
             fullName: ""
         } );
@@ -28,7 +36,7 @@ class AuthProvider extends Component {
         console.log( "responseData: ", responseData );
         if ( responseData.report.isError ) return;
         // Если всё проходит успешно:
-        this.setState( {
+        this.saveAuthState( {
             isAuthorized: true,
             fullName: responseData.reply.fullName
         } );
@@ -46,7 +54,7 @@ class AuthProvider extends Component {
         console.log( "responseData: ", responseData );
         if ( responseData.report.isError ) return;
         // Если всё проходит успешно:
-        this.setState( {
+        this.saveAuthState( {
             isAuthorized: true,
             fullName
         } );
