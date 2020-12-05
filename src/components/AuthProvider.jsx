@@ -5,6 +5,10 @@ import loader from "../tools/loader";
 export let isRegistrationAllowed = () => JSON.parse( getCookie( "isRegistrationAllowed" ) );
 
 class AuthProvider extends Component {
+    state = {
+        isAuthorized: false,
+        fullName: ""
+    }
     logout = async () => {
         // запрос на выход чтобы сервер стёр сессию
         await loader( {}, "/logout" );
@@ -47,10 +51,6 @@ class AuthProvider extends Component {
             fullName
         } );
         isRegistrationAllowed = () => false;
-    }
-    state = {
-        isAuthorized: false,
-        fullName: ""
     }
     componentWillUnmount() {
         this.logout();
