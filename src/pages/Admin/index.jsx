@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { PublicPage } from "./PublicPage";
+import { PublicPage } from "../Public";
 import { withRouter, Redirect } from "react-router-dom";
 
 class AdminPage extends Component {

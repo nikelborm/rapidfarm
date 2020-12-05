@@ -1,15 +1,9 @@
 import React, { Component } from "react";
-import getCookie from "./getCookie";
-import loader from "./loader";
-export let isRegistrationAllowed = () => JSON.parse( getCookie( "isRegistrationAllowed" ) );
+import AuthContext from "../tools/AuthContext";
+import getCookie from "../tools/getCookie";
+import loader from "../tools/loader";
 
-export const AuthContext = React.createContext( {
-    isAuthorized: false,
-    fullName: "",
-    logout: async () => {},
-    register: async () => {},
-    login: async () => {},
-});
+export let isRegistrationAllowed = () => JSON.parse( getCookie( "isRegistrationAllowed" ) );
 
 class AuthProvider extends Component {
     logout = async () => {
