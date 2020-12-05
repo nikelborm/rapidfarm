@@ -199,6 +199,7 @@ app.post("/registerAsUser", function (request, response) {
 
     users.findOne({ email })
     .then((result) => {
+        console.log('result: ', result);
         const userProfile = {
             password: sha256(password),
             email,
