@@ -2,17 +2,19 @@
 
 async function loader( body, address ) {
     try {
+        const asd = await fetch(
+            document.location.origin + address,
+            {
+                method: "post",
+                body: JSON.stringify(body),
+                headers: new Headers( {
+                    "Content-Type": "application/json"
+                } )
+            }
+        )
+        console.log('asd: ', asd);
         const data = await (
-            await fetch(
-                document.location.origin + address,
-                {
-                    method: "post",
-                    body: JSON.stringify(body),
-                    headers: new Headers( {
-                        "Content-Type": "application/json"
-                    } )
-                }
-            )
+            asd
         ).json();
         console.log( data );
         // const { isError, info } = data.report;
