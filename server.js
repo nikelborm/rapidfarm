@@ -256,11 +256,13 @@ WSServer.on("connection", (connection, request) => {
                         break;
                     case "warning":
                         // переслать всем онлайн пользователям и уведомить их ещё как-то (по почте, через пуш уведомления, в слак, в вк, в телегу, в дискорд)
-                        if ( connection.name === mainFarm.name ) sendToUsers(data);
+                        // if ( connection.name === mainFarm.name ) sendToUsers(data);
+                        sendToUsers(data);
                         break;
                     case "records":
                         // переслать всем онлайн пользователям и сохранить в бд с датой
-                        if ( connection.name === mainFarm.name ) sendToUsers(data);
+                        // if ( connection.name === mainFarm.name ) sendToUsers(data);
+                        sendToUsers(data);
                         sensorsLogs.insertOne({
                             sensor: data.sensor,
                             value: data.value,
@@ -292,51 +294,38 @@ WSServer.on("connection", (connection, request) => {
             getSessionBySid( sid, connection, session => {
                 connection.isAuthAsUser = session.isAuthAsUser;
                 connection.authInfo = session.authInfo;
-                if ( session.isAuthAsUser ) {
-                    // Все команды, что прилетают идут главной ферме. А чтобы отдать другой - нужно сначала переключить
-                    // TODO: сделать функцию обработчик для добавления новой фермы
-                    // TODO: сделать функцию обработчик для установки активной фермы
-                    // TODO: Добавить возможность изменить тайминги полива освещения и кислорирования
+                if ( !session.isAuthAsUser ) return;
+                // Все команды, что прилетают идут главной ферме. А чтобы отдать другой - нужно сначала переключить
+                // eslint-disable-next-line default-case
+                switch ( data.class ) {
+                    case "set":
+                        // eslint-disable-next-line default-case
+                        switch ( data.what ) {
+                            case "processTimings":
+                                break;
+                            case "todayProcessTimings":
+                                break;
+                            case "config":
+                        }
+                        break;
+                    case "get":
+                        if ( data.what === "activitySyncPackage" ) {
+
+                        }
+                        break;
+                    case "execute":
+                        // eslint-disable-next-line default-case
+                        switch ( data.what ) {
+                            case "shutDownFarm":
+                                break;
+                            case "workWithFarm":
+                                break;
+                            case "addNewFarm":
+                        }
                 }
             } );
         });
     } );
-    connection.on("message", (input) => {
-        // TODO: Проверять не слишком ли большие данные, чтобы долго их не обрабатывать
-        const data = JSON.parse(input.toString());
-        console.log("Пришло в ws: ", data);
-        //* Пользовательские запросы которые можно обработать и без авторизации
-        // { "class": "execute", "what": "workWithFarm", name: "asdasdasd"  }
-        // if ( data.class === "execute" && data.what === "workWithFarm" ) {
-        // }
-        if ( data.class === "get" && data.what === "stateSyncPackage" ) {
-            connection.send(JSON.stringify({ class: "activitySyncPackage", package: farmActivity }));
-            return;
-        }
-        getSessionBySid( sid, connection, session => {
-            if ( session.isAuthAsFarm ) {
-                
-            }
-            if ( session.isAuthAsUser ) {
-                connection.isAuthAsUser = session.isAuthAsUser;
-                connection.authInfo = session.authInfo;
-                // Все команды, что прилетают идут главной ферме. А чтобы отдать другой - нужно сначала переключить
-                if ( mainFarm ) {
-                    // Прислать целый пакет данных со всеми показателями фермы (а для этого сначала их надо получить)
-                    // mainFarm.send(JSON.stringify(resdata))
-                }
-                connection.authInfo = session.authInfo;
-                // TODO: сделать функцию обработчик для добавления новой фермы
-                // TODO: сделать функцию обработчик для установки активной фермы
-                // TODO: Добавить возможность изменить тайминги полива освещения и кислорирования
-                // Все команды, что прилетают идут главной ферме. А чтобы отдать другой - нужно сначала переключить
-                // const { authInfo } = connection;
-                
-                console.log("Пришло в ws: ", JSON.parse(input.toString()));
-                // if (rp.info) return connection.send(JSON.stringify(resdata));
-            }
-        } );
-    });
 });
 const cleaner = setInterval(() => {
     // Проверка на то, оставлять ли соединение активным
