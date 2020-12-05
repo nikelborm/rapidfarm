@@ -46,7 +46,7 @@ function sendToUsers( message ) {
 }
 const port = process.env.PORT || 3000;
 const mongoLink = process.env.MONGODB_URI || "mongodb://Admin:0000@localhost:27017/admin";
-const redisLink = process.env.REDIS_TLS_URL || "redis://admin:foobared@127.0.0.1:6379";
+const redisLink = process.env.REDIS_URL || "redis://admin:foobared@127.0.0.1:6379";
 const isRegistrationAllowed = !!process.env.IS_REGISTRATION_ALLOWED;
 const sessionSecretKey = process.env.SESSION_SECRET || "wHaTeVeR123";
 const cookieSecretKey = process.env.COOKIE_SECRET || "wHaTeVeR123";
