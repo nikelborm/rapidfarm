@@ -276,6 +276,7 @@ WSServer.on("connection", (connection, request) => {
                         break;
                     case "activitySyncPackage":
                         farmActivity = data.package;
+                        sendToUsers({ class: "activitySyncPackage", package: farmActivity });
                 }
             });
             return;
@@ -284,6 +285,7 @@ WSServer.on("connection", (connection, request) => {
             connection.send(JSON.stringify({ class: "activitySyncPackage", package: farmActivity }));
         }
         connection.on("message", (input) => {
+            // TODO: А вот тут подумать над защитой и обработкой ошибок потому что любой неавторизованный пользователь может достичь этой точки
             const data = JSON.parse(input.toString());
             console.log("Пришло в ws: ", data);
             //* Пользовательские запросы которые можно обработать и без авторизации
