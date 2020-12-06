@@ -137,7 +137,7 @@ app.post("/loginAsUser", function (request, response) {
     const { email, password } = request.body;
     let { resdata, rp } = createEmptyResponseData();
 
-    resdata.reply.errorField = !email ? "email" : !password ? "password" : "";
+    rp.errorField = !email ? "email" : !password ? "password" : "";
     rp.info = !email ? "Вы не ввели почту" : !password ? "Вы не ввели пароль" : "";
 
     if (rp.info) return response.json(resdata);
@@ -145,12 +145,12 @@ app.post("/loginAsUser", function (request, response) {
     users.findOne({ email })
     .then((result) => {
         if (!result) {
-            resdata.reply.errorField = "email";
+            rp.errorField = "email";
             rp.info = "Пользователь с указанной почтой не найден";
             return;
         }
         if (result.password !== sha256(password)) {
-            resdata.reply.errorField = "password";
+            rp.errorField = "password";
             rp.info = "Неверный пароль";
             return;
         }
@@ -175,7 +175,7 @@ app.post("/registerAsUser", function (request, response) {
         return response.json(resdata);
     }
     const { password, confirmPassword, fullName, email } = request.body;
-    resdata.reply.errorField = !email ? "email" : !password ? "password" : !fullName ? "fullName" : "";
+    rp.errorField = !email ? "email" : !password ? "password" : !fullName ? "fullName" : "";
     rp.info = !email ? "Вы не ввели почту" : !password ? "Вы не ввели пароль" : !fullName ? "Вы не ввели ваше имя" : "";
 
     if (rp.info) return response.json(resdata);
@@ -194,7 +194,7 @@ app.post("/registerAsUser", function (request, response) {
         errorField = "confirmPassword";
     }
 
-    resdata.reply.errorField = errorField;
+    rp.errorField = errorField;
     rp.info = info;
 
     if (rp.info) return response.json(resdata);
@@ -207,7 +207,7 @@ app.post("/registerAsUser", function (request, response) {
             fullName
         };
         if ( result ) {
-            resdata.reply.errorField = "email";
+            rp.errorField = "email";
             rp.info = "Эта почта занята. Если вы владелец, попробуйте <a href='/restore' style='color: #FFFFFF;'>восстановить аккаунт</a>.";
             return;
         }
