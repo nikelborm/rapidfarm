@@ -32,13 +32,11 @@ class AuthProvider extends Component {
             email,
             password,
         };
-        const responseData = await loader( body, "/loginAsUser" );
-        console.log( "responseData: ", responseData );
-        if ( responseData.report.isError ) return;
+        const { reply } = await loader( body, "/loginAsUser" );
         // Если всё проходит успешно:
         this.saveAuthState( {
             isAuthorized: true,
-            fullName: responseData.reply.fullName
+            fullName: reply.fullName
         } );
         isRegistrationAllowed = () => false;
     }
@@ -50,9 +48,7 @@ class AuthProvider extends Component {
             confirmPassword,
             fullName
         };
-        const responseData = await loader( body, "/registerAsUser" );
-        console.log( "responseData: ", responseData );
-        if ( responseData.report.isError ) return;
+        await loader( body, "/registerAsUser" );
         // Если всё проходит успешно:
         this.saveAuthState( {
             isAuthorized: true,

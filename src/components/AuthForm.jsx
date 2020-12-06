@@ -23,7 +23,7 @@ class AuthForm extends Component {
             fullName?.value
         ).catch( error => {
             // TODO: Красиво уведомить пользователя об ошибке, а не через alert
-            alert( error );
+            alert( error.errorField + "   " + error.message );
             this.setState( {
                 isSendingNow: false
             } );

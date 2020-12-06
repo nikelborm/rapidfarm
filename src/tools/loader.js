@@ -1,6 +1,9 @@
-// import serverError from "./serverError";
+import serverError from "./serverError";
 
 async function loader( body, address ) {
+    let isError;
+    let info;
+    let errorField;
     try {
         const data = await (
             await fetch(
@@ -15,17 +18,20 @@ async function loader( body, address ) {
             )
         ).json();
         console.log( data );
-        // const { isError, info } = data.report;
-        // const { errorField } = data.reply;
-        return data;
+        // return data;
+        if ( data.report.isError ) {
+            ({isError, info, errorField } = data.report);
+        } else {
+            return data;
+        }
     } catch ( error ) {
         console.log( "error: ", error );
-        return {
-            report: {
-                isError:true,
-                info: "Ошибка подключения"
-            }
-        };
+        isError = true;
+        info = "Клиентская ошибка (плохое соединение или сервер прислал то, что нельзя обработать)";
+        errorField = "submitButton"; // TODO: Подумать над  этим
+    }
+    if ( isError ) {
+        throw new serverError( info, errorField )
     }
 }
 
