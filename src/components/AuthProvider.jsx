@@ -1,9 +1,15 @@
 import React, { Component } from "react";
-import AuthContext from "../tools/AuthContext";
 import getCookie from "../tools/getCookie";
 import loader from "../tools/loader";
 export let isRegistrationAllowed = () => JSON.parse( getCookie( "isRegistrationAllowed" ) );
 
+export const AuthContext = React.createContext( {
+    isAuthorized: false,
+    fullName: "",
+    logout: async () => {},
+    register: async () => {},
+    login: async () => {}
+});
 class AuthProvider extends Component {
     state = {
         isAuthorized: localStorage.getItem( "isAuthorized") === "true" || false,

@@ -1,6 +1,9 @@
 import React, { Component } from "react";
-import AppConfigsContext from "../tools/AppConfigsContext";
 import { addMessageListener } from "../tools/SocketManager";
+
+export const AppConfigsContext = React.createContext( {
+    processActivities: {}
+});
 
 class AppConfigsProvider extends Component {
     state = {
