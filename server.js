@@ -292,6 +292,8 @@ WSServer.on("connection", (connection, request) => {
         if ( mainFarm ) {
             connection.send(JSON.stringify({ class: "activitySyncPackage", package: farmActivity }));
         }
+        connection.isAuthAsUser = initialSession.isAuthAsUser;
+        connection.authInfo = initialSession.authInfo;
         connection.on("message", (input) => {
             logSession( "connection - onmessage у любого пользователя", connection.sid, connection );
             // TODO: А вот тут подумать над защитой и обработкой ошибок потому что любой неавторизованный пользователь может достичь этой точки
