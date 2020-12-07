@@ -315,14 +315,20 @@ WSServer.on("connection", (connection, request) => {
             // { "class": "execute", "what": "workWithFarm", name: "asdasdasd"  }
             // if ( data.class === "execute" && data.what === "workWithFarm" ) {
             // }
-            if ( data.class === "get" && data.what === "stateSyncPackage" ) {
-                connection.send(JSON.stringify({ class: "activitySyncPackage", package: farmActivity }));
+            if ( data.class === "get" ) {
+                switch ( data.what ) {
+                    case "activitySyncPackage":
+                        sendActivityPackage( connection );
+                }
                 return;
             }
             getSessionBySid( connection, session => {
                 connection.isAuthAsUser = session.isAuthAsUser;
                 connection.authInfo = session.authInfo;
-                if ( !session.isAuthAsUser ) return;
+                if ( !session.isAuthAsUser ) {
+                    connection.send(JSON.stringify({ class: "error", message: "Вы не авторизованы" }));
+                    return;
+                }
                 logSession( "session - onmessage у пользователя(авторизованного)", sid, session );
                 // Все команды, что прилетают идут главной ферме. А чтобы отдать другой - нужно сначала переключить
                 switch ( data.class ) {
