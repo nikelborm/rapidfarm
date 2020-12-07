@@ -102,13 +102,15 @@ function logout(request, response) {
     request.session.destroy((err) => {
         if (err) return console.log(err);
         response.json( { report: { isError: !!err } } );
-        WSServer.clients.forEach((connection) => {
-            if (connection.sid === request.session.id) {
-                connection.isAuthAsUser = undefined;
-                connection.authInfo = undefined;
-                return;
-            }
-        });
+        if(request.session){
+            WSServer.clients.forEach((connection) => {
+                if ( connection.sid === request.session.id) {
+                    connection.isAuthAsUser = undefined;
+                    connection.authInfo = undefined;
+                    return;
+                }
+            });
+        }
     });
 }
 app.use(function(request, response, next){
