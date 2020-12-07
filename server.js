@@ -85,7 +85,7 @@ app.use(bodyParser.text());
 app.use(session({
     store,
     secret: sessionSecretKey,
-    resave: false,
+    resave: true,
     rolling: true,
     unset: "destroy",
     saveUninitialized: true,
@@ -244,7 +244,7 @@ WSServer.on("connection", (connection, request) => {
     });
     const cookies = cookie.parse(request.headers.cookie);
     const sid = cookieParser.signedCookie(cookies["connect.sid"], sessionSecretKey);
-    console.log("sid: ", sid);
+    console.log("onconnection sid: ", sid);
     if (!sid) return closeConnection(connection, "Вы не авторизованы!");
     getSessionBySid( sid, connection, initialSession => {
         logSession( "initialSession - Первый заход(подключение к redis)", sid, initialSession );
@@ -344,6 +344,7 @@ WSServer.on("connection", (connection, request) => {
 const cleaner = setInterval(() => {
     // Проверка на то, оставлять ли соединение активным
     WSServer.clients.forEach((connection) => {
+        logSession( "connection - cleaner", sid, connection );
         // Если соединение мертво, завершить
         if (!connection.isAlive) {
             if (connection.isAuthAsFarm) {
