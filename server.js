@@ -54,7 +54,7 @@ const farmSecrets = JSON.parse(process.env.FARM_SECRETS || `{
     "ec5d48de1fea693990a7f5eebd52c632c744d473d595d0eb883e55b7dec14327" : "Лондонская ферма",
     "d8a928b2043db77e340b523547bf16cb4aa483f0645fe0a290ed1f20aab76257" : "Команда 2"
 }`);
-// sha256("spbgos5QpJkp4ghuDtKH7g1FF8M7jsW46qieRR3ZLsjRp3h2LOWbl46Mn99z4DZI"); =='ccd01e70db4df3506e98a6532a73095a83dbf0d8a1029d210fb212cfae4d230c'
+// sha256("spbgos5QpJkp4ghuDtKH7g1FF8M7jsW46qieRR3ZLsjRp3h2LOWbl46Mn99z4DZI"); =="ccd01e70db4df3506e98a6532a73095a83dbf0d8a1029d210fb212cfae4d230c"
 
 let dbClient;
 let users = {};
@@ -219,6 +219,7 @@ app.post("/registerAsUser", function (request, response) {
             rp.info = "Регистрация успешна";
         }); // Возвращаем промис
     }).catch((err) => {
+        console.log("err: ", err);
         rp.info = "Ошибка сервера";
     }).finally(() => {
         response.json(resdata);
@@ -233,6 +234,9 @@ function getSessionBySid(sid, connection, callback) {
         callback(session);
     });
 }
+function logSession( event, sid, session ) {
+    console.log(event+" : sid("+sid+"): isAuthAsFarm, name, isAuthAsUser, authInfo -> ", session.isAuthAsFarm, session.name, session.isAuthAsUser, session.authInfo );
+}
 WSServer.on("connection", (connection, request) => {
     connection.isAlive = true;
     connection.on("pong", () => {
@@ -243,11 +247,14 @@ WSServer.on("connection", (connection, request) => {
     console.log("sid: ", sid);
     if (!sid) return closeConnection(connection, "Вы не авторизованы!");
     getSessionBySid( sid, connection, initialSession => {
+        logSession( "initialSession - Первый заход(подключение к redis)", sid, initialSession );
         if ( initialSession.isAuthAsFarm ) {
+            // TODO: Запросить у фермы набор данных о состоянии
             connection.isAuthAsFarm = initialSession.isAuthAsFarm;
             connection.name = initialSession.name;
             if ( !mainFarm ) mainFarm = connection;
             connection.on("message", (input) => {
+                logSession( "onmessage - connection у фермы", sid, connection );
                 const data = JSON.parse(input.toString());
                 console.log("Пришло в ws: ", data);
                 // eslint-disable-next-line default-case
@@ -285,6 +292,7 @@ WSServer.on("connection", (connection, request) => {
             connection.send(JSON.stringify({ class: "activitySyncPackage", package: farmActivity }));
         }
         connection.on("message", (input) => {
+            logSession( "connection - onmessage у любого пользователя", sid, connection );
             // TODO: А вот тут подумать над защитой и обработкой ошибок потому что любой неавторизованный пользователь может достичь этой точки
             const data = JSON.parse(input.toString());
             console.log("Пришло в ws: ", data);
@@ -300,6 +308,7 @@ WSServer.on("connection", (connection, request) => {
                 connection.isAuthAsUser = session.isAuthAsUser;
                 connection.authInfo = session.authInfo;
                 if ( !session.isAuthAsUser ) return;
+                logSession( "session - onmessage у пользователя(авторизованного)", sid, session );
                 // Все команды, что прилетают идут главной ферме. А чтобы отдать другой - нужно сначала переключить
                 // eslint-disable-next-line default-case
                 switch ( data.class ) {
