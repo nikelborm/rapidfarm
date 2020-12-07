@@ -9,6 +9,7 @@ import Menu from "./components/Menu";
 import { createNewWebSocket } from "./tools/SocketManager";
 import { BrowserRouter } from "react-router-dom";
 import AuthProvider from "./components/AuthProvider";
+import AppConfigsProvider from "./components/AppConfigsProvider";
 
 class App extends Component {
     componentDidMount() {
@@ -19,17 +20,19 @@ class App extends Component {
             <React.StrictMode>
                 <BrowserRouter>
                     <AuthProvider>
-                        <Menu/>
-                        <Switch>
-                            <LoginRoute    path="/login"    exact/>
-                            <RegisterRoute path="/register" exact/>
-                            <LogoutRoute   path="/logout"   exact/>
-                            <AdminRoute    path="/admin"    exact/>
-                            <PublicRoute   path="/"         exact/>
-                            <Route path="*">
-                                <Redirect to="/"/>
-                            </Route>
-                        </Switch>
+                        <AppConfigsProvider>
+                            <Menu/>
+                            <Switch>
+                                <LoginRoute    path="/login"    exact/>
+                                <RegisterRoute path="/register" exact/>
+                                <LogoutRoute   path="/logout"   exact/>
+                                <AdminRoute    path="/admin"    exact/>
+                                <PublicRoute   path="/"         exact/>
+                                <Route path="*">
+                                    <Redirect to="/"/>
+                                </Route>
+                            </Switch>
+                        </AppConfigsProvider>
                     </AuthProvider>
                 </BrowserRouter>
             </React.StrictMode>

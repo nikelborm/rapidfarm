@@ -1,17 +1,13 @@
 import React, { Component } from "react";
 import { Redirect, withRouter } from "react-router-dom";
 import AuthContext from "../../tools/AuthContext";
-import Container from "react-bootstrap/Container";
-import Process from "./components/Process";
+import ProcessList from "./components/ProcessList";
 
 export class PublicContent extends Component {
     render() {
-        return <Container>
-            <Process title="Полив" activity={true}/>
-            <Process title="Аэрация" activity={true}/>
-            <Process title="Свет" activity={false}/>
-            <Process title="Подогрев почвы"/>
-        </Container>;
+        return <>
+            <ProcessList/>
+        </>;
     }
 }
 class PublicPage extends Component {
