@@ -99,8 +99,8 @@ app.use(favicon(__dirname + "/build/favicon.ico"));
 
 function logout(request, response) {
     request.session.destroy((err) => {
-        if (err) console.log(err);
-        response.json({});
+        if (err) return console.log(err);
+        response.json( { report: { isError: false } } );
     });
 }
 app.use(function(request, response, next){
