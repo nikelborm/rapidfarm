@@ -1,3 +1,4 @@
+/* eslint-disable default-case */
 const express = require("express");
 const mongodb = require("mongodb");
 const favicon = require("express-favicon");
@@ -100,7 +101,14 @@ app.use(favicon(__dirname + "/build/favicon.ico"));
 function logout(request, response) {
     request.session.destroy((err) => {
         if (err) return console.log(err);
-        response.json( { report: { isError: false } } );
+        response.json( { report: { isError: !!err } } );
+        WSServer.clients.forEach((connection) => {
+            if (connection.sid === request.session.id) {
+                connection.isAuthAsUser = undefined;
+                connection.authInfo = undefined;
+                return;
+            }
+        });
     });
 }
 app.use(function(request, response, next){
@@ -237,6 +245,9 @@ function getSessionBySid(connection, callback) {
 function logSession( event, sid, session ) {
     console.log(event+" : sid("+sid+"): isAuthAsFarm, name, isAuthAsUser, authInfo -> ", session.isAuthAsFarm, session.name, session.isAuthAsUser, session.authInfo );
 }
+function sendActivityPackage( connection ) {
+    connection.send(JSON.stringify({ class: "activitySyncPackage", package: farmActivity }));
+}
 WSServer.on("connection", (connection, request) => {
     connection.isAlive = true;
     connection.on("pong", () => {
@@ -247,9 +258,11 @@ WSServer.on("connection", (connection, request) => {
     console.log("onconnection sid: ", sid);
     if (!sid) return closeConnection(connection, "Вы не авторизованы!");
     connection.sid = sid;
+    //* Ферма сначала посылает запрос, авторизуется и только потом подключается к вебсокету
     getSessionBySid( connection, initialSession => {
         logSession( "initialSession - Первый заход(подключение к redis)", connection.sid, initialSession );
         if ( initialSession.isAuthAsFarm ) {
+            // Если ферма авторизована гарантировано, то записываем её в соединение
             // TODO: Запросить у фермы набор данных о состоянии
             connection.isAuthAsFarm = initialSession.isAuthAsFarm;
             connection.name = initialSession.name;
@@ -258,7 +271,6 @@ WSServer.on("connection", (connection, request) => {
                 logSession( "onmessage - connection у фермы", connection.sid, connection );
                 const data = JSON.parse(input.toString());
                 console.log("Пришло в ws: ", data);
-                // eslint-disable-next-line default-case
                 switch ( data.class ) {
                     case "event":
                         // просто переслать всем онлайн пользователям
@@ -290,10 +302,8 @@ WSServer.on("connection", (connection, request) => {
             return;
         }
         if ( mainFarm ) {
-            connection.send(JSON.stringify({ class: "activitySyncPackage", package: farmActivity }));
+            sendActivityPackage( connection );
         }
-        connection.isAuthAsUser = initialSession.isAuthAsUser;
-        connection.authInfo = initialSession.authInfo;
         connection.on("message", (input) => {
             logSession( "connection - onmessage у любого пользователя", connection.sid, connection );
             // TODO: А вот тут подумать над защитой и обработкой ошибок потому что любой неавторизованный пользователь может достичь этой точки
@@ -313,10 +323,8 @@ WSServer.on("connection", (connection, request) => {
                 if ( !session.isAuthAsUser ) return;
                 logSession( "session - onmessage у пользователя(авторизованного)", sid, session );
                 // Все команды, что прилетают идут главной ферме. А чтобы отдать другой - нужно сначала переключить
-                // eslint-disable-next-line default-case
                 switch ( data.class ) {
                     case "set":
-                        // eslint-disable-next-line default-case
                         switch ( data.what ) {
                             case "processTimings":
                                 break;
@@ -327,11 +335,10 @@ WSServer.on("connection", (connection, request) => {
                         break;
                     case "get":
                         if ( data.what === "activitySyncPackage" ) {
-
+                            sendActivityPackage( connection );
                         }
                         break;
                     case "execute":
-                        // eslint-disable-next-line default-case
                         switch ( data.what ) {
                             case "shutDownFarm":
                                 break;
@@ -347,8 +354,6 @@ WSServer.on("connection", (connection, request) => {
 const cleaner = setInterval(() => {
     // Проверка на то, оставлять ли соединение активным
     WSServer.clients.forEach((connection) => {
-        logSession( "connection - cleaner ", connection.sid, connection );
-
         // Если соединение мертво, завершить
         if (!connection.isAlive) {
             if (connection.isAuthAsFarm) {
