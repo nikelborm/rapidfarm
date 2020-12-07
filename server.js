@@ -24,27 +24,7 @@ function createEmptyResponseData() {
     };
     return { resdata, rp: resdata.report };
 }
-function closeConnection( wsConnection, reason ) {
-    let { resdata, rp } = createEmptyResponseData();
-    rp.info = reason;
-    // Не вырубать, а просто деавторизовать как-то
-    wsConnection.send(JSON.stringify(resdata));
-    wsConnection.terminate();
-}
-function setMainFarm( name ) {
 
-}
-function sendToMainFarm() {
-
-}
-function sendToUsers( message ) {
-    //* Отправляет сообщение онлайн пользователям
-    for (const client of WSServer.clients) {
-        if ( !client.isAuthAsFarm ) {
-            client.send(JSON.stringify(message));
-        }
-    }
-}
 const port = process.env.PORT || 3000;
 const mongoLink = process.env.MONGODB_URI || "mongodb://Admin:0000@localhost:27017/admin";
 const redisLink = process.env.REDIS_URL || "redis://admin:foobared@127.0.0.1:6379";
@@ -235,11 +215,36 @@ app.post("/registerAsUser", function (request, response) {
         response.json(resdata);
     });
 });
+
+function sendMessage(connection, message) {
+    connection.send(JSON.stringify(message));
+}
+function closeWsConnection( connection, reason ) {
+    let { resdata, rp } = createEmptyResponseData();
+    rp.info = reason;
+    // Не вырубать, а просто деавторизовать как-то
+    sendMessage(connection, resdata);
+    connection.terminate();
+}
+function setMainFarm( name ) {
+
+}
+function sendToMainFarm() {
+
+}
+function sendToUsers( message ) {
+    //* Отправляет сообщение онлайн пользователям
+    for (const client of WSServer.clients) {
+        if ( !client.isAuthAsFarm ) {
+            sendMessage(client, message);
+        }
+    }
+}
 function getSessionBySid(connection, callback) {
     store.get(connection.sid, (err, session) => {
         if (!session || err) { // TODO: Добавить сверку IP реального с тем что хранится в подписанной сесии, чтобы заблокировать попытку украсть сессию
             console.log( session, err );
-            return closeConnection(connection, "Вы не авторизованы!");
+            return closeWsConnection(connection, "Вы не авторизованы!");
         }
         callback(session);
     });
@@ -248,7 +253,10 @@ function logSession( event, sid, session ) {
     console.log(event+" : sid("+sid+"): isAuthAsFarm, name, isAuthAsUser, authInfo -> ", session.isAuthAsFarm, session.name, session.isAuthAsUser, session.authInfo );
 }
 function sendActivityPackage( connection ) {
-    connection.send(JSON.stringify({ class: "activitySyncPackage", package: farmActivity }));
+    sendMessage(connection, { class: "activitySyncPackage", package: farmActivity });
+}
+function sendError( connection, message ) {
+    sendMessage(connection, {class:"error", message});
 }
 WSServer.on("connection", (connection, request) => {
     connection.isAlive = true;
@@ -258,7 +266,7 @@ WSServer.on("connection", (connection, request) => {
     const cookies = cookie.parse(request.headers.cookie);
     const sid = cookieParser.signedCookie(cookies["connect.sid"], sessionSecretKey);
     console.log("onconnection sid: ", sid);
-    if (!sid) return closeConnection(connection, "Вы не авторизованы!");
+    if (!sid) return closeWsConnection(connection, "Вы не авторизованы!");
     connection.sid = sid;
     //* Ферма сначала посылает запрос, авторизуется и только потом подключается к вебсокету
     getSessionBySid( connection, initialSession => {
@@ -299,6 +307,9 @@ WSServer.on("connection", (connection, request) => {
                     case "activitySyncPackage":
                         farmActivity = data.package;
                         sendToUsers({ class: "activitySyncPackage", package: farmActivity });
+                        break;
+                    default:
+                        sendError(connection, "Ошибка в составлении запроса");
                 }
             });
             return;
@@ -319,6 +330,9 @@ WSServer.on("connection", (connection, request) => {
                 switch ( data.what ) {
                     case "activitySyncPackage":
                         sendActivityPackage( connection );
+                        break;
+                    default:
+                        sendError(connection, "Ошибка в составлении запроса");
                 }
                 return;
             }
@@ -339,11 +353,9 @@ WSServer.on("connection", (connection, request) => {
                             case "todayProcessTimings":
                                 break;
                             case "config":
-                        }
-                        break;
-                    case "get":
-                        if ( data.what === "activitySyncPackage" ) {
-                            sendActivityPackage( connection );
+                                break;
+                            default:
+                                sendError(connection, "Ошибка в составлении запроса");
                         }
                         break;
                     case "execute":
@@ -353,7 +365,13 @@ WSServer.on("connection", (connection, request) => {
                             case "workWithFarm":
                                 break;
                             case "addNewFarm":
+                                break;
+                            default:
+                                sendError(connection, "Ошибка в составлении запроса");
                         }
+                        break;
+                    default:
+                        sendError(connection, "Ошибка в составлении запроса");
                 }
             } );
         });
