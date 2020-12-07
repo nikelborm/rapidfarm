@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { PublicContent } from "../Public";
 import { withRouter, Redirect } from "react-router-dom";
-import AuthContext from "../../tools/AuthContext";
+import { AuthContext } from "../../components/AuthProvider";
 
 class AdminPage extends Component {
     static contextType = AuthContext;
