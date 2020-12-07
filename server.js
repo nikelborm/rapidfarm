@@ -225,8 +225,8 @@ app.post("/registerAsUser", function (request, response) {
         response.json(resdata);
     });
 });
-function getSessionBySid(sid, connection, callback) {
-    store.get(sid, (err, session) => {
+function getSessionBySid(connection, callback) {
+    store.get(connection.sid, (err, session) => {
         if (!session || err) { // TODO: Добавить сверку IP реального с тем что хранится в подписанной сесии, чтобы заблокировать попытку украсть сессию
             console.log( session, err );
             return closeConnection(connection, "Вы не авторизованы!");
@@ -246,15 +246,16 @@ WSServer.on("connection", (connection, request) => {
     const sid = cookieParser.signedCookie(cookies["connect.sid"], sessionSecretKey);
     console.log("onconnection sid: ", sid);
     if (!sid) return closeConnection(connection, "Вы не авторизованы!");
-    getSessionBySid( sid, connection, initialSession => {
-        logSession( "initialSession - Первый заход(подключение к redis)", sid, initialSession );
+    connection.sid = sid;
+    getSessionBySid( connection, initialSession => {
+        logSession( "initialSession - Первый заход(подключение к redis)", connection.sid, initialSession );
         if ( initialSession.isAuthAsFarm ) {
             // TODO: Запросить у фермы набор данных о состоянии
             connection.isAuthAsFarm = initialSession.isAuthAsFarm;
             connection.name = initialSession.name;
             if ( !mainFarm ) mainFarm = connection;
             connection.on("message", (input) => {
-                logSession( "onmessage - connection у фермы", sid, connection );
+                logSession( "onmessage - connection у фермы", connection.sid, connection );
                 const data = JSON.parse(input.toString());
                 console.log("Пришло в ws: ", data);
                 // eslint-disable-next-line default-case
@@ -292,7 +293,7 @@ WSServer.on("connection", (connection, request) => {
             connection.send(JSON.stringify({ class: "activitySyncPackage", package: farmActivity }));
         }
         connection.on("message", (input) => {
-            logSession( "connection - onmessage у любого пользователя", sid, connection );
+            logSession( "connection - onmessage у любого пользователя", connection.sid, connection );
             // TODO: А вот тут подумать над защитой и обработкой ошибок потому что любой неавторизованный пользователь может достичь этой точки
             const data = JSON.parse(input.toString());
             console.log("Пришло в ws: ", data);
@@ -304,7 +305,7 @@ WSServer.on("connection", (connection, request) => {
                 connection.send(JSON.stringify({ class: "activitySyncPackage", package: farmActivity }));
                 return;
             }
-            getSessionBySid( sid, connection, session => {
+            getSessionBySid( connection, session => {
                 connection.isAuthAsUser = session.isAuthAsUser;
                 connection.authInfo = session.authInfo;
                 if ( !session.isAuthAsUser ) return;
@@ -344,7 +345,8 @@ WSServer.on("connection", (connection, request) => {
 const cleaner = setInterval(() => {
     // Проверка на то, оставлять ли соединение активным
     WSServer.clients.forEach((connection) => {
-        logSession( "connection - cleaner", sid, connection );
+        logSession( "connection - cleaner ", connection.sid, connection );
+
         // Если соединение мертво, завершить
         if (!connection.isAlive) {
             if (connection.isAuthAsFarm) {
@@ -357,6 +359,7 @@ const cleaner = setInterval(() => {
                     }
                 }
             }
+            logSession( "connection - cleaner terminate", connection.sid, connection );
             return connection.terminate();
         }
         // обьявить все соединения мертвыми, а тех кто откликнется на ping, сделать живыми
