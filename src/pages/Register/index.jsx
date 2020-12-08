@@ -1,7 +1,7 @@
 import React from "react";
 import { Redirect, withRouter } from "react-router-dom";
 import AuthForm from "../../components/AuthForm";
-import { isRegistrationAllowed } from "../../components/AuthProvider";
+import { isRegistrationAllowed } from "../../components/AuthManager";
 
 const Register = props => (
     isRegistrationAllowed()

@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { AuthContext } from "../components/AuthProvider";
+import { AuthContext } from "../components/AuthManager";
 import { Redirect } from "react-router-dom";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";

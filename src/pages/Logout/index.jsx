@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { withRouter, Redirect } from "react-router-dom";
-import { AuthContext } from "../../components/AuthProvider";
+import { AuthContext } from "../../components/AuthManager";
 
 class LogoutPage extends Component {
     static contextType = AuthContext;
