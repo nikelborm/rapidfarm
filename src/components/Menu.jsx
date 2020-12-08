@@ -33,6 +33,9 @@ class Menu extends Component {
             "/admin": <> { logout } </>
         };
     }
+    shouldComponentUpdate(nextProps, nextState) {
+        return nextProps.location.pathname !== this.props.location.pathname;
+    }
     render() {
         const path = this.props.location.pathname;
         return (
