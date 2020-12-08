@@ -11,22 +11,43 @@ export const AuthContext = React.createContext( {
     login: async () => {}
 });
 class AuthProvider extends Component {
-    state = {
-        isAuthorized: localStorage.getItem( "isAuthorized") === "true" || false,
-        fullName: localStorage.getItem( "fullName" ) || ""
+    constructor(props) {
+        super(props);
+        if ( this.isAuthSessionChanged() ) {
+            this.state = {
+                isAuthorized: false,
+                fullName: "",
+            }
+            this.updateAuthStatus("false", "");
+        } else {
+            this.state = {
+                isAuthorized: localStorage.getItem( "isAuthorized" ) === "true" || false,
+                fullName: localStorage.getItem( "fullName" ) || "",
+            }
+        }
     }
-    saveAuthState = ( { isAuthorized, fullName } ) => {
-        localStorage.setItem( "isAuthorized", isAuthorized);
-        localStorage.setItem( "fullName", fullName);
+    updateAuthState = ( { isAuthorized, fullName } ) => {
+        this.updateAuthStatus( isAuthorized, fullName );
         this.setState( {
             isAuthorized,
             fullName
         } );
     }
+    updateAuthStatus = (isAuthorized, fullName) => {
+        localStorage.setItem( "isAuthorized", ""+isAuthorized);
+        localStorage.setItem( "fullName", fullName);
+    }
+    setAuthorizedAuthState = (fullName) => {
+        this.updateAuthState( {
+            isAuthorized: true,
+            fullName
+        } );
+    }
+    isAuthSessionChanged = () => localStorage.getItem( "connect.sid" ) !== getCookie( "connect.sid" );
     logout = async () => {
         // запрос на выход чтобы сервер стёр сессию
         await loader( {}, "/logout" );
-        this.saveAuthState( {
+        this.updateAuthState( {
             isAuthorized: false,
             fullName: ""
         } );
@@ -40,10 +61,7 @@ class AuthProvider extends Component {
         };
         const { reply } = await loader( body, "/loginAsUser" );
         // Если всё проходит успешно:
-        this.saveAuthState( {
-            isAuthorized: true,
-            fullName: reply.fullName
-        } );
+        this.setAuthorizedAuthState( reply.fullName );
         isRegistrationAllowed = () => false;
     }
     register = async ( email, password, confirmPassword, fullName ) => {
@@ -56,10 +74,7 @@ class AuthProvider extends Component {
         };
         await loader( body, "/registerAsUser" );
         // Если всё проходит успешно:
-        this.saveAuthState( {
-            isAuthorized: true,
-            fullName
-        } );
+        this.setAuthorizedAuthState(fullName);
         isRegistrationAllowed = () => false;
     }
     componentWillUnmount() {
