@@ -2,7 +2,16 @@ import React, { Component } from "react";
 import { PublicContent } from "../Public";
 import { withRouter, Redirect } from "react-router-dom";
 import { AuthContext } from "../../components/AuthManager";
-import AdminContent from "./components/AdminContent";
+
+class AdminContent extends Component {
+    render() {
+        return (
+            <div>
+                Какие-то Дополнительные кнопки для управления фермой на правах админа
+            </div>
+        );
+    }
+}
 
 class AdminPage extends Component {
     static contextType = AuthContext;
