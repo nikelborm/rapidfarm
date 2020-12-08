@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import Container from "react-bootstrap/Container";
-import { AppConfigsContext } from "../../../components/AppConfigsProvider";
+import { AppConfigsContext } from "../../../components/AppConfigsManager";
 import Process from "./Process";
 
 class ProcessList extends Component {
