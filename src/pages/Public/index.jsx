@@ -1,11 +1,13 @@
 import React, { Component } from "react";
 import { Redirect, withRouter } from "react-router-dom";
 import { AuthContext } from "../../components/AuthManager";
+import Hello from "./components/Hello";
 import ProcessList from "./components/ProcessList";
 
 export class PublicContent extends Component {
     render() {
         return <>
+            <Hello/>
             <ProcessList/>
         </>;
     }
