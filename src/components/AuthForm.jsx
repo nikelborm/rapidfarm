@@ -1,8 +1,22 @@
-import React, { Component } from "react";
+import React, { Component, PureComponent } from "react";
 import { AuthContext } from "../components/AuthManager";
 import { Redirect } from "react-router-dom";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
+
+class Input extends PureComponent {
+    render() {
+        const { name, type, label, placeholder } = this.props;
+        return (
+            <Form.Group controlId={name}>
+                <Form.Label>{ label }</Form.Label>
+                <Form.Control type={type} name={name} required placeholder={placeholder} />
+            </Form.Group>
+        )
+    }
+}
+
+const shityshit = { margin: "20px" };
 
 class AuthForm extends Component {
     static contextType = AuthContext;
@@ -35,29 +49,33 @@ class AuthForm extends Component {
             return <Redirect to="/admin" />;
         }
         return (
-            <div style={{ margin: "20px" }}>{/* TODO: поменять это, ведь вызывает лишние перерендеры */}
+            <div style={shityshit}>
                 <h1>{ isLogin ? "Вход" : "Регистрация" }</h1>
                 <Form onSubmit={ this.onSubmit }>
-                    { !isLogin && (
-                        <Form.Group controlId="nameInput">
-                            <Form.Label>Введите полное имя:</Form.Label>
-                            <Form.Control type="text" name="fullName" required placeholder="Иванов Иван" />
-                        </Form.Group>
-                    ) }
-                    <Form.Group controlId="emailInput">
-                        <Form.Label>Введите email адрес:</Form.Label>
-                        <Form.Control type="email" name="email" required placeholder="ivan@mail.ru" />
-                    </Form.Group>
-                    <Form.Group controlId="passwordInput">
-                        <Form.Label>Введите пароль:</Form.Label>
-                        <Form.Control type="password" name="password" required placeholder="********" />
-                    </Form.Group>
-                    { !isLogin && (
-                        <Form.Group controlId="confirmPasswordInput">
-                            <Form.Label>Повторите пароль:</Form.Label>
-                            <Form.Control type="password" name="confirmPassword" required placeholder="********" />
-                        </Form.Group>
-                    ) }
+                    { !isLogin && <Input
+                        type="text"
+                        name="fullName"
+                        placeholder="Иванов Иван"
+                        label="Введите полное имя:"
+                    /> }
+                    <Input
+                        type="email"
+                        name="email"
+                        placeholder="ivan@mail.ru"
+                        label="Введите email адрес:"
+                    />
+                    <Input
+                        type="password"
+                        name="password"
+                        placeholder="********"
+                        label="Введите пароль:"
+                    />
+                    { !isLogin && <Input
+                        type="password"
+                        name="confirmPassword"
+                        placeholder="********"
+                        label="Повторите пароль:"
+                    /> }
                     <Button variant="primary" type="submit" disabled={ this.state.isSendingNow }>
                         { this.state.isSendingNow
                             ? ( isLogin ? "Вход..." : "Создание аккаунта..." )
