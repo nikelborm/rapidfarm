@@ -5,17 +5,16 @@ const favicon = require("express-favicon");
 const bodyParser = require("body-parser");
 const cookie = require("cookie");
 const cookieParser = require("cookie-parser");
-const session = require("express-session");
 const redis = require("redis");
-const RedisStorage = require("connect-redis")(session);
 const http = require("http");
 const WebSocket = require("ws"); // jshint ignore:line
 const path = require("path");
 const sha256 = require("sha256");
 
-function createEmptyResponseData() {
+function createEmptyResponseData( handlerType ) {
     // * Создаёт базовый объект ответа на запрос
     const resdata = {
+        ...(handlerType ? { handlerType } : {}),
         report: {
             isError: true,
             info: ""
@@ -25,7 +24,7 @@ function createEmptyResponseData() {
     return { resdata, rp: resdata.report };
 }
 
-const port = process.env.PORT || 3000;
+const port = parseInt(process.env.PORT, 10) || 3000;
 const mongoLink = process.env.MONGODB_URI || "mongodb://Admin:0000@localhost:27017/admin";
 const redisLink = process.env.REDIS_URL || "redis://admin:foobared@127.0.0.1:6379";
 const isRegistrationAllowed = !!process.env.IS_REGISTRATION_ALLOWED;
@@ -47,9 +46,6 @@ let farmConfigs = {};
 
 const app = express();
 const redisClient = redis.createClient(redisLink);
-const store = new RedisStorage({
-    client: redisClient
-});
 const mongoClient = new mongodb.MongoClient(mongoLink, {
     useNewUrlParser: true,
     useUnifiedTopology: true
@@ -59,40 +55,9 @@ const WSServer = new WebSocket.Server({
     server
 });
 
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
-// TODO: Проверять не слишком ли большие данные, чтобы долго их не обрабатывать
-app.use(bodyParser.text());
-app.use(session({
-    store,
-    secret: sessionSecretKey,
-    resave: true,
-    rolling: true,
-    unset: "destroy",
-    saveUninitialized: true,
-    cookie: {
-        maxAge: 172800000,
-        httpOnly: true,
-    }
-}));
 app.use(cookieParser(cookieSecretKey));
 app.use(favicon(__dirname + "/build/favicon.ico"));
 
-function logout(request, response) {
-    request.session.destroy((err) => {
-        if (err) return console.log(err);
-        response.json( { report: { isError: !!err } } );
-        if(request.session){
-            WSServer.clients.forEach((connection) => {
-                if ( connection.sid === request.session.id) {
-                    connection.isAuthAsUser = undefined;
-                    connection.authInfo = undefined;
-                    return;
-                }
-            });
-        }
-    });
-}
 app.use(function(request, response, next){
     response.cookie("isRegistrationAllowed", isRegistrationAllowed);
     next();
@@ -102,74 +67,73 @@ app.get("/*", (request, response) => {
     response.sendFile(path.join(__dirname, "build", "index.html"));
 });
 
-app.post("/logout", logout);
 
-app.post("/loginAsFarm", function (request, response) {
-    const { secret, name } = request.body;
-    let { resdata, rp } = createEmptyResponseData();
+async function loginAsFarm(connection, body) {
+    const { secret, name } = body;
+    let { resdata, rp } = createEmptyResponseData("loginAsFarm");
 
     if ( typeof secret !== "string" || secret.length !== 64 ) {
-        rp.info = "Incorrect key format";
+        rp.info = "Некорректный формат ключа";
     } else if ( typeof name !== "string" || !name.length ) {
-        rp.info = "Farm unnamed";
+        rp.info = "У фермы нет имени";
     } else if ( sha256( secret ) in farmSecrets === false ) {
-        rp.info = "Farm not registered";
+        rp.info = "Ферма не зарегистрирована";
     } else {
-        request.session.isAuthAsFarm = true;
-        request.session.name = name;
+        connection.isAuthAsFarm = true;
+        connection.name = name;
         rp.isError = false;
-        rp.info = "Success authorization";
+        rp.info = "Успешная авторизация";
     }
-    response.json(resdata);
-});
+    return resdata;
+};
 
-app.post("/loginAsUser", function (request, response) {
-    const { email, password } = request.body;
-    let { resdata, rp } = createEmptyResponseData();
+async function loginAsUser(connection, body) {
+    const { email, password } = body;
+    let { resdata, rp } = createEmptyResponseData("loginAsUser");
 
     rp.errorField = !email ? "email" : !password ? "password" : "";
     rp.info = !email ? "Вы не ввели почту" : !password ? "Вы не ввели пароль" : "";
 
-    if (rp.info) return response.json(resdata);
-
-    users.findOne({ email })
-    .then((result) => {
-        if (!result) {
+    if (rp.info) return resdata;
+    try {
+        const userSearchResult = await users.findOne({ email });
+        if (!userSearchResult) {
             rp.errorField = "email";
             rp.info = "Пользователь с указанной почтой не найден";
-            return;
+            return resdata;
         }
-        if (result.password !== sha256(password)) {
+        if (userSearchResult.password !== sha256(password)) {
             rp.errorField = "password";
             rp.info = "Неверный пароль";
-            return;
+            return resdata;
         }
 
-        const { fullName } = request.session.authInfo = result;
-        request.session.isAuthAsUser = true;
-        resdata.reply = { fullName };
+        connection.authInfo = userSearchResult;
+        connection.isAuthAsUser = true;
+        resdata.reply = {
+            fullName: userSearchResult.fullName
+        };
         rp.isError = false;
         rp.info = "Успешная авторизация";
-    }).catch((err) => {
+    } catch (err) {
         console.log(err);
         rp.info = "Ошибка сервера";
-    }).finally(() => {
-        response.json(resdata);
-    });
-});
+    }
+    return resdata;
+};
 
-app.post("/registerAsUser", function (request, response) {
-    let { resdata, rp } = createEmptyResponseData();
+async function registerAsUser(connection, body) {
+    let { resdata, rp } = createEmptyResponseData("registerAsUser");
     if ( !isRegistrationAllowed ) {
         rp.info = "Регистрация запрещена"
-        return response.json(resdata);
+        return resdata;
     }
-    const { password, confirmPassword, fullName, email } = request.body;
+    const { password, confirmPassword, fullName, email } = body;
     rp.errorField = !email ? "email" : !password ? "password" : !fullName ? "fullName" : "";
     rp.info = !email ? "Вы не ввели почту" : !password ? "Вы не ввели пароль" : !fullName ? "Вы не ввели ваше имя" : "";
 
-    if (rp.info) return response.json(resdata);
-    let errorField = "", info = "";
+    if (rp.info) return resdata;
+    let info = "", errorField = "";
 
     if (password.length < 8) {
         info = "Длина пароля должна быть от 8 символов";
@@ -187,34 +151,30 @@ app.post("/registerAsUser", function (request, response) {
     rp.errorField = errorField;
     rp.info = info;
 
-    if (rp.info) return response.json(resdata);
-
-    users.findOne({ email })
-    .then((result) => {
+    if (rp.info) return resdata;
+    try {
+        const userSearchResult = await users.findOne({ email });
+        if ( userSearchResult ) {
+            rp.errorField = "email";
+            rp.info = "Эта почта занята. Если вы владелец, попробуйте <a href='/restore' style='color: #FFFFFF;'>восстановить аккаунт</a>.";
+            return resdata;
+        }
         const userProfile = {
             password: sha256(password),
             email,
             fullName
         };
-        if ( result ) {
-            rp.errorField = "email";
-            rp.info = "Эта почта занята. Если вы владелец, попробуйте <a href='/restore' style='color: #FFFFFF;'>восстановить аккаунт</a>.";
-            return;
-        }
-        return users.insertOne(userProfile)
-        .then((result) => {
-            request.session.isAuthAsUser = true;
-            request.session.authInfo = result.ops[0];
-            rp.isError = false;
-            rp.info = "Регистрация успешна";
-        }); // Возвращаем промис
-    }).catch((err) => {
+        const insertationResult = await users.insertOne(userProfile);
+        connection.isAuthAsUser = true;
+        connection.authInfo = insertationResult.ops[0];
+        rp.isError = false;
+        rp.info = "Регистрация успешна";
+    } catch (err) {
         console.log("err: ", err);
         rp.info = "Ошибка сервера";
-    }).finally(() => {
-        response.json(resdata);
-    });
-});
+    }
+    return resdata;
+}
 
 function sendMessage(connection, message) {
     connection.send(JSON.stringify(message));
@@ -240,15 +200,6 @@ function sendToUsers( message ) {
         }
     }
 }
-function getSessionBySid(connection, callback) {
-    store.get(connection.sid, (err, session) => {
-        if (!session || err) { // TODO: Добавить сверку IP реального с тем что хранится в подписанной сесии, чтобы заблокировать попытку украсть сессию
-            console.log( session, err );
-            return closeWsConnection(connection, "Вы не авторизованы!");
-        }
-        callback(session);
-    });
-}
 function logSession( event, sid, session ) {
     console.log(event+" : sid("+sid+"): isAuthAsFarm, name, isAuthAsUser, authInfo -> ", session.isAuthAsFarm, session.name, session.isAuthAsUser, session.authInfo );
 }
@@ -258,124 +209,159 @@ function sendActivityPackage( connection ) {
 function sendError( connection, message ) {
     sendMessage(connection, {class:"error", message});
 }
+async function targetError(connection, body) {
+    const { resdata } = createEmptyResponseData("targetError");
+    resdata.report.info = "Некорректный запрос";
+    return resdata;
+}
+function handlerSwitcher( type ) {
+    switch (type) {
+        case "loginAsFarm":
+            return loginAsFarm;
+        case "loginAsUser":
+            return loginAsUser;
+        case "registerAsUser":
+            return registerAsUser;
+        default:
+            return targetError;
+    }
+}
 WSServer.on("connection", (connection, request) => {
     connection.isAlive = true;
     connection.on("pong", () => {
         connection.isAlive = true;
     });
-    const cookies = cookie.parse(request.headers.cookie);
-    const sid = cookieParser.signedCookie(cookies["connect.sid"], sessionSecretKey);
-    console.log("onconnection sid: ", sid);
-    if (!sid) return closeWsConnection(connection, "Вы не авторизованы!");
-    connection.sid = sid;
-    //* Ферма сначала посылает запрос, авторизуется и только потом подключается к вебсокету
-    getSessionBySid( connection, initialSession => {
-        logSession( "initialSession - Первый заход(подключение к redis)", connection.sid, initialSession );
-        if ( initialSession.isAuthAsFarm ) {
-            // Если ферма авторизована гарантировано, то записываем её в соединение
-            // TODO: Запросить у фермы набор данных о состоянии
-            connection.isAuthAsFarm = initialSession.isAuthAsFarm;
-            connection.name = initialSession.name;
+    const authorizationStep = async (data) => {
+        connection.send(
+            JSON.stringify(
+                await handlerSwitcher( data.class )( connection, data )
+            )
+        );
+        if (connection.isAuthAsFarm) {
             if ( !mainFarm ) mainFarm = connection;
-            connection.on("message", (input) => {
-                logSession( "onmessage - connection у фермы", connection.sid, connection );
-                const data = JSON.parse(input.toString());
-                console.log("Пришло в ws: ", data);
-                switch ( data.class ) {
-                    case "event":
-                        // просто переслать всем онлайн пользователям
-                        // if ( connection.name === mainFarm.name ) sendToUsers(data); // и ещё имя фермы
-                        sendToUsers( data );
-                        farmActivity[ data.process ] = data.isActive;
-                        break;
-                    case "warning":
-                        // переслать всем онлайн пользователям и уведомить их ещё как-то (по почте, через пуш уведомления, в слак, в вк, в телегу, в дискорд)
-                        // if ( connection.name === mainFarm.name ) sendToUsers(data);
-                        sendToUsers(data);
-                        break;
-                    case "records":
-                        // переслать всем онлайн пользователям и сохранить в бд с датой
-                        // if ( connection.name === mainFarm.name ) sendToUsers(data);
-                        sendToUsers(data);
-                        sensorsLogs.insertOne({
-                            sensor: data.sensor,
-                            value: data.value,
-                            date: new Date(),
-                            farmName: connection.name
-                        });
-                        break;
-                    case "activitySyncPackage":
-                        farmActivity = data.package;
-                        sendToUsers({ class: "activitySyncPackage", package: farmActivity });
-                        break;
-                    default:
-                        sendError(connection, "Ошибка в составлении запроса");
-                }
-            });
-            return;
+            connection.removeListener("message", authorizationStep);
+            connection.addListener("message", farmQueriesHandler);
+            connection.addListener("message", logout);
         }
-        if ( mainFarm ) {
-            sendActivityPackage( connection );
+        if (connection.isAuthAsUser) {
+            connection.removeListener("message", authorizationStep);
+            connection.addListener("message", userQueriesHandler);
+            connection.addListener("message", logout);
         }
-        connection.on("message", (input) => {
-            logSession( "connection - onmessage у любого пользователя", connection.sid, connection );
-            // TODO: А вот тут подумать над защитой и обработкой ошибок потому что любой неавторизованный пользователь может достичь этой точки
-            const data = JSON.parse(input.toString());
-            console.log("Пришло в ws: ", data);
-            //* Пользовательские запросы которые можно обработать и без авторизации
-            // { "class": "execute", "what": "workWithFarm", name: "asdasdasd"  }
-            // if ( data.class === "execute" && data.what === "workWithFarm" ) {
-            // }
-            if ( data.class === "get" ) {
+    }
+    const publicQueriesHandler = (input) => {
+        // TODO: Подумать над обработкой и защитой от ошибок в JSON.parse
+        const data = JSON.parse(input.toString());
+        //* Пользовательские запросы которые можно обработать и без авторизации
+        // { "class": "execute", "what": "workWithFarm", name: "asdasdasd"  }
+        // if ( data.class === "execute" && data.what === "workWithFarm" ) {
+        // }
+        switch ( data.class ) {
+            case "get":
                 switch ( data.what ) {
                     case "activitySyncPackage":
                         sendActivityPackage( connection );
                         break;
                     default:
-                        sendError(connection, "Ошибка в составлении запроса");
+                        sendError(connection, `Обработчика what для ${data.what} не существует`);
                 }
-                return;
-            }
-            getSessionBySid( connection, session => {
-                connection.isAuthAsUser = session.isAuthAsUser;
-                connection.authInfo = session.authInfo;
-                if ( !session.isAuthAsUser ) {
-                    connection.send(JSON.stringify({ class: "error", message: "Вы не авторизованы" }));
-                    return;
-                }
-                logSession( "session - onmessage у пользователя(авторизованного)", sid, session );
-                // Все команды, что прилетают идут главной ферме. А чтобы отдать другой - нужно сначала переключить
-                switch ( data.class ) {
-                    case "set":
-                        switch ( data.what ) {
-                            case "processTimings":
-                                break;
-                            case "todayProcessTimings":
-                                break;
-                            case "config":
-                                break;
-                            default:
-                                sendError(connection, "Ошибка в составлении запроса");
-                        }
+                break;
+            default:
+                break;
+        }
+    };
+    const farmQueriesHandler = (input) => {
+        const data = JSON.parse(input.toString());
+        console.log("Пришло в ws: ", data);
+        switch ( data.class ) {
+            case "event":
+                // просто переслать всем онлайн пользователям
+                // if ( connection.name === mainFarm.name ) sendToUsers(data); // и ещё имя фермы
+                sendToUsers( data );
+                farmActivity[ data.process ] = data.isActive;
+                break;
+            case "warning":
+                // переслать всем онлайн пользователям и уведомить их ещё как-то (по почте, через пуш уведомления, в слак, в вк, в телегу, в дискорд)
+                // if ( connection.name === mainFarm.name ) sendToUsers(data);
+                sendToUsers(data);
+                break;
+            case "records":
+                // переслать всем онлайн пользователям и сохранить в бд с датой
+                // if ( connection.name === mainFarm.name ) sendToUsers(data);
+                sendToUsers(data);
+                sensorsLogs.insertOne({
+                    sensor: data.sensor,
+                    value: data.value,
+                    date: new Date(),
+                    farmName: connection.name
+                });
+                break;
+            case "activitySyncPackage":
+                farmActivity = data.package;
+                sendToUsers({ class: "activitySyncPackage", package: farmActivity });
+                break;
+            default:
+                break;
+        }
+    };
+    const userQueriesHandler = (input) => {
+        const data = JSON.parse(input.toString());
+        switch ( data.class ) {
+            case "set":
+                switch ( data.what ) {
+                    case "processTimings":
                         break;
-                    case "execute":
-                        switch ( data.what ) {
-                            case "shutDownFarm":
-                                break;
-                            case "workWithFarm":
-                                break;
-                            case "addNewFarm":
-                                break;
-                            default:
-                                sendError(connection, "Ошибка в составлении запроса");
-                        }
+                    case "todayProcessTimings":
+                        break;
+                    case "config":
                         break;
                     default:
-                        sendError(connection, "Ошибка в составлении запроса");
+                        sendError(connection, `Обработчика what для ${data.what} не существует`);
                 }
-            } );
-        });
-    } );
+                break;
+            case "execute":
+                switch ( data.what ) {
+                    case "shutDownFarm":
+                        break;
+                    case "workWithFarm":
+                        break;
+                    case "addNewFarm":
+                        break;
+                    default:
+                        sendError(connection, `Обработчика what для ${data.what} не существует`);
+                }
+                break;
+            default:
+                break;
+        }
+    };
+    const logout = (input) => {
+        const data = JSON.parse(input.toString());
+        if (data.class !== "logout") return;
+        if (connection.isAuthAsFarm) {
+            if ( mainFarm === connection ) mainFarm = null;
+            connection.isAuthAsFarm = false;
+            connection.name = "";
+            connection.addListener("message", authorizationStep);
+            connection.removeListener("message", farmQueriesHandler);
+            connection.removeListener("message", logout);
+        }
+        if (connection.isAuthAsUser) {
+            connection.isAuthAsUser = false;
+            connection.authInfo = null;
+            connection.addListener("message", authorizationStep);
+            connection.removeListener("message", userQueriesHandler);
+            connection.removeListener("message", logout);
+        }
+    };
+    connection.addListener("message", authorizationStep);
+    connection.addListener("message", publicQueriesHandler);
+    if ( mainFarm ) {
+        sendActivityPackage( connection );
+    }
+    // const cookies = cookie.parse(request.headers.cookie);
+    // console.log("onconnection sid: ", sid);
+    // connection.sid = sid;
 });
 const cleaner = setInterval(() => {
     // Проверка на то, оставлять ли соединение активным
