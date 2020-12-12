@@ -2,8 +2,6 @@
 const express = require("express");
 const mongodb = require("mongodb");
 const favicon = require("express-favicon");
-const bodyParser = require("body-parser");
-const cookie = require("cookie");
 const cookieParser = require("cookie-parser");
 const redis = require("redis");
 const http = require("http");
@@ -11,10 +9,9 @@ const WebSocket = require("ws"); // jshint ignore:line
 const path = require("path");
 const sha256 = require("sha256");
 
-function createEmptyResponseData( handlerType ) {
+function createEmptyResponseData() {
     // * Создаёт базовый объект ответа на запрос
     const resdata = {
-        ...(handlerType ? { handlerType } : {}),
         report: {
             isError: true,
             info: ""
@@ -28,7 +25,6 @@ const port = parseInt(process.env.PORT, 10) || 3000;
 const mongoLink = process.env.MONGODB_URI || "mongodb://Admin:0000@localhost:27017/admin";
 const redisLink = process.env.REDIS_URL || "redis://admin:foobared@127.0.0.1:6379";
 const isRegistrationAllowed = !!process.env.IS_REGISTRATION_ALLOWED;
-const sessionSecretKey = process.env.SESSION_SECRET || "wHaTeVeR123";
 const cookieSecretKey = process.env.COOKIE_SECRET || "wHaTeVeR123";
 const farmSecrets = JSON.parse(process.env.FARM_SECRETS || `{
     "ec5d48de1fea693990a7f5eebd52c632c744d473d595d0eb883e55b7dec14327" : "Лондонская ферма",
@@ -70,7 +66,7 @@ app.get("/*", (request, response) => {
 
 async function loginAsFarm(connection, body) {
     const { secret, name } = body;
-    let { resdata, rp } = createEmptyResponseData("loginAsFarm");
+    let { resdata, rp } = createEmptyResponseData();
 
     if ( typeof secret !== "string" || secret.length !== 64 ) {
         rp.info = "Некорректный формат ключа";
@@ -89,7 +85,7 @@ async function loginAsFarm(connection, body) {
 
 async function loginAsUser(connection, body) {
     const { email, password } = body;
-    let { resdata, rp } = createEmptyResponseData("loginAsUser");
+    let { resdata, rp } = createEmptyResponseData();
 
     rp.errorField = !email ? "email" : !password ? "password" : "";
     rp.info = !email ? "Вы не ввели почту" : !password ? "Вы не ввели пароль" : "";
@@ -123,7 +119,7 @@ async function loginAsUser(connection, body) {
 };
 
 async function registerAsUser(connection, body) {
-    let { resdata, rp } = createEmptyResponseData("registerAsUser");
+    let { resdata, rp } = createEmptyResponseData();
     if ( !isRegistrationAllowed ) {
         rp.info = "Регистрация запрещена"
         return resdata;
@@ -179,19 +175,6 @@ async function registerAsUser(connection, body) {
 function sendMessage(connection, message) {
     connection.send(JSON.stringify(message));
 }
-function closeWsConnection( connection, reason ) {
-    let { resdata, rp } = createEmptyResponseData();
-    rp.info = reason;
-    // Не вырубать, а просто деавторизовать как-то
-    sendMessage(connection, resdata);
-    connection.terminate();
-}
-function setMainFarm( name ) {
-
-}
-function sendToMainFarm() {
-
-}
 function sendToUsers( message ) {
     //* Отправляет сообщение онлайн пользователям
     for (const client of WSServer.clients) {
@@ -210,7 +193,7 @@ function sendError( connection, message ) {
     sendMessage(connection, {class:"error", message});
 }
 async function targetError(connection, body) {
-    const { resdata } = createEmptyResponseData("targetError");
+    const { resdata } = createEmptyResponseData();
     resdata.report.info = "Некорректный запрос";
     return resdata;
 }
@@ -231,12 +214,12 @@ WSServer.on("connection", (connection, request) => {
     connection.on("pong", () => {
         connection.isAlive = true;
     });
-    const authorizationStep = async (data) => {
-        connection.send(
-            JSON.stringify(
-                await handlerSwitcher( data.class )( connection, data )
-            )
-        );
+    const authorizationStep = async (input) => {
+        const data = JSON.parse(input.toString());
+        sendMessage(connection, {
+            ...(await handlerSwitcher( data.class )( connection, data )),
+            class: data.class
+        });
         if (connection.isAuthAsFarm) {
             if ( !mainFarm ) mainFarm = connection;
             connection.removeListener("message", authorizationStep);

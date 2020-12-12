@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import getCookie from "../tools/getCookie";
 import loader from "../tools/loader";
+import { addMessageListener } from "../tools/SocketManager";
 export let isRegistrationAllowed = () => JSON.parse( getCookie( "isRegistrationAllowed" ) );
 
 export const AuthContext = React.createContext( {
@@ -79,6 +80,9 @@ class AuthProvider extends Component {
     }
     componentWillUnmount() {
         this.logout();
+    }
+    componentDidMount() {
+        addMessageListener();
     }
     render() {
         return (
