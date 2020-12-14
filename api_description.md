@@ -48,6 +48,9 @@
     "waterHeating":  false,
     "airHeating":    false,
 } }
+{ "class": "loginAsFarm", "secret": "64СимволаДлинныйКлюч", "name": "Имя фермы" }
+
+
 
 Что пользователь может прислать на сервер?
 
@@ -69,6 +72,8 @@
 { "class": "execute", "what": "shutDownFarm" }
 { "class": "execute", "what": "workWithFarm", "name": "asdasdasd"  }
 { "class": "execute", "what": "addNewFarm", "name": "asdasdasd"  } ?????
+{ "class": "loginAsUser", "email": "asd@mail.ru", "password": "asdasdasd"  }
+{ "class": "registerAsUser", "password": "strong cat", "confirmPassword": "strong cat", "fullName": "asd", "email": "asd@mail.ru"  }
 
 Что сервер может прислать на ферму?
 
@@ -88,6 +93,7 @@
 { "class": "get", "what": "activitySyncPackage" }
 { "class": "set", "what": "config" }
 { "class": "execute", "what": "shutDownFarm" }
+{ "class": "execute", "what": "updateArduino" }
 
 
 Что сервер может прислать пользователю?
