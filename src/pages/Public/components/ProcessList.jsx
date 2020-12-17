@@ -8,8 +8,8 @@ class ProcessList extends Component {
     render() {
         return (
             <Container>
-                { Object.entries(this.context.processActivities).map(
-                    ([title, activity]) => <Process title={title} activity={activity}/>
+                { Object.entries( this.context.processes ).map(
+                    ([title, activity]) => <Process title={title} isActive={isActive} isAvailable={isAvailable}/>
                 ) }
             </Container>
         );

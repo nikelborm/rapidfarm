@@ -33,12 +33,12 @@ const farmSecrets = JSON.parse(process.env.FARM_SECRETS || `{
 // sha256("spbgos5QpJkp4ghuDtKH7g1FF8M7jsW46qieRR3ZLsjRp3h2LOWbl46Mn99z4DZI"); =="ccd01e70db4df3506e98a6532a73095a83dbf0d8a1029d210fb212cfae4d230c"
 
 let dbClient;
-let users = {};
 let mainFarm;
-let sensorsLogs = {};
-let webCommandsLogs = {};
-let farmActivity = {};
-let farmConfigs = {};
+let cachedProcessStates = {};
+let users = {}; // collection
+let sensorsLogs = {}; // collection
+let webCommandsLogs = {}; // collection
+let farmConfigs = {}; // collection
 
 const app = express();
 const redisClient = redis.createClient(redisLink);
@@ -68,9 +68,9 @@ async function loginAsFarm(connection, body) {
     const { secret, name } = body;
     let { resdata, rp } = createEmptyResponseData();
 
-    if ( typeof secret !== "string" || secret.length !== 64 ) {
+    /* if ( typeof secret !== "string" || secret.length !== 64 ) {
         rp.info = "Некорректный формат ключа";
-    } else if ( typeof name !== "string" || !name.length ) {
+    } else */if ( typeof name !== "string" || !name.length ) {
         rp.info = "У фермы нет имени";
     } else if ( sha256( secret ) in farmSecrets === false ) {
         rp.info = "Ферма не зарегистрирована";
@@ -187,7 +187,7 @@ function logSession( event, sid, session ) {
     console.log(event+" : sid("+sid+"): isAuthAsFarm, name, isAuthAsUser, authInfo -> ", session.isAuthAsFarm, session.name, session.isAuthAsUser, session.authInfo );
 }
 function sendActivityPackage( connection ) {
-    sendMessage(connection, { class: "activitySyncPackage", package: farmActivity });
+    sendMessage(connection, { class: "activitySyncPackage", package: cachedProcessStates });
 }
 function sendError( connection, message ) {
     sendMessage(connection, {class:"error", message});
@@ -209,13 +209,16 @@ function handlerSwitcher( type ) {
             return targetError;
     }
 }
+function prepare(input) {
+    return JSON.parse(input.toString());
+}
 WSServer.on("connection", (connection, request) => {
     connection.isAlive = true;
     connection.on("pong", () => {
         connection.isAlive = true;
     });
     const authorizationStep = async (input) => {
-        const data = JSON.parse(input.toString());
+        const data = prepare(input);
         sendMessage(connection, {
             ...(await handlerSwitcher( data.class )( connection, data )),
             class: data.class
@@ -234,7 +237,7 @@ WSServer.on("connection", (connection, request) => {
     }
     const publicQueriesHandler = (input) => {
         // TODO: Подумать над обработкой и защитой от ошибок в JSON.parse
-        const data = JSON.parse(input.toString());
+        const data = prepare(input);
         //* Пользовательские запросы которые можно обработать и без авторизации
         // { "class": "execute", "what": "workWithFarm", name: "asdasdasd"  }
         // if ( data.class === "execute" && data.what === "workWithFarm" ) {
@@ -254,14 +257,13 @@ WSServer.on("connection", (connection, request) => {
         }
     };
     const farmQueriesHandler = (input) => {
-        const data = JSON.parse(input.toString());
-        console.log("Пришло в ws: ", data);
+        const data = prepare(input);
         switch ( data.class ) {
             case "event":
                 // просто переслать всем онлайн пользователям
                 // if ( connection.name === mainFarm.name ) sendToUsers(data); // и ещё имя фермы
                 sendToUsers( data );
-                farmActivity[ data.process ] = data.isActive;
+                cachedProcessStates[ data.process ] = data.isActive;
                 break;
             case "warning":
                 // переслать всем онлайн пользователям и уведомить их ещё как-то (по почте, через пуш уведомления, в слак, в вк, в телегу, в дискорд)
@@ -280,21 +282,21 @@ WSServer.on("connection", (connection, request) => {
                 });
                 break;
             case "activitySyncPackage":
-                farmActivity = data.package;
-                sendToUsers({ class: "activitySyncPackage", package: farmActivity });
+                cachedProcessStates = data.package;
+                sendToUsers({ class: "activitySyncPackage", package: cachedProcessStates });
                 break;
             default:
                 break;
         }
     };
     const userQueriesHandler = (input) => {
-        const data = JSON.parse(input.toString());
+        const data = prepare(input);
         switch ( data.class ) {
             case "set":
                 switch ( data.what ) {
-                    case "processTimings":
+                    case "timings":
                         break;
-                    case "todayProcessTimings":
+                    case "todayTimings":
                         break;
                     case "config":
                         break;
@@ -319,7 +321,7 @@ WSServer.on("connection", (connection, request) => {
         }
     };
     const logout = (input) => {
-        const data = JSON.parse(input.toString());
+        const data = prepare(input);
         if (data.class !== "logout") return;
         if (connection.isAuthAsFarm) {
             if ( mainFarm === connection ) mainFarm = null;
@@ -337,6 +339,9 @@ WSServer.on("connection", (connection, request) => {
             connection.removeListener("message", logout);
         }
     };
+    connection.addListener("message", function (input) {
+        console.log("Пришло в ws: ", prepare(input));
+    });
     connection.addListener("message", authorizationStep);
     connection.addListener("message", publicQueriesHandler);
     if ( mainFarm ) {
