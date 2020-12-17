@@ -3,34 +3,48 @@ import Badge from "react-bootstrap/Badge";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 
+function getVariant(
+    isActive,
+    isAvailable,
+    activeVariant,
+    inactiveVariant,
+    unavailableVariant
+) {
+    return ( !isAvailable
+        ? unavailableVariant
+        : isActive
+            ? activeVariant
+            : inactiveVariant
+    );
+}
 class Process extends PureComponent {
     render() {
-        const getVariant = (
-            state,
-            active,
-            inactive,
-            unavailable
-        ) => (
-            state
-                ? active
-                : state === false
-                    ? inactive
-                    : unavailable
-        );
-        const { title, activity } = this.props;
+        const { title, isActive, isAvailable } = this.props;
         return (
             <Row>
                 <Col>
-                    {title}{": "}
+                    { title }{": "}
                 </Col>
                 <Col>
                     <Badge
                         pill
                         variant={
-                            getVariant( activity, "success", "danger", "secondary" )
+                            getVariant(
+                                isActive,
+                                isAvailable,
+                                "success",
+                                "danger",
+                                "secondary"
+                            )
                         }
                         children={
-                            getVariant( activity, "Активно", "Выключено", "Недоступно" )
+                            getVariant(
+                                isActive,
+                                isAvailable,
+                                "Активно",
+                                "Выключено",
+                                "Недоступно"
+                            )
                         }
                     />
                 </Col>

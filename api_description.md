@@ -54,18 +54,18 @@
 
 Что пользователь может прислать на сервер?
 
-{ "class": "set", "what": "processTimings",      "process": "oxidation",     "timings": [] } // TODO: Подумать как реализовать временной конфиг процесса
-{ "class": "set", "what": "processTimings",      "process": "watering",      "timings": [] }
-{ "class": "set", "what": "processTimings",      "process": "lighting",      "timings": [] }
-{ "class": "set", "what": "processTimings",      "process": "groundHeating", "timings": [] }
-{ "class": "set", "what": "processTimings",      "process": "waterHeating",  "timings": [] }
-{ "class": "set", "what": "processTimings",      "process": "airHeating",    "timings": [] }
-{ "class": "set", "what": "todayProcessTimings", "process": "oxidation",     "timings": [] } // в интерфейсе показывать временную линию текущего времени
-{ "class": "set", "what": "todayProcessTimings", "process": "watering",      "timings": [] }
-{ "class": "set", "what": "todayProcessTimings", "process": "lighting",      "timings": [] }
-{ "class": "set", "what": "todayProcessTimings", "process": "groundHeating", "timings": [] }
-{ "class": "set", "what": "todayProcessTimings", "process": "waterHeating",  "timings": [] }
-{ "class": "set", "what": "todayProcessTimings", "process": "airHeating",    "timings": [] }
+{ "class": "set", "what": "timings",      "process": "oxidation",     "timings": [] } // TODO: Подумать как реализовать временной конфиг процесса
+{ "class": "set", "what": "timings",      "process": "watering",      "timings": [] }
+{ "class": "set", "what": "timings",      "process": "lighting",      "timings": [] }
+{ "class": "set", "what": "timings",      "process": "groundHeating", "timings": [] }
+{ "class": "set", "what": "timings",      "process": "waterHeating",  "timings": [] }
+{ "class": "set", "what": "timings",      "process": "airHeating",    "timings": [] }
+{ "class": "set", "what": "todayTimings", "process": "oxidation",     "timings": [] } // в интерфейсе показывать временную линию текущего времени
+{ "class": "set", "what": "todayTimings", "process": "watering",      "timings": [] }
+{ "class": "set", "what": "todayTimings", "process": "lighting",      "timings": [] }
+{ "class": "set", "what": "todayTimings", "process": "groundHeating", "timings": [] }
+{ "class": "set", "what": "todayTimings", "process": "waterHeating",  "timings": [] }
+{ "class": "set", "what": "todayTimings", "process": "airHeating",    "timings": [] }
 
 { "class": "set", "what": "config" }
 { "class": "get", "what": "activitySyncPackage" }
@@ -77,18 +77,18 @@
 
 Что сервер может прислать на ферму?
 
-{ "class": "set", "what": "processTimings",      "process": "oxidation",     "timings": [] } // TODO: Подумать как реализовать временной конфиг процесса
-{ "class": "set", "what": "processTimings",      "process": "watering",      "timings": [] }
-{ "class": "set", "what": "processTimings",      "process": "lighting",      "timings": [] }
-{ "class": "set", "what": "processTimings",      "process": "groundHeating", "timings": [] }
-{ "class": "set", "what": "processTimings",      "process": "waterHeating",  "timings": [] }
-{ "class": "set", "what": "processTimings",      "process": "airHeating",    "timings": [] }
-{ "class": "set", "what": "todayProcessTimings", "process": "oxidation",     "timings": [] } // в интерфейсе показывать временную линию текущего времени
-{ "class": "set", "what": "todayProcessTimings", "process": "watering",      "timings": [] }
-{ "class": "set", "what": "todayProcessTimings", "process": "lighting",      "timings": [] }
-{ "class": "set", "what": "todayProcessTimings", "process": "groundHeating", "timings": [] }
-{ "class": "set", "what": "todayProcessTimings", "process": "waterHeating",  "timings": [] }
-{ "class": "set", "what": "todayProcessTimings", "process": "airHeating",    "timings": [] }
+{ "class": "set", "what": "timings",      "process": "oxidation",     "timings": [] } // TODO: Подумать как реализовать временной конфиг процесса
+{ "class": "set", "what": "timings",      "process": "watering",      "timings": [] }
+{ "class": "set", "what": "timings",      "process": "lighting",      "timings": [] }
+{ "class": "set", "what": "timings",      "process": "groundHeating", "timings": [] }
+{ "class": "set", "what": "timings",      "process": "waterHeating",  "timings": [] }
+{ "class": "set", "what": "timings",      "process": "airHeating",    "timings": [] }
+{ "class": "set", "what": "todayTimings", "process": "oxidation",     "timings": [] } // в интерфейсе показывать временную линию текущего времени
+{ "class": "set", "what": "todayTimings", "process": "watering",      "timings": [] }
+{ "class": "set", "what": "todayTimings", "process": "lighting",      "timings": [] }
+{ "class": "set", "what": "todayTimings", "process": "groundHeating", "timings": [] }
+{ "class": "set", "what": "todayTimings", "process": "waterHeating",  "timings": [] }
+{ "class": "set", "what": "todayTimings", "process": "airHeating",    "timings": [] }
 
 { "class": "get", "what": "activitySyncPackage" }
 { "class": "set", "what": "config" }
