@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react';
+import React, { PureComponent } from "react";
 import Container from "react-bootstrap/Container";
 import { AppConfigsContext } from "../../../components/AppConfigsManager";
 import Process from "./Process";
@@ -27,7 +27,7 @@ class ProcessList extends PureComponent {
             <Container>
                 { Object.entries( this.context.processes ).map(
                     ( [ long, isActive ] ) => {
-                        console.log( 'this.context.processes: ', this.context.processes );
+                        console.log( "this.context.processes: ", this.context.processes );
                         const { isAvailable, title } = this.context.processes.find(
                             process => process.long === long
                         );
