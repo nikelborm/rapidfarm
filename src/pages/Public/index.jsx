@@ -15,6 +15,7 @@ export class PublicContent extends Component {
 class PublicPage extends Component {
     static contextType = AuthContext;
     render() {
+        console.log('PublicPage this.context: ', this.context);
         if ( this.context.isAuthorized ) {
             return <Redirect to="/admin"/>;
         }
