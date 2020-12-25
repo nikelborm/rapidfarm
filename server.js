@@ -26,11 +26,7 @@ const mongoLink = process.env.MONGODB_URI || "mongodb://Admin:0000@localhost:270
 const redisLink = process.env.REDIS_URL || "redis://admin:foobared@127.0.0.1:6379";
 const isRegistrationAllowed = !!process.env.IS_REGISTRATION_ALLOWED;
 const cookieSecretKey = process.env.COOKIE_SECRET || "wHaTeVeR123";
-const farmSecrets = JSON.parse(process.env.FARM_SECRETS || `{
-    "ec5d48de1fea693990a7f5eebd52c632c744d473d595d0eb883e55b7dec14327" : "Лондонская ферма",
-    "d8a928b2043db77e340b523547bf16cb4aa483f0645fe0a290ed1f20aab76257" : "Команда 2"
-}`);
-// sha256("spbgos5QpJkp4ghuDtKH7g1FF8M7jsW46qieRR3ZLsjRp3h2LOWbl46Mn99z4DZI"); =="ccd01e70db4df3506e98a6532a73095a83dbf0d8a1029d210fb212cfae4d230c"
+const farmSecrets = JSON.parse(process.env.FARM_SECRETS || `{}`);
 
 let dbClient;
 let mainFarm;
@@ -68,15 +64,16 @@ async function loginAsFarm(connection, body) {
     const { secret, name } = body;
     let { resdata, rp } = createEmptyResponseData();
 
-    /* if ( typeof secret !== "string" || secret.length !== 64 ) {
+    if ( typeof secret !== "string" || secret.length !== 64 ) {
         rp.info = "Некорректный формат ключа";
-    } else */if ( typeof name !== "string" || !name.length ) {
+    } else if ( typeof name !== "string" || !name.length ) {
         rp.info = "У фермы нет имени";
     } else if ( sha256( secret ) in farmSecrets === false ) {
         rp.info = "Ферма не зарегистрирована";
     } else {
         connection.isAuthAsFarm = true;
         connection.name = name;
+        farmSecrets[ sha256( secret ) ] = name;
         rp.isError = false;
         rp.info = "Успешная авторизация";
     }
@@ -133,11 +130,11 @@ async function registerAsUser(connection, body) {
 
     if (password.length < 8) {
         info = "Длина пароля должна быть от 8 символов";
-        errorField = "passwordRegister";
+        errorField = "password";
     }
     else if (password.length > 40) {
         info = "Длина пароля должна быть до 40 символов";
-        errorField = "passwordRegister";
+        errorField = "password";
     }
     else if (confirmPassword !== password) {
         info = "Пароли не совпадают";
@@ -152,7 +149,7 @@ async function registerAsUser(connection, body) {
         const userSearchResult = await users.findOne({ email });
         if ( userSearchResult ) {
             rp.errorField = "email";
-            rp.info = "Эта почта занята. Если вы владелец, попробуйте <a href='/restore' style='color: #FFFFFF;'>восстановить аккаунт</a>.";
+            rp.info = "Эта почта занята. Если вы владелец, попробуйте обратиться к администратору.";
             return resdata;
         }
         const userProfile = {
@@ -183,8 +180,8 @@ function sendToUsers( message ) {
         }
     }
 }
-function logSession( event, sid, session ) {
-    console.log(event+" : sid("+sid+"): isAuthAsFarm, name, isAuthAsUser, authInfo -> ", session.isAuthAsFarm, session.name, session.isAuthAsUser, session.authInfo );
+function logProfile( event, WSclient ) {
+    console.log(event+" : isAuthAsFarm, name, isAuthAsUser, authInfo -> ",  WSclient.isAuthAsFarm,  WSclient.name,  WSclient.isAuthAsUser,  WSclient.authInfo );
 }
 function sendActivityPackage( connection ) {
     sendMessage(connection, { class: "activitySyncPackage", package: cachedProcessStates });
@@ -365,8 +362,9 @@ const cleaner = setInterval(() => {
                         break;
                     }
                 }
+                cachedProcessStates = {};
             }
-            logSession( "connection - cleaner terminate", connection.sid, connection );
+            logProfile( "connection - cleaner terminate", connection );
             return connection.terminate();
         }
         // обьявить все соединения мертвыми, а тех кто откликнется на ping, сделать живыми

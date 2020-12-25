@@ -94,6 +94,9 @@
 { "class": "set", "what": "config" }
 { "class": "execute", "what": "shutDownFarm" }
 { "class": "execute", "what": "updateArduino" }
+{ report: { isError: true, info: "У фермы нет имени" }, reply: {} }
+{ report: { isError: true, info: "Ферма не зарегистрирована" }, reply: {} }
+{ report: { isError: false, info: "Успешная авторизация" }, reply: {} }
 
 
 Что сервер может прислать пользователю?
@@ -147,3 +150,17 @@
     "waterHeating":  false,
     "airHeating":    false,
 } }
+
+{ report: { isError: true, info: "Вы не ввели почту", errorField: "email" }, reply: {} }
+{ report: { isError: true, info: "Эта почта занята. Если вы владелец, попробуйте обратиться к администратору.", errorField: "email" }, reply: {} }
+{ report: { isError: true, info: "Вы не ввели пароль", errorField: "password" }, reply: {} }
+{ report: { isError: true, info: "Длина пароля должна быть от 8 символов", errorField: "password" }, reply: {} }
+{ report: { isError: true, info: "Длина пароля должна быть до 40 символов", errorField: "password" }, reply: {} }
+{ report: { isError: true, info: "Пароли не совпадают", errorField: "confirmPassword" }, reply: {} }
+{ report: { isError: true, info: "Вы не ввели ваше имя", errorField: "fullName" }, reply: {} }
+{ report: { isError: true, info: "Пользователь с указанной почтой не найден", errorField: "email" }, reply: {} }
+{ report: { isError: true, info: "Неверный пароль", errorField: "password" }, reply: {} }
+{ report: { isError: true, info: "Ошибка сервера" }, reply: {} }
+{ report: { isError: true, info: "Регистрация запрещена" }, reply: {} }
+{ report: { isError: false, info: "Успешная авторизация" }, reply: { fullName: "Полное имя" } }
+{ report: { isError: false, info: "Регистрация успешна" }, reply: { fullName: "Полное имя" } }
