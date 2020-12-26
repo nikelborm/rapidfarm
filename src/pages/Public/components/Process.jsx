@@ -20,7 +20,7 @@ function getVariant(
 class Process extends PureComponent {
     render() {
         const { title, isActive, isAvailable } = this.props;
-        console.log('this.props: ', this.props);
+        console.log("this.props: ", this.props);
         return (
             <Row>
                 <Col>

@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import getCookie from "../tools/getCookie";
 import loader from "../tools/loader";
-import { addMessageListener } from "../tools/SocketManager";
+import { addMessageListener, isSocketAvailable, WSConnection } from "../tools/SocketManager";
 export let isRegistrationAllowed = () => JSON.parse( getCookie( "isRegistrationAllowed" ) );
 
 export const AuthContext = React.createContext( {
@@ -38,51 +38,57 @@ class AuthProvider extends Component {
         localStorage.setItem( "isAuthorized", ""+isAuthorized);
         localStorage.setItem( "fullName", fullName);
     }
-    setAuthorizedAuthState = (fullName) => {
-        this.updateAuthState( {
-            isAuthorized: true,
-            fullName
-        } );
-    }
-    isAuthSessionChanged = () => localStorage.getItem( "connect.sid" ) !== getCookie( "connect.sid" );
+    isAuthSessionChanged = () => false && (localStorage.getItem( "connect.sid" ) !== getCookie( "connect.sid" ));
     logout = async () => {
         // запрос на выход чтобы сервер стёр сессию
-        await loader( {}, "/logout" );
+        this.sendToWS( { class : "logout" } );
         this.updateAuthState( {
             isAuthorized: false,
             fullName: ""
         } );
     }
-    login = async ( email, password ) => {
-        // Запрос на авторизацию
-        console.log( "email, password: ", email, password );
+    sendToWS = body => {
+        console.log("body: ", body);
+        if( isSocketAvailable() ) {
+            WSConnection.send(JSON.stringify(body));
+        } else {
+            alert("Соединение потеряно");
+        }
+    }
+    login = ( email, password ) => {
         const body = {
+            class: "loginAsUser",
             email,
             password,
         };
-        const { reply } = await loader( body, "/loginAsUser" );
-        // Если всё проходит успешно:
-        this.setAuthorizedAuthState( reply.fullName );
-        isRegistrationAllowed = () => false;
+        this.sendToWS( body );
     }
     register = async ( email, password, confirmPassword, fullName ) => {
-        console.log( "email, password, confirmPassword, fullName: ", email, password, confirmPassword, fullName );
         const body = {
+            class: "registerAsUser",
             email,
             password,
             confirmPassword,
             fullName
         };
-        await loader( body, "/registerAsUser" );
-        // Если всё проходит успешно:
-        this.setAuthorizedAuthState(fullName);
-        isRegistrationAllowed = () => false;
+        this.sendToWS( body );
     }
     componentWillUnmount() {
         this.logout();
     }
     componentDidMount() {
-        addMessageListener();
+        addMessageListener( data => {
+            if ( data.class !== "loginAsUser" && data.class !== "registerAsUser" ) return;
+            if ( data.report.isError ) {
+                alert(data.info);
+            } else {
+                this.updateAuthState( {
+                    isAuthorized: true,
+                    fullName: data.reply.fullName
+                } );
+                isRegistrationAllowed = () => false;
+            }
+        });
     }
     render() {
         return (

@@ -160,6 +160,9 @@ async function registerAsUser(connection, body) {
         const insertationResult = await users.insertOne(userProfile);
         connection.isAuthAsUser = true;
         connection.authInfo = insertationResult.ops[0];
+        resdata.reply = {
+            fullName: insertationResult.ops[ 0 ].fullName
+        };
         rp.isError = false;
         rp.info = "Регистрация успешна";
     } catch (err) {
