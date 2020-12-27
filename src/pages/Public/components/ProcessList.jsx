@@ -9,6 +9,7 @@ class ProcessList extends PureComponent {
     componentDidMount() {
         addMessageListener((data)=> {
             console.log("ProcessList MessageListener getted: ", data);
+            console.log(this.state);
             // eslint-disable-next-line default-case
             switch ( data.class ) {
                 case "activitySyncPackage":
@@ -30,7 +31,7 @@ class ProcessList extends PureComponent {
 
         return (
             <Container>
-                { Object.entries( this.context.processes ).map(
+                { Object.entries( this.state ).map(
                     ( [ long, isActive ] ) => {
                         console.log( "this.context.processes: ", this.context.processes );
                         const { isAvailable, title } = this.context.processes.find(

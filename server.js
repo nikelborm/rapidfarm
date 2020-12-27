@@ -31,6 +31,7 @@ const farmSecrets = JSON.parse(process.env.FARM_SECRETS || `{}`);
 let dbClient;
 let mainFarm;
 let cachedProcessStates = {};
+let cachedConfig = {};
 let users = {}; // collection
 let sensorsLogs = {}; // collection
 let webCommandsLogs = {}; // collection
@@ -189,6 +190,9 @@ function logProfile( event, WSclient ) {
 function sendActivityPackage( connection ) {
     sendMessage(connection, { class: "activitySyncPackage", package: cachedProcessStates });
 }
+function sendConfigPackage( connection ) {
+    sendMessage(connection, { class: "configPackage", package: cachedConfig });
+}
 function sendError( connection, message ) {
     sendMessage(connection, {class:"error", message});
 }
@@ -248,6 +252,9 @@ WSServer.on("connection", (connection, request) => {
                     case "activitySyncPackage":
                         sendActivityPackage( connection );
                         break;
+                    case "configPackage":
+                        sendConfigPackage( connection );
+                        break;
                     default:
                         sendError(connection, `Обработчика what для ${data.what} не существует`);
                 }
@@ -284,6 +291,10 @@ WSServer.on("connection", (connection, request) => {
             case "activitySyncPackage":
                 cachedProcessStates = data.package;
                 sendToUsers({ class: "activitySyncPackage", package: cachedProcessStates });
+                break;
+            case "configPackage":
+                cachedConfig = data.package;
+                sendToUsers({ class: "configPackage", package: cachedConfig });
                 break;
             default:
                 break;
@@ -346,6 +357,7 @@ WSServer.on("connection", (connection, request) => {
     connection.addListener("message", publicQueriesHandler);
     if ( mainFarm ) {
         sendActivityPackage( connection );
+        sendConfigPackage( connection );
     }
     // const cookies = cookie.parse(request.headers.cookie);
     // console.log("onconnection sid: ", sid);
@@ -365,6 +377,7 @@ const cleaner = setInterval(() => {
                         break;
                     }
                 }
+                cachedConfig = {};
                 cachedProcessStates = {};
             }
             logProfile( "connection - cleaner terminate", connection );
