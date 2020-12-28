@@ -1,10 +1,10 @@
-import React, { PureComponent } from "react";
+import React, { Component } from "react";
 import Container from "react-bootstrap/Container";
 import { AppConfigsContext } from "../../../components/AppConfigsManager";
 import Process from "./Process";
 import { addMessageListener } from "../../../tools/SocketManager";
 
-class ProcessList extends PureComponent {
+class ProcessList extends Component {
     static contextType = AppConfigsContext;
     constructor(props) {
         super(props);
