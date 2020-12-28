@@ -26,20 +26,41 @@ class AuthProvider extends Component {
                 fullName: localStorage.getItem( "fullName" ) || "",
             }
         }
-        addMessageListener( data => {
-            console.log('AuthProvider messageListener data: ', data);
-            if ( data.class !== "loginAsUser" && data.class !== "registerAsUser" ) return;
-            if ( data.report.isError ) {
-                alert( data.info );
-            } else {
-                this.updateAuthState( {
-                    isAuthorized: true,
-                    fullName: data.reply.fullName
-                } );
-                isRegistrationAllowed = () => false;
-            }
-        });
+        this.registerRejecter = null;
+        this.registerResolver = null;
+        this.loginRejecter = null;
+        this.loginResolver = null;
+
+        addMessageListener( );
+        addMessageListener(this.registerListener );
     }
+    authorizationHandler = (data) => {
+        this.updateAuthState( {
+            isAuthorized: true,
+            fullName: data.reply.fullName
+        } );
+        isRegistrationAllowed = () => false;
+    };
+    loginListener = data => {
+        console.log('AuthProvider messageListener data: ', data);
+        if ( data.class !== "loginAsUser" ) return;
+        if ( data.report.isError ) {
+            this.loginRejecter();
+        } else {
+            this.loginResolver();
+            this.authorizationHandler(data);
+        }
+    };
+    registerListener = data => {
+        console.log('AuthProvider messageListener data: ', data);
+        if ( data.class !== "registerAsUser" ) return;
+        if ( data.report.isError ) {
+            this.registerRejecter();
+        } else {
+            this.registerResolver();
+            this.authorizationHandler(data);
+        }
+    };
     updateAuthState = ( { isAuthorized, fullName } ) => {
         this.updateAuthStatus( isAuthorized, fullName );
         this.setState( {
@@ -68,13 +89,15 @@ class AuthProvider extends Component {
             alert( "Соединение потеряно" );
         }
     }
-    login = ( email, password ) => {
+    login = async ( email, password ) => {
         const body = {
             class: "loginAsUser",
             email,
             password,
         };
         this.sendToWS( body );
+        this.loginRejecter = Promise.reject;
+        this.loginResolver = Promise.resolve;
     }
     register = async ( email, password, confirmPassword, fullName ) => {
         const body = {
@@ -85,6 +108,8 @@ class AuthProvider extends Component {
             fullName
         };
         this.sendToWS( body );
+        this.registerRejecter = Promise.reject;
+        this.registerResolver = Promise.resolve;
     }
     render() {
         return (
