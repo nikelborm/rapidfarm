@@ -73,9 +73,6 @@ class AuthProvider extends Component {
         };
         this.sendToWS( body );
     }
-    componentWillUnmount() {
-        this.logout();
-    }
     componentDidMount() {
         addMessageListener( data => {
             if ( data.class !== "loginAsUser" && data.class !== "registerAsUser" ) return;
