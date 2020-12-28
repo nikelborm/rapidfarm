@@ -75,6 +75,7 @@ class AuthProvider extends Component {
     }
     componentDidMount() {
         addMessageListener( data => {
+            console.log('AuthProvider messageListener data: ', data);
             if ( data.class !== "loginAsUser" && data.class !== "registerAsUser" ) return;
             if ( data.report.isError ) {
                 alert( data.info );

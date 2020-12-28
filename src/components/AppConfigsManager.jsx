@@ -13,7 +13,6 @@ class AppConfigsProvider extends Component {
     }
     componentDidMount() {
         addMessageListener( data => {
-            console.log("AppConfigsProvider MessageListener got: ", data);
             // eslint-disable-next-line default-case
             switch ( data.class ) {
                 case "configPackage":
