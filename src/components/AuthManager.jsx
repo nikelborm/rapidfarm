@@ -31,10 +31,10 @@ class AuthProvider extends Component {
         this.loginRejecter = null;
         this.loginResolver = null;
 
-        addMessageListener( );
-        addMessageListener(this.registerListener );
+        addMessageListener( this.loginListener );
+        addMessageListener( this.registerListener );
     }
-    authorizationHandler = (data) => {
+    onSuccessAuthorization = (data) => {
         this.updateAuthState( {
             isAuthorized: true,
             fullName: data.reply.fullName
@@ -48,7 +48,7 @@ class AuthProvider extends Component {
             this.loginRejecter();
         } else {
             this.loginResolver();
-            this.authorizationHandler(data);
+            this.onSuccessAuthorization(data);
         }
     };
     registerListener = data => {
@@ -58,7 +58,7 @@ class AuthProvider extends Component {
             this.registerRejecter();
         } else {
             this.registerResolver();
-            this.authorizationHandler(data);
+            this.onSuccessAuthorization(data);
         }
     };
     updateAuthState = ( { isAuthorized, fullName } ) => {
