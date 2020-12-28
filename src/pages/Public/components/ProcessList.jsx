@@ -28,24 +28,20 @@ class ProcessList extends PureComponent {
         console.log("ProcessList render: ");
         console.log("this.context.processes: ", this.context.processes);
         console.log("this.state: ", this.state);
-
         return (
             <Container>
-                { Object.entries( this.state ).map(
-                    ( [ long, isActive ] ) => {
-                        console.log( "this.context.processes: ", this.context.processes );
-                        const { isAvailable, title } = this.context.processes.find(
-                            process => process.long === long
-                        );
-                        return (
+                { this.context.processes.length
+                    ? this.context.processes.map(
+                        ( { long, isAvailable, title } ) => (
                             <Process
                                 title={ title }
-                                isActive={ isActive }
+                                isActive={ this.state[ long ] }
                                 isAvailable={ isAvailable }
                             />
                         )
-                    }
-                ) }
+                    )
+                    : <h1> Ферма неактивна </h1>
+                }
             </Container>
         );
     }
