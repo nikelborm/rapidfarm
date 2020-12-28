@@ -40,7 +40,5 @@ export const addMessageListener = newListener => {
         newListener(data);
     }
     customMessageListeners.add( improvedEventListener );
-    if ( isSocketAvailable() ) {
-        WSConnection.addEventListener( "message", improvedEventListener );
-    }
+    WSConnection.addEventListener( "message", improvedEventListener );
 };
