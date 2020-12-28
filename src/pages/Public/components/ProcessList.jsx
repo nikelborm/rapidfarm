@@ -7,9 +7,7 @@ import { addMessageListener } from "../../../tools/SocketManager";
 class ProcessList extends PureComponent {
     state = {}
     componentDidMount() {
-        addMessageListener((data)=> {
-            console.log("ProcessList MessageListener getted: ", data);
-            console.log(this.state);
+        addMessageListener( data => {
             // eslint-disable-next-line default-case
             switch ( data.class ) {
                 case "activitySyncPackage":
@@ -25,9 +23,7 @@ class ProcessList extends PureComponent {
     }
     static contextType = AppConfigsContext;
     render() {
-        console.log("ProcessList render: ");
-        console.log("this.context.processes: ", this.context.processes);
-        console.log("this.state: ", this.state);
+        console.log('this.state[ long ]: ', this.state);
         return (
             <Container>
                 { this.context.processes.length
