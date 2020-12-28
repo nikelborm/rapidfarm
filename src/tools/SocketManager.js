@@ -35,10 +35,8 @@ export const createNewWebSocket = () => {
 export let WSConnection = null;
 export const isSocketAvailable = () => WSConnection?.readyState === 1;
 export const addMessageListener = newListener => {
-    const improvedEventListener = event => {
-        const data = JSON.parse(event.data);
+    customMessageListeners.add( event => {
+        const data = JSON.parse( event.data );
         newListener(data);
-    }
-    customMessageListeners.add( improvedEventListener );
-    WSConnection.addEventListener( "message", improvedEventListener );
+    } );
 };
