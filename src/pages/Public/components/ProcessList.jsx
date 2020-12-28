@@ -9,6 +9,7 @@ class ProcessList extends Component {
     constructor(props) {
         super(props);
         addMessageListener( data => {
+            console.log("ProcessList MessageListener ", data);
             // eslint-disable-next-line default-case
             switch ( data.class ) {
                 case "activitySyncPackage":
