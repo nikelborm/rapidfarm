@@ -5,8 +5,9 @@ import Process from "./Process";
 import { addMessageListener } from "../../../tools/SocketManager";
 
 class ProcessList extends PureComponent {
-    state = {}
-    componentDidMount() {
+    static contextType = AppConfigsContext;
+    constructor(props) {
+        super(props);
         addMessageListener( data => {
             // eslint-disable-next-line default-case
             switch ( data.class ) {
@@ -21,7 +22,7 @@ class ProcessList extends PureComponent {
             }
         });
     }
-    static contextType = AppConfigsContext;
+    state = {}
     render() {
         console.log('this.state[ long ]: ', this.state);
         return (

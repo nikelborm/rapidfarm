@@ -7,11 +7,8 @@ export const AppConfigsContext = React.createContext( {
 });
 
 class AppConfigsProvider extends Component {
-    state = {
-        processes: [],
-        sensors: []
-    }
-    componentDidMount() {
+    constructor(props) {
+        super(props);
         addMessageListener( data => {
             // eslint-disable-next-line default-case
             switch ( data.class ) {
@@ -21,7 +18,10 @@ class AppConfigsProvider extends Component {
             }
         });
     }
-
+    state = {
+        processes: [],
+        sensors: []
+    }
     render() {
         return (
             <AppConfigsContext.Provider

@@ -26,6 +26,19 @@ class AuthProvider extends Component {
                 fullName: localStorage.getItem( "fullName" ) || "",
             }
         }
+        addMessageListener( data => {
+            console.log('AuthProvider messageListener data: ', data);
+            if ( data.class !== "loginAsUser" && data.class !== "registerAsUser" ) return;
+            if ( data.report.isError ) {
+                alert( data.info );
+            } else {
+                this.updateAuthState( {
+                    isAuthorized: true,
+                    fullName: data.reply.fullName
+                } );
+                isRegistrationAllowed = () => false;
+            }
+        });
     }
     updateAuthState = ( { isAuthorized, fullName } ) => {
         this.updateAuthStatus( isAuthorized, fullName );
@@ -72,21 +85,6 @@ class AuthProvider extends Component {
             fullName
         };
         this.sendToWS( body );
-    }
-    componentDidMount() {
-        addMessageListener( data => {
-            console.log('AuthProvider messageListener data: ', data);
-            if ( data.class !== "loginAsUser" && data.class !== "registerAsUser" ) return;
-            if ( data.report.isError ) {
-                alert( data.info );
-            } else {
-                this.updateAuthState( {
-                    isAuthorized: true,
-                    fullName: data.reply.fullName
-                } );
-                isRegistrationAllowed = () => false;
-            }
-        });
     }
     render() {
         return (
