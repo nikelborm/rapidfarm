@@ -35,6 +35,10 @@ class Menu extends Component {
         };
     }
     shouldComponentUpdate( nextProps, nextState, nextContext ) {
+        console.log('this.props.location.pathname: ', this.props.location.pathname);
+        console.log('nextProps.location.pathname: ', nextProps.location.pathname);
+        console.log('this.context.isRegistrationAllowed: ', this.context.isRegistrationAllowed);
+        console.log('nextContext.isRegistrationAllowed: ', nextContext.isRegistrationAllowed);
         return nextContext.isRegistrationAllowed !== this.context.isRegistrationAllowed || nextProps.location.pathname !== this.props.location.pathname;
     }
     render() {
