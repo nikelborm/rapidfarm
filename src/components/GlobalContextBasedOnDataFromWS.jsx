@@ -122,7 +122,7 @@ class GlobalContextBasedOnDataFromWS extends Component {
                     isAuthInProcess: false
                 } );
                 if ( data.report.isError ) {
-                    alert( data.report.errorField + "   " + data.report.message );
+                    alert( data.report.errorField + "   " + data.report.info );
                     return;
                 }
                 localStorage.setItem( "isAuthorized", "true" );
