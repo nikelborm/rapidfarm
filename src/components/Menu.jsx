@@ -20,14 +20,18 @@ const logout =   <MenuPoint to="/logout"   text="Выйти из аккаунт�
 const register = <MenuPoint to="/register" text="Создать аккаунт..."  />;
 const login =    <MenuPoint to="/login"    text="Войти в аккаунт..."  />;
 const main =     <MenuPoint to="/"         text="На главную..."       />;
+class DynamicRegister extends PureComponent {
+    render = () => <> { main }  { this.props.is && register } </>;
+}
+
 class Menu extends Component {
     static contextType = GlobalContext;
     constructor( props ) {
         super( props );
 
         this.dynamicRenders = {
-            "/login": () => <> { main }  { this.context.isRegistrationAllowed && register } </>,
-            "/":      () => <> { login } { this.context.isRegistrationAllowed && register } </>
+            "/login": () => <> { main }  { <DynamicRegister is={this.context.isRegistrationAllowed}/> && register } </>,
+            "/":      () => <> { login } { <DynamicRegister is={this.context.isRegistrationAllowed}/> && register } </>
         };
         this.staticRenders = {
             "/register": <> { main } { login } </>,
