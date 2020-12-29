@@ -366,7 +366,7 @@ WSServer.on("connection", (connection, request) => {
 });
 const cleaner = setInterval(() => {
     // Проверка на то, оставлять ли соединение активным
-    WSServer.clients.forEach((connection) => {
+    WSServer.clients.forEach( connection => {
         // Если соединение мертво, завершить
         if (!connection.isAlive) {
             if (connection.isAuthAsFarm) {

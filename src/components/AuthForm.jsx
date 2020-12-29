@@ -20,10 +20,7 @@ class AuthForm extends Component {
             password.value,
             confirmPassword?.value,
             fullName?.value
-        ).catch( error => {
-            // TODO: Красиво уведомить пользователя об ошибке, а не через alert
-            alert( error.errorField + "   " + error.message );
-        } );
+        )
     };
     render() {
         const isLogin = this.props.formType === "login";

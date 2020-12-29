@@ -29,7 +29,8 @@ class SelfHealingWebSocket {
     };
     respawnWebSocket = () => {
         this.connection = null;
-        this.connection = new WebSocket( this.initializationArgs );
+        // @ts-ignore
+        this.connection = new WebSocket( ...this.initializationArgs );
         this.connection.addEventListener( "error", this.errorEL );
         this.connection.addEventListener( "open", this.openEL );
         this.connection.addEventListener( "message", this.messageEL );
@@ -51,9 +52,9 @@ export const GlobalContext = React.createContext( {
     isAuthorized: false,
     fullName: "",
     authorizationActions: {
-        logout: async () => {},
-        register: async () => {},
-        login: async () => {}
+        logout: () => {},
+        register: () => {},
+        login: () => {}
     },
     isAuthInProcess: false,
     isRegistrationAllowed: false,
@@ -69,8 +70,8 @@ class GlobalContextBasedOnDataFromWS extends Component {
         isAuthInProcess: false,
         isLogoutInProcess: false,
         isRegistrationAllowed: JSON.parse( getCookie( "isRegistrationAllowed" ) ),
-        // isAuthorized: false,
-        // fullName: "",
+        isAuthorized: false,
+        fullName: "",
         config: {
             processes: [],
             sensors: []
@@ -80,8 +81,6 @@ class GlobalContextBasedOnDataFromWS extends Component {
     constructor( props ) {
         super( props );
         if ( this.isAuthSessionChanged() ) {
-            this.state.isAuthorized = false;
-            this.state.fullName = "";
             localStorage.setItem( "isAuthorized", "false" );
             localStorage.setItem( "fullName", "" );
         } else {
@@ -120,9 +119,12 @@ class GlobalContextBasedOnDataFromWS extends Component {
             case "loginAsUser":
             case "registerAsUser":
                 this.setState( {
-                    isAuthInProcess: true
+                    isAuthInProcess: false
                 } );
-                if ( data.report.isError ) return;
+                if ( data.report.isError ) {
+                    alert( data.report.errorField + "   " + data.report.message );
+                    return;
+                }
                 localStorage.setItem( "isAuthorized", "true" );
                 localStorage.setItem( "fullName", data.reply.fullName );
                 this.setState( {
