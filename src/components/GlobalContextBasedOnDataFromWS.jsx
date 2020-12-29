@@ -47,7 +47,6 @@ class SelfHealingWebSocket {
     };
 }
 
-
 export const GlobalContext = React.createContext( {
     isAuthorized: false,
     fullName: "",
@@ -89,6 +88,9 @@ class GlobalContextBasedOnDataFromWS extends Component {
             this.state.isAuthorized = localStorage.getItem( "isAuthorized" ) === "true" || false;
             this.state.fullName = localStorage.getItem( "fullName" ) || "";
         }
+        this.ws = null;
+    }
+    componentDidMount() {
         const loc = document.location;
         const protocol = (loc.protocol[4] === "s" ? "wss://": "ws://");
         const WSAdress = protocol + (loc.port === "3001" ? loc.hostname + ":3000" : loc.host);
@@ -139,9 +141,6 @@ class GlobalContextBasedOnDataFromWS extends Component {
                 } );
         }
     };
-    onSuccessAuthorization = (data) => {
-        
-    };
     isAuthSessionChanged = () => false && ( localStorage.getItem( "connect.sid" ) !== getCookie( "connect.sid" ) );
     logout = () => {
         // запрос на выход чтобы сервер стёр сессию
@@ -151,30 +150,29 @@ class GlobalContextBasedOnDataFromWS extends Component {
             isLogoutInProcess: true
         } );
     };
-    login = ( email, password ) => {
+    authorize = query => {
         if ( this.state.isLogoutInProcess || this.state.isAuthInProcess ) return;
-        this.ws.send( {
-            class: "loginAsUser",
-            email,
-            password,
-        } );
+        this.ws.send( query );
         this.setState( {
             isAuthInProcess: true
         } );
     };
-    register = ( email, password, confirmPassword, fullName ) => {
-        if ( this.state.isLogoutInProcess || this.state.isAuthInProcess ) return;
-        this.ws.send( {
+    login = ( email, password ) => this.authorize(
+        {
+            class: "loginAsUser",
+            email,
+            password,
+        }
+    );
+    register = ( email, password, confirmPassword, fullName ) => this.authorize(
+        {
             class: "registerAsUser",
             email,
             password,
             confirmPassword,
             fullName
-        } );
-        this.setState( {
-            isAuthInProcess: true
-        } );
-    };
+        }
+    );
     authorizationActions = {
         logout: this.logout,
         register: this.register,
