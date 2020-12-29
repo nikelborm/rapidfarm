@@ -11,6 +11,9 @@ const shityshit = { margin: "20px" };
 
 class AuthForm extends Component {
     static contextType = GlobalContext;
+    shouldComponentUpdate( nextProps, nextState, nextContext) {
+        return this.context.isAuthInProcess !== nextContext.isAuthInProcess || nextContext.isAuthorized !== this.context.isAuthorized;
+    }
     onSubmit = event => {
         event.preventDefault();
         const { email, password, confirmPassword, fullName } = event.target.elements;
