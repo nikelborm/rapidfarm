@@ -20,20 +20,16 @@ const logout =   <MenuPoint to="/logout"   text="Выйти из аккаунт�
 const register = <MenuPoint to="/register" text="Создать аккаунт..."  />;
 const login =    <MenuPoint to="/login"    text="Войти в аккаунт..."  />;
 const main =     <MenuPoint to="/"         text="На главную..."       />;
+
+const sets = {
+    "/":         class extends PureComponent { render = () => <> { login } { this.props.isReg && register } </>},
+    "/login":    class extends PureComponent { render = () => <> { main } { this.props.isReg && register } </>},
+    "/register": class extends PureComponent { render = () => <> { main } { login } </> },
+    "/admin":    class extends PureComponent { render = () => <> { logout } </> }
+}
+
 class Menu extends Component {
     static contextType = GlobalContext;
-    constructor( props ) {
-        super( props );
-
-        this.dynamicRenders = {
-            "/login": () => <> { main }  { this.context.isRegistrationAllowed && register } </>,
-            "/":      () => <> { login } { this.context.isRegistrationAllowed && register } </>
-        };
-        this.staticRenders = {
-            "/register": <> { main } { login } </>,
-            "/admin": <> { logout } </>
-        };
-    }
     shouldComponentUpdate( nextProps, nextState, nextContext ) {
         console.log('this.props.location.pathname: ', this.props.location.pathname);
         console.log('nextProps.location.pathname: ', nextProps.location.pathname);
@@ -46,13 +42,10 @@ class Menu extends Component {
         return (
             <Nav
                 className="justify-content-center"
-                children={
-                    path in this.dynamicRenders
-                        ? this.dynamicRenders[ path ]()
-                        : path in this.staticRenders
-                            ? this.staticRenders[ path ]
-                            : ""
-                }
+                children={ React.createElement(
+                    sets[ path ],
+                    { isReg: this.context.isRegistrationAllowed }
+                ) }
             />
         );
     }
