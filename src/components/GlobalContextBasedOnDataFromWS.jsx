@@ -30,7 +30,7 @@ class SelfHealingWebSocket {
     respawnWebSocket = () => {
         this.connection = null;
         this.connection = new WebSocket( this.initializationArgs );
-        this.connection.addEventListener( "error", this.this.errorEL );
+        this.connection.addEventListener( "error", this.errorEL );
         this.connection.addEventListener( "open", this.openEL );
         this.connection.addEventListener( "message", this.messageEL );
         this.connection.addEventListener( "message", this.allMessagesHandler );
