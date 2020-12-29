@@ -36,10 +36,10 @@ class SelfHealingWebSocket {
         this.connection.addEventListener( "message", this.allMessagesHandler );
         this.connection.addEventListener( "close", this.closeEL );
     };
-    isSocketAvailable = () => this.connection?.readyState === 1;
+    isAvailable = () => this.connection?.readyState === 1;
     send = data => {
         console.log( "data: ", data );
-        if( this.isSocketAvailable() ) {
+        if( this.isAvailable() ) {
             this.connection.send( JSON.stringify( data ) );
         } else {
             alert( "Соединение с сервером не установлено." );
@@ -83,16 +83,16 @@ class GlobalContextBasedOnDataFromWS extends Component {
         if ( this.isAuthSessionChanged() ) {
             this.state.isAuthorized = false;
             this.state.fullName = "";
-            const loc = document.location;
-            const WSAdress = (loc.protocol[4] === "s" ? "wss://": "ws://") + (loc.port === "3001" ? loc.hostname + ":3000" : loc.host);
-
-            this.ws = new SelfHealingWebSocket( this.messageParser, WSAdress );
             localStorage.setItem( "isAuthorized", "false" );
             localStorage.setItem( "fullName", "" );
         } else {
             this.state.isAuthorized = localStorage.getItem( "isAuthorized" ) === "true" || false;
             this.state.fullName = localStorage.getItem( "fullName" ) || "";
         }
+        const loc = document.location;
+        const protocol = (loc.protocol[4] === "s" ? "wss://": "ws://");
+        const WSAdress = protocol + (loc.port === "3001" ? loc.hostname + ":3000" : loc.host);
+        this.ws = new SelfHealingWebSocket( this.messageParser, WSAdress );
     }
     messageParser = data => {
         // eslint-disable-next-line default-case
@@ -116,20 +116,18 @@ class GlobalContextBasedOnDataFromWS extends Component {
                 } );
                 break;
             case "loginAsUser":
-                if ( data.report.isError ) {
-                    this.loginRejecter();
-                } else {
-                    this.loginResolver();
-                    this.onSuccessAuthorization(data);
-                }
-                break;
             case "registerAsUser":
-                if ( data.report.isError ) {
-                    this.registerRejecter();
-                } else {
-                    this.registerResolver();
-                    this.onSuccessAuthorization(data);
-                }
+                this.setState( {
+                    isAuthInProcess: true
+                } );
+                if ( data.report.isError ) return;
+                localStorage.setItem( "isAuthorized", "true" );
+                localStorage.setItem( "fullName", data.reply.fullName );
+                this.setState( {
+                    isAuthorized: true,
+                    fullName: data.reply.fullName,
+                    isRegistrationAllowed: false
+                } );
                 break;
             case "logout":
                 localStorage.setItem( "isAuthorized", "" + false );
@@ -142,16 +140,10 @@ class GlobalContextBasedOnDataFromWS extends Component {
         }
     };
     onSuccessAuthorization = (data) => {
-        localStorage.setItem( "isAuthorized", "true" );
-        localStorage.setItem( "fullName", data.reply.fullName );
-        this.setState( {
-            isAuthorized: true,
-            fullName: data.reply.fullName,
-            isRegistrationAllowed: false
-        } );
+        
     };
     isAuthSessionChanged = () => false && ( localStorage.getItem( "connect.sid" ) !== getCookie( "connect.sid" ) );
-    logout = async () => {
+    logout = () => {
         // запрос на выход чтобы сервер стёр сессию
         if ( this.state.isLogoutInProcess || this.state.isAuthInProcess ) return;
         this.ws.send( { class : "logout" } );
@@ -159,17 +151,18 @@ class GlobalContextBasedOnDataFromWS extends Component {
             isLogoutInProcess: true
         } );
     };
-    login = ( email, password ) => new Promise( ( resolve, reject ) => {
+    login = ( email, password ) => {
         if ( this.state.isLogoutInProcess || this.state.isAuthInProcess ) return;
         this.ws.send( {
             class: "loginAsUser",
             email,
             password,
         } );
-        this.loginRejecter = reject;
-        this.loginResolver = resolve;
-    });
-    register = ( email, password, confirmPassword, fullName ) => new Promise( ( resolve, reject ) => {
+        this.setState( {
+            isAuthInProcess: true
+        } );
+    };
+    register = ( email, password, confirmPassword, fullName ) => {
         if ( this.state.isLogoutInProcess || this.state.isAuthInProcess ) return;
         this.ws.send( {
             class: "registerAsUser",
@@ -178,9 +171,10 @@ class GlobalContextBasedOnDataFromWS extends Component {
             confirmPassword,
             fullName
         } );
-        this.registerRejecter = reject;
-        this.registerResolver = resolve;
-    });
+        this.setState( {
+            isAuthInProcess: true
+        } );
+    };
     authorizationActions = {
         logout: this.logout,
         register: this.register,
