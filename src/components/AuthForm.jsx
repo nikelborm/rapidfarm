@@ -1,36 +1,20 @@
-import React, { Component, PureComponent } from "react";
-import { AuthContext } from "../components/AuthManager";
+import React, { Component } from "react";
+import { GlobalContext } from "./GlobalContextBasedOnDataFromWS";
+import Input from "./Input";
 import { Redirect } from "react-router-dom";
-import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 
-class Input extends PureComponent {
-    render() {
-        const { name, type, label, placeholder } = this.props;
-        return (
-            <Form.Group controlId={name}>
-                <Form.Label>{ label }</Form.Label>
-                <Form.Control type={type} name={name} required placeholder={placeholder} />
-            </Form.Group>
-        )
-    }
-}
+
 
 const shityshit = { margin: "20px" };
 
 class AuthForm extends Component {
-    static contextType = AuthContext;
-    state = {
-        isSendingNow: false
-    }
+    static contextType = GlobalContext;
     onSubmit = event => {
         event.preventDefault();
-        this.setState( {
-            isSendingNow: true
-        } );
         const { email, password, confirmPassword, fullName } = event.target.elements;
 
-        this.context[ this.props.formType ](
+        this.context.authorizationActions[ this.props.formType ](
             email.value,
             password.value,
             confirmPassword?.value,
@@ -38,9 +22,6 @@ class AuthForm extends Component {
         ).catch( error => {
             // TODO: Красиво уведомить пользователя об ошибке, а не через alert
             alert( error.errorField + "   " + error.message );
-            this.setState( {
-                isSendingNow: false
-            } );
         } );
     };
     render() {
@@ -76,8 +57,8 @@ class AuthForm extends Component {
                         placeholder="********"
                         label="Повторите пароль:"
                     /> }
-                    <Button variant="primary" type="submit" disabled={ this.state.isSendingNow }>
-                        { this.state.isSendingNow
+                    <Button variant="primary" type="submit" disabled={ this.context.isAuthInProcess }>
+                        { this.context.isAuthInProcess
                             ? ( isLogin ? "Вход..." : "Создание аккаунта..." )
                             : ( isLogin ? "Войти" : "Создать аккаунт" )
                         }

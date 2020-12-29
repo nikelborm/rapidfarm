@@ -2,7 +2,7 @@ import React, { PureComponent, Component } from "react";
 import { withRouter } from "react-router";
 import Nav from "react-bootstrap/Nav";
 import LinkContainer from "react-router-bootstrap/lib/LinkContainer";
-import { isRegistrationAllowed } from "./AuthManager";
+import { GlobalContext } from "./GlobalContextBasedOnDataFromWS";
 
 class MenuPoint extends PureComponent {
     render() {
@@ -21,20 +21,21 @@ const register = <MenuPoint to="/register" text="Создать аккаунт..
 const login =    <MenuPoint to="/login"    text="Войти в аккаунт..."  />;
 const main =     <MenuPoint to="/"         text="На главную..."       />;
 class Menu extends Component {
+    static contextType = GlobalContext;
     constructor( props ) {
         super( props );
 
         this.dynamicRenders = {
-            "/login": () => <> { main }  { isRegistrationAllowed() && register } </>,
-            "/":      () => <> { login } { isRegistrationAllowed() && register } </>
+            "/login": () => <> { main }  { this.context.isRegistrationAllowed && register } </>,
+            "/":      () => <> { login } { this.context.isRegistrationAllowed && register } </>
         };
         this.staticRenders = {
             "/register": <> { main } { login } </>,
             "/admin": <> { logout } </>
         };
     }
-    shouldComponentUpdate(nextProps, nextState) {
-        return nextProps.location.pathname !== this.props.location.pathname;
+    shouldComponentUpdate( nextProps, nextState, nextContext ) {
+        return nextContext.isRegistrationAllowed !== this.context.isRegistrationAllowed || nextProps.location.pathname !== this.props.location.pathname;
     }
     render() {
         const path = this.props.location.pathname;

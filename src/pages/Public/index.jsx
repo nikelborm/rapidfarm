@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Redirect, withRouter } from "react-router-dom";
-import { AuthContext } from "../../components/AuthManager";
+import { GlobalContext } from "../../components/GlobalContextBasedOnDataFromWS";
 import ProcessList from "./components/ProcessList";
 
 export class PublicContent extends Component {
@@ -13,9 +13,8 @@ export class PublicContent extends Component {
     }
 }
 class PublicPage extends Component {
-    static contextType = AuthContext;
+    static contextType = GlobalContext;
     render() {
-        console.log("PublicPage this.context: ", this.context);
         if ( this.context.isAuthorized ) {
             return <Redirect to="/admin"/>;
         }
