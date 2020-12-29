@@ -21,7 +21,7 @@ function createEmptyResponseData() {
     return { resdata, rp: resdata.report };
 }
 
-const port = parseInt(process.env.PORT, 10) || 3000;
+const port = parseInt( process.env.PORT, 10 ) || 3000;
 const mongoLink = process.env.MONGODB_URI || "mongodb://Admin:0000@localhost:27017/admin";
 const redisLink = process.env.REDIS_URL || "redis://admin:foobared@127.0.0.1:6379";
 const isRegistrationAllowed = !!process.env.IS_REGISTRATION_ALLOWED;
@@ -173,7 +173,8 @@ async function registerAsUser(connection, body) {
     return resdata;
 }
 
-function sendMessage(connection, message) {
+function sendMessage( connection, message ) {
+    console.log('send message to connection: ', message);
     connection.send(JSON.stringify(message));
 }
 function sendToUsers( message ) {
