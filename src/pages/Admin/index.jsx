@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { PublicContent } from "../Public";
 import { withRouter, Redirect } from "react-router-dom";
-import { AuthContext } from "../../components/AuthManager";
+import { GlobalContext } from "../../components/GlobalContextBasedOnDataFromWS";
 
 class AdminContent extends Component {
     render() {
@@ -14,7 +14,7 @@ class AdminContent extends Component {
 }
 
 class AdminPage extends Component {
-    static contextType = AuthContext;
+    static contextType = GlobalContext;
     render() {
         if ( !this.context.isAuthorized ) {
             return <Redirect to="/login" />;

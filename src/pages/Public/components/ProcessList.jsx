@@ -1,39 +1,19 @@
 import React, { Component } from "react";
 import Container from "react-bootstrap/Container";
-import { AppConfigsContext } from "../../../components/AppConfigsManager";
+import { GlobalContext } from "../../../components/GlobalContextBasedOnDataFromWS";
 import Process from "./Process";
-import { addMessageListener } from "../../../tools/SocketManager";
 
 class ProcessList extends Component {
-    static contextType = AppConfigsContext;
-    constructor(props) {
-        super(props);
-        addMessageListener( data => {
-            console.log("ProcessList MessageListener ", data);
-            // eslint-disable-next-line default-case
-            switch ( data.class ) {
-                case "activitySyncPackage":
-                    this.setState( () => data.package );
-                    break;
-                case "event":
-                    this.setState( prevState => {
-                        prevState[ data.process ] = data.isActive;
-                        return prevState;
-                    } );
-            }
-        });
-    }
-    state = {}
+    static contextType = GlobalContext;
     render() {
-        console.log('this.state[ long ]: ', this.state);
         return (
             <Container>
-                { this.context.processes.length
-                    ? this.context.processes.map(
+                { this.context.config.processes.length
+                    ? this.context.config.processes.map(
                         ( { long, isAvailable, title } ) => (
                             <Process
                                 title={ title }
-                                isActive={ this.state[ long ] }
+                                isActive={ this.context.processesStates[ long ] }
                                 isAvailable={ isAvailable }
                             />
                         )
