@@ -4,6 +4,7 @@ import Input from "../../../components/Input";
 import { GlobalContext } from "../../../components/GlobalContextBasedOnDataFromWS";
 import Button from "react-bootstrap/Button";
 import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
 
 
 class Commander extends Component {
@@ -16,15 +17,26 @@ class Commander extends Component {
         return (
             <Row>
                 <Form onSubmit={ this.onSubmit }>
-                    <Input
-                        type="text"
-                        name="command"
-                        placeholder="Не трогайте, если не знаете, какую"
-                        label="Введите команду: "
-                    />
-                    <Button variant="primary" type="submit">
-                        Отправить
-                    </Button>
+                    <Form.Group controlId="command">
+                        <Col>
+                            <Form.Label>
+                                Введите команду:
+                            </Form.Label>
+                        </Col>
+                        <Col>
+                            <Form.Control
+                                type="text"
+                                name="command"
+                                required
+                                placeholder="Не пишите, если не уверены"
+                            />
+                        </Col>
+                    </Form.Group>
+                    <Col>
+                        <Button variant="primary" type="submit">
+                            Отправить
+                        </Button>
+                    </Col>
                 </Form>
             </Row>
         );
