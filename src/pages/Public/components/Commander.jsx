@@ -17,21 +17,19 @@ class Commander extends Component {
         return (
             <Row>
                 <Form onSubmit={ this.onSubmit }>
-                    <Form.Group controlId="command">
-                        <Col>
-                            <Form.Label>
-                                Введите команду:
-                            </Form.Label>
-                        </Col>
-                        <Col>
-                            <Form.Control
-                                type="text"
-                                name="command"
-                                required
-                                placeholder="Не пишите, если не уверены"
-                            />
-                        </Col>
-                    </Form.Group>
+                    <Col>
+                        <Form.Label>
+                            Введите команду:
+                        </Form.Label>
+                    </Col>
+                    <Col>
+                        <Form.Control
+                            type="text"
+                            name="command"
+                            required
+                            placeholder="Не пишите, если не уверены"
+                        />
+                    </Col>
                     <Col>
                         <Button variant="primary" type="submit">
                             Отправить
