@@ -16,26 +16,18 @@ class Commander extends Component {
     render() {
         return (
             <Form onSubmit={ this.onSubmit }>
-                {/* <Row> */}
-                    <Col sm>
-                        <Form.Label>
-                            Введите команду:
-                        </Form.Label>
-                    </Col>
-                    <Col sm>
-                        <Form.Control
-                            type="text"
-                            name="command"
-                            required
-                            placeholder="Не пишите, если не уверены"
-                        />
-                    </Col>
-                    <Col sm>
-                        <Button variant="primary" type="submit">
-                            Отправить
-                        </Button>
-                    </Col>
-                {/* </Row> */}
+                <Form.Label>
+                    Введите команду:
+                </Form.Label>
+                <Form.Control
+                    type="text"
+                    name="command"
+                    required
+                    placeholder="Не пишите, если не уверены"
+                />
+                <Button variant="primary" type="submit">
+                    Отправить
+                </Button>
             </Form>
         );
     }
