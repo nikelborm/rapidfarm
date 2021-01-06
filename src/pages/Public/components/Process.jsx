@@ -22,7 +22,7 @@ class Process extends PureComponent {
         const { title, isActive, isAvailable } = this.props;
         console.log("this.props: ", this.props);
         return (
-            <Row xs={2} md={4} lg={6}>
+            <Row xs={ 2 } md={ 4 } lg={ 7 }>
                 <Col style={ { textAlign: "right" } }>
                     { title }{": "}
                 </Col>
