@@ -17,22 +17,21 @@ class Commander extends Component {
         return (
             <Row>
                 <Form onSubmit={ this.onSubmit }>
-                    <Col>
+                    <Col sm>
                         <Form.Label>
                             Введите команду:
                         </Form.Label>
                     </Col>
-                    <Col>
+                    <Col sm>
                         <Form.Control
                             type="text"
                             name="command"
                             required
                             placeholder="Не пишите, если не уверены"
-                            inline
                         />
                     </Col>
-                    <Col>
-                        <Button inline variant="primary" type="submit">
+                    <Col sm>
+                        <Button variant="primary" type="submit">
                             Отправить
                         </Button>
                     </Col>
