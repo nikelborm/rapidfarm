@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import Container from "react-bootstrap/Container";
+import Row from "react-bootstrap/Row";
 import { GlobalContext } from "../../../components/GlobalContextBasedOnDataFromWS";
 import Process from "./Process";
 
@@ -7,7 +7,7 @@ class ProcessList extends Component {
     static contextType = GlobalContext;
     render() {
         return (
-            <Container>
+            <Row>
                 { this.context.config.processes.length
                     ? this.context.config.processes.map(
                         ( { long, isAvailable, title } ) => (
@@ -20,7 +20,7 @@ class ProcessList extends Component {
                     )
                     : <h1> Ферма неактивна </h1>
                 }
-            </Container>
+            </Row>
         );
     }
 }

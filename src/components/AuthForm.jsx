@@ -6,9 +6,6 @@ import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 
 
-
-const shityshit = { margin: "20px" };
-
 class AuthForm extends Component {
     static contextType = GlobalContext;
     shouldComponentUpdate( nextProps, nextState, nextContext) {
@@ -31,7 +28,7 @@ class AuthForm extends Component {
             return <Redirect to="/admin" />;
         }
         return (
-            <div style={shityshit}>
+            <>
                 <h1>{ isLogin ? "Вход" : "Регистрация" }</h1>
                 <Form onSubmit={ this.onSubmit }>
                     { !isLogin && <Input
@@ -65,7 +62,7 @@ class AuthForm extends Component {
                         }
                     </Button>
                 </Form>
-            </div>
+            </>
         );
     }
 }
