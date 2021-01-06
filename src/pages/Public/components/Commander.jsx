@@ -28,10 +28,11 @@ class Commander extends Component {
                             name="command"
                             required
                             placeholder="Не пишите, если не уверены"
+                            inline
                         />
                     </Col>
                     <Col>
-                        <Button variant="primary" type="submit">
+                        <Button inline variant="primary" type="submit">
                             Отправить
                         </Button>
                     </Col>
