@@ -23,7 +23,7 @@ class Process extends PureComponent {
         console.log("this.props: ", this.props);
         return (
             <Row>
-                <Col style={ { align:"right" } }>
+                <Col style={ { textAlign: "right" } }>
                     { title }{": "}
                 </Col>
                 <Col>
