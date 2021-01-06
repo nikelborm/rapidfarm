@@ -9,6 +9,7 @@ export class PublicContent extends Component {
         return (
             <>
                 <ProcessList/>
+                <br/>
                 <Commander/>
             </>
         );
