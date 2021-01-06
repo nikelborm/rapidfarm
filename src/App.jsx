@@ -8,26 +8,29 @@ import RegisterRoute from "./pages/Register";
 import Menu from "./components/Menu";
 import { BrowserRouter } from "react-router-dom";
 import GlobalContextBasedOnDataFromWS from "./components/GlobalContextBasedOnDataFromWS";
+import Container from "react-bootstrap/Container";
 
 class App extends Component {
     render() {
         return (
             <React.StrictMode>
-                <GlobalContextBasedOnDataFromWS>
-                    <BrowserRouter>
-                                <Menu/>
-                                <Switch>
-                                    <LoginRoute    path="/login"    exact/>
-                                    <RegisterRoute path="/register" exact/>
-                                    <LogoutRoute   path="/logout"   exact/>
-                                    <AdminRoute    path="/admin"    exact/>
-                                    <PublicRoute   path="/"         exact/>
-                                    <Route path="*">
-                                        <Redirect to="/"/>
-                                    </Route>
-                                </Switch>
-                    </BrowserRouter>
-                </GlobalContextBasedOnDataFromWS>
+                <Container>
+                    <GlobalContextBasedOnDataFromWS>
+                        <BrowserRouter>
+                            <Menu/>
+                            <Switch>
+                                <LoginRoute    path="/login"    exact/>
+                                <RegisterRoute path="/register" exact/>
+                                <LogoutRoute   path="/logout"   exact/>
+                                <AdminRoute    path="/admin"    exact/>
+                                <PublicRoute   path="/"         exact/>
+                                <Route path="*">
+                                    <Redirect to="/"/>
+                                </Route>
+                            </Switch>
+                        </BrowserRouter>
+                    </GlobalContextBasedOnDataFromWS>
+                </Container>
             </React.StrictMode>
         );
     }
