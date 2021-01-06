@@ -3,8 +3,6 @@ import Form from "react-bootstrap/Form";
 import Input from "../../../components/Input";
 import { GlobalContext } from "../../../components/GlobalContextBasedOnDataFromWS";
 import Button from "react-bootstrap/Button";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
 
 
 class Commander extends Component {
@@ -16,21 +14,15 @@ class Commander extends Component {
     render() {
         return (
             <Form onSubmit={ this.onSubmit }>
-                <Row>
-                    <Col>
-                        <Input
-                            type="text"
-                            name="command"
-                            placeholder="Не трогайте, если не знаете, какую"
-                            label="Введите команду: "
-                        />
-                    </Col>
-                    <Col>
-                        <Button variant="primary" type="submit">
-                            Отправить
-                        </Button>
-                    </Col>
-                </Row>
+                <Input
+                    type="text"
+                    name="command"
+                    placeholder="Не трогайте, если не знаете, какую"
+                    label="Введите команду: "
+                />
+                <Button variant="primary" type="submit">
+                    Отправить
+                </Button>
             </Form>
         );
     }
