@@ -15,22 +15,17 @@ class Commander extends Component {
     };
     render() {
         return (
-            <Container>
-                <Form onSubmit={ this.onSubmit }>
-                    <Form.Label>
-                        Введите команду:
-                    </Form.Label>
-                    <Form.Control
-                        type="text"
-                        name="command"
-                        required
-                        placeholder="Не пишите, если не уверены"
-                    />
-                    <Button variant="primary" type="submit">
-                        Отправить
-                    </Button>
-                </Form>
-            </Container>
+            <Form onSubmit={ this.onSubmit }>
+                <Input
+                    name="command"
+                    type="text"
+                    label="Введите команду:"
+                    placeholder="Не пишите, если не уверены"
+                />
+                <Button variant="primary" type="submit">
+                    Отправить
+                </Button>
+            </Form>
         );
     }
 }
