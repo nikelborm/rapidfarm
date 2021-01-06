@@ -24,7 +24,9 @@ class AdminPage extends Component {
                 <h1>
                     Здравствуйте, { this.context.fullName }.
                 </h1>
+                <hr/>
                 <PublicContent/>
+                <hr/>
                 <AdminContent/>
             </div>
         );
