@@ -29,9 +29,12 @@ const cookieSecretKey = process.env.COOKIE_SECRET || "wHaTeVeR123";
 const farmSecrets = JSON.parse(process.env.FARM_SECRETS || `{}`);
 
 let dbClient;
-let mainFarm;
+let mainFarm = null;
 let cachedProcessStates = {};
-let cachedConfig = {};
+let cachedConfig = {
+    processes: [],
+    sensors: []
+};
 let users = {}; // collection
 let sensorsLogs = {}; // collection
 let webCommandsLogs = {}; // collection
@@ -186,18 +189,61 @@ function sendToUsers( message ) {
     }
 }
 function logProfile( event, WSclient ) {
-    console.log(event+" : isAuthAsFarm, name, isAuthAsUser, authInfo -> ",  WSclient.isAuthAsFarm,  WSclient.name,  WSclient.isAuthAsUser,  WSclient.authInfo );
+    console.log(
+        event + " : isAuthAsFarm, name, isAuthAsUser, authInfo -> ",
+        WSclient.isAuthAsFarm,  WSclient.name,  WSclient.isAuthAsUser,  WSclient.authInfo
+    );
 }
 function sendActivityPackage( connection ) {
-    sendMessage(connection, { class: "activitySyncPackage", package: cachedProcessStates });
+    sendMessage( connection, { class: "activitySyncPackage", package: cachedProcessStates } );
 }
 function sendConfigPackage( connection ) {
-    sendMessage(connection, { class: "configPackage", package: cachedConfig });
+    sendMessage( connection, { class: "configPackage", package: cachedConfig } );
+}
+function sendRecordsPackage( connection ) {
+    let pkg = [];
+    sensorsLogs.find(
+        {/* искать записи, где дата больше дня, который был месяц назад */}, {projection: { _id: 0 }}
+    ).limit( 20 ).forEach(
+        (doc) => {
+            pkg.push( doc );
+            console.log('doc: ', doc);
+        },
+        function (err) {
+            if (err) {
+                console.log(err);
+                sendError( connection, "Произошла ошибка при пакета с показаниями датчиков" );
+            } else {
+                sendMessage( connection, { class: "recordsPackage", package: pkg } );
+            }
+        }
+    );
+}
+
+function sendExactSensorRecordsPackage( connection ) {
+    // sensorsLogs.find({/* где дата больше дня, который месяц назад */})
+    // .forEach(
+    //     (doc) => {
+    //         console.log('doc: ', doc);
+    //     },
+    //     function (err) {
+    //         if (err) {
+    //             console.log(err);
+    //             rp.info = err;
+    //         } else {
+    //             resdata.reply = { room, results };
+    //             rp.isError = false;
+    //             rp.info = "Данные успешно загружены";
+    //         }
+    //         connection.send(JSON.stringify(resdata));
+    //     }
+    // );
+    // sendMessage( connection, { class: "recordsPackage", package } );
 }
 function sendError( connection, message ) {
-    sendMessage(connection, {class:"error", message});
+    sendMessage( connection, { class: "error", message } );
 }
-async function targetError(connection, body) {
+async function targetError( connection, body ) {
     const { resdata } = createEmptyResponseData();
     resdata.report.info = "Некорректный запрос";
     return resdata;
@@ -256,6 +302,12 @@ WSServer.on("connection", (connection, request) => {
                     case "configPackage":
                         sendConfigPackage( connection );
                         break;
+                    case "recordsPackage":
+                        sendRecordsPackage( connection );
+                        break;
+                    case "exactSensorRecordsPackage":
+                        sendExactSensorRecordsPackage( connection );
+                        break;
                     default:
                         sendError(connection, `Обработчика what для ${data.what} не существует`);
                 }
@@ -274,7 +326,8 @@ WSServer.on("connection", (connection, request) => {
                 cachedProcessStates[ data.process ] = data.isActive;
                 break;
             case "warning":
-                // переслать всем онлайн пользователям и уведомить их ещё как-то (по почте, через пуш уведомления, в слак, в вк, в телегу, в дискорд)
+                // переслать всем онлайн пользователям и уведомить их ещё как-то
+                // по почте, через пуш уведомления, в слак, в вк, в телегу, в дискорд
                 // if ( connection.name === mainFarm.name ) sendToUsers(data);
                 sendToUsers(data);
                 break;
@@ -359,6 +412,7 @@ WSServer.on("connection", (connection, request) => {
     if ( mainFarm ) {
         sendActivityPackage( connection );
         sendConfigPackage( connection );
+        sendRecordsPackage( connection );
     }
     // const cookies = cookie.parse(request.headers.cookie);
     // console.log("onconnection sid: ", sid);
@@ -370,7 +424,10 @@ const cleaner = setInterval(() => {
         // Если соединение мертво, завершить
         if (!connection.isAlive) {
             if (connection.isAuthAsFarm) {
-                // TODO: Если отключилась ферма - уведомить всех по почте или как-то ещё, а то пиздец. Это либо отключение интернета либо электричества блять либо пожар нахуй и ферма горит либо залило водой плату или короткое замыкание от этого. Что бы ни было причиной - это пиздец. А на ферме кстати нужно сделать чтобы автоподключение происходило
+                // TODO: Если отключилась ферма - уведомить всех по почте или как-то ещё, а то пиздец.
+                // Это либо отключение интернета либо электричества блять либо пожар нахуй и ферма
+                // горит либо залило водой плату или короткое замыкание от этого. Что бы ни было
+                // причиной - это пиздец. А на ферме кстати нужно сделать чтобы автоподключение происходило
                 mainFarm = null;
                 for (const client of WSServer.clients) {
                     if ( client.isAuthAsFarm ) {
@@ -378,7 +435,10 @@ const cleaner = setInterval(() => {
                         break;
                     }
                 }
-                cachedConfig = {};
+                cachedConfig = {
+                    processes: [],
+                    sensors: []
+                };
                 cachedProcessStates = {};
             }
             logProfile( "connection - cleaner terminate", connection );

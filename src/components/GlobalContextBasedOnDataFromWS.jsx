@@ -38,14 +38,15 @@ class SelfHealingWebSocket {
         this.connection.addEventListener( "close", this.closeEL );
     };
     isAvailable = () => this.connection?.readyState === 1;
-    send = data => {
+    sendRaw = data => {
         console.log( "data: ", data );
         if( this.isAvailable() ) {
-            this.connection.send( JSON.stringify( data ) );
+            this.connection.send( data );
         } else {
             alert( "Соединение с сервером не установлено." );
         }
     };
+    send = data => this.sendRaw( JSON.stringify( data ) );
 }
 
 export const GlobalContext = React.createContext( {
@@ -62,7 +63,9 @@ export const GlobalContext = React.createContext( {
         processes: [],
         sensors: []
     },
-    processesStates: {}
+    processesStates: {},
+    records: [],
+    sendRawQuery: () => {},
 });
 
 class GlobalContextBasedOnDataFromWS extends Component {
@@ -77,6 +80,7 @@ class GlobalContextBasedOnDataFromWS extends Component {
             sensors: []
         },
         processesStates: {},
+        records: [],
     }
     constructor( props ) {
         super( props );
@@ -107,6 +111,12 @@ class GlobalContextBasedOnDataFromWS extends Component {
             case "activitySyncPackage":
                 this.setState( prevState => {
                     prevState.processesStates = data.package;
+                    return prevState;
+                } );
+                break;
+            case "recordsPackage":
+                this.setState( prevState => {
+                    prevState.records = data.package;
                     return prevState;
                 } );
                 break;
@@ -141,6 +151,16 @@ class GlobalContextBasedOnDataFromWS extends Component {
                     fullName: "",
                     isLogoutInProcess: false
                 } );
+                break;
+            case "error":
+                alert( "Ошибка, сообщите программисту этот текст: " + data.message );
+                break;
+            case "warning":
+                break;
+            case "records":
+                break;
+            default:
+                alert( "Пришло нечто неожиданное, сообщите программисту этот текст: " + JSON.stringify( data ) );
         }
     };
     isAuthSessionChanged = () => false && ( localStorage.getItem( "connect.sid" ) !== getCookie( "connect.sid" ) );
@@ -180,12 +200,14 @@ class GlobalContextBasedOnDataFromWS extends Component {
         register: this.register,
         login: this.login
     };
+    sendRawQuery = JSONString => this.ws && this.ws.sendRaw( JSONString );
     render() {
         return (
             <GlobalContext.Provider
                 value={ {
                     ...this.state,
-                    authorizationActions: this.authorizationActions
+                    authorizationActions: this.authorizationActions,
+                    sendRawQuery: this.sendRawQuery
                 } }
                 children={ this.props.children }
             />

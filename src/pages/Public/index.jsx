@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Redirect, withRouter } from "react-router-dom";
 import { GlobalContext } from "../../components/GlobalContextBasedOnDataFromWS";
+import Commander from "./components/Commander";
 import ProcessList from "./components/ProcessList";
 
 export class PublicContent extends Component {
@@ -8,6 +9,7 @@ export class PublicContent extends Component {
         return (
             <>
                 <ProcessList/>
+                <Commander/>
             </>
         );
     }
