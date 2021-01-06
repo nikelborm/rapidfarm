@@ -8,8 +8,14 @@ export class PublicContent extends Component {
     render() {
         return (
             <>
+                <h2>
+                    Состояние процессов
+                </h2>
                 <ProcessList/>
-                <br/>
+                <hr/>
+                <h2>
+                    Командный интерфейс
+                </h2>
                 <Commander/>
             </>
         );

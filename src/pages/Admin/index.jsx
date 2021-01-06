@@ -6,9 +6,9 @@ import { GlobalContext } from "../../components/GlobalContextBasedOnDataFromWS";
 class AdminContent extends Component {
     render() {
         return (
-            <div>
+            <h2>
                 Какие-то Дополнительные кнопки для управления фермой на правах админа
-            </div>
+            </h2>
         );
     }
 }
@@ -21,9 +21,9 @@ class AdminPage extends Component {
         }
         return (
             <div>
-                <h1>
+                <h2>
                     Здравствуйте, { this.context.fullName }.
-                </h1>
+                </h2>
                 <hr/>
                 <PublicContent/>
                 <hr/>
