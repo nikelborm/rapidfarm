@@ -15,8 +15,8 @@ class Commander extends Component {
     };
     render() {
         return (
-            <Row>
-                <Form onSubmit={ this.onSubmit }>
+            <Form onSubmit={ this.onSubmit }>
+                {/* <Row> */}
                     <Col sm>
                         <Form.Label>
                             Введите команду:
@@ -35,8 +35,8 @@ class Commander extends Component {
                             Отправить
                         </Button>
                     </Col>
-                </Form>
-            </Row>
+                {/* </Row> */}
+            </Form>
         );
     }
 }
