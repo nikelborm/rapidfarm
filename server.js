@@ -1,3 +1,4 @@
+/* eslint-disable no-fallthrough */
 /* eslint-disable default-case */
 const express = require("express");
 const mongodb = require("mongodb");
@@ -177,7 +178,7 @@ async function registerAsUser(connection, body) {
 }
 
 function sendMessage( connection, message ) {
-    console.log('send message to connection: ', message);
+    console.log("send message to connection: ", message);
     connection.send(JSON.stringify(message));
 }
 function sendToUsers( message ) {
@@ -229,7 +230,7 @@ function sendExactSensorRecordsPackage( connection ) {
     // sensorsLogs.find({/* где дата больше дня, который месяц назад */})
     // .forEach(
     //     (doc) => {
-    //         console.log('doc: ', doc);
+    //         console.log("doc: ", doc);
     //     },
     //     function (err) {
     //         if (err) {
@@ -270,11 +271,11 @@ function prepare(input) {
 }
 WSServer.on("connection", (connection, request) => {
     connection.isAlive = true;
-    connection.on("pong", () => {
+    connection.on( "pong", () => {
         connection.isAlive = true;
-    });
+    } );
     const authorizationStep = async (input) => {
-        const data = prepare(input);
+        const data = prepare( input );
         sendMessage(connection, {
             ...(await handlerSwitcher( data.class )( connection, data )),
             class: data.class
@@ -294,59 +295,47 @@ WSServer.on("connection", (connection, request) => {
     }
     const publicQueriesHandler = (input) => {
         // TODO: Подумать над обработкой и защитой от ошибок в JSON.parse
-        const data = prepare(input);
+        const data = prepare( input );
         //* Пользовательские запросы которые можно обработать и без авторизации
-        // { "class": "execute", "what": "workWithFarm", name: "asdasdasd"  }
-        // if ( data.class === "execute" && data.what === "workWithFarm" ) {
-        // }
-        switch ( data.class ) {
-            case "get":
-                switch ( data.what ) {
-                    case "activitySyncPackage":
-                        sendActivityPackage( connection );
-                        break;
-                    case "configPackage":
-                        sendConfigPackage( connection );
-                        break;
-                    case "recordsPackage":
-                        sendRecordsPackage( connection );
-                        break;
-                    case "exactSensorRecordsPackage":
-                        sendExactSensorRecordsPackage( connection );
-                        break;
-                    default:
-                        sendError(connection, `Обработчика what для ${data.what} не существует`);
-                }
+        if ( data.class !== "get" ) return;
+        switch ( data.what ) {
+            case "activitySyncPackage":
+                sendActivityPackage( connection );
+                break;
+            case "configPackage":
+                sendConfigPackage( connection );
+                break;
+            case "recordsPackage":
+                sendRecordsPackage( connection );
+                break;
+            case "exactSensorRecordsPackage":
+                sendExactSensorRecordsPackage( connection );
                 break;
             default:
-                break;
+                sendError(connection, `Обработчика what (${data.what}) для class (${data.class}) не существует`);
         }
     };
     const farmQueriesHandler = (input) => {
-        const data = prepare(input);
+        const data = prepare( input );
         switch ( data.class ) {
             case "event":
                 // просто переслать всем онлайн пользователям
-                // if ( connection.name === farmConnection.name ) sendToUsers(data); // и ещё имя фермы
                 sendToUsers( data );
                 cachedProcessStates[ data.process ] = data.isActive;
                 break;
             case "warning":
                 // переслать всем онлайн пользователям и уведомить их ещё как-то
                 // по почте, через пуш уведомления, в слак, в вк, в телегу, в дискорд
-                // if ( connection.name === farmConnection.name ) sendToUsers(data);
-                sendToUsers(data);
-                break;
+                break; // records по действиям похожи
             case "records":
                 // переслать всем онлайн пользователям и сохранить в бд с датой
-                // if ( connection.name === farmConnection.name ) sendToUsers(data);
-                sendToUsers(data);
-                sensorsLogs.insertOne({
+                const log = {
                     sensor: data.sensor,
                     value: data.value,
-                    date: new Date(),
-                    farmName: connection.name
-                });
+                    date: new Date()
+                };
+                sendToUsers( { ...log, class: "records" } );
+                sensorsLogs.insertOne( log );
                 break;
             case "activitySyncPackage":
                 cachedProcessStates = data.package;
@@ -361,55 +350,58 @@ WSServer.on("connection", (connection, request) => {
         }
     };
     const userQueriesHandler = (input) => {
-        const data = prepare(input);
+        const data = prepare( input );
         switch ( data.class ) {
             case "set":
                 switch ( data.what ) {
                     case "timings":
+                        sendToUsers();
+                        sendToFarm();
                         break;
-                    case "todayTimings":
+                    case "criticalBorders":
+                        sendToUsers();
+                        sendToFarm();
                         break;
                     case "config":
+                        sendToUsers();
+                        sendToFarm();
                         break;
                     default:
-                        sendError(connection, `Обработчика what для ${data.what} не существует`);
+                        sendError(connection, `Обработчика what (${data.what}) для class (${data.class}) не существует`);
                 }
                 break;
-            case "execute":
-                switch ( data.what ) {
-                    case "shutDownFarm":
-                        break;
-                    case "workWithFarm":
-                        break;
-                    case "addNewFarm":
-                        break;
-                    default:
-                        sendError(connection, `Обработчика what для ${data.what} не существует`);
-                }
-                break;
+            // case "execute":
+            //     switch ( data.what ) {
+            //         case "bashCommand":
+            //             sendToFarm( connection, input );
+            //             break;
+            //         default:
+            //             sendError(connection, `Обработчика what (${data.what}) для class (${data.class}) не существует`);
+            //     }
+            //     break;
             default:
                 break;
         }
     };
     const logout = (input) => {
-        const data = prepare(input);
-        if (data.class !== "logout") return;
-        if (connection.isAuthAsFarm) {
+        const data = prepare( input );
+        if ( data.class !== "logout" ) return;
+        if ( connection.isAuthAsFarm ) {
             farmConnection = null;
             newFarmStateNotifier();
             connection.isAuthAsFarm = false;
             connection.name = "";
-            connection.addListener("message", authorizationStep);
-            connection.removeListener("message", farmQueriesHandler);
-            connection.removeListener("message", logout);
+            connection.addListener( "message", authorizationStep );
+            connection.removeListener( "message", farmQueriesHandler );
+            connection.removeListener( "message", logout );
         }
-        if (connection.isAuthAsUser) {
+        if ( connection.isAuthAsUser ) {
             connection.isAuthAsUser = false;
             connection.authInfo = null;
             sendMessage( connection, { class: "logout" } );
-            connection.addListener("message", authorizationStep);
-            connection.removeListener("message", userQueriesHandler);
-            connection.removeListener("message", logout);
+            connection.addListener( "message", authorizationStep );
+            connection.removeListener( "message", userQueriesHandler );
+            connection.removeListener( "message", logout );
         }
     };
     connection.addListener("message", function (input) {

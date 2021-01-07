@@ -3,6 +3,11 @@ import { GlobalContext } from "../../../components/GlobalContextBasedOnDataFromW
 import Process from "./Process";
 
 class ProcessList extends Component {
+    shouldComponentUpdate( nextProps, nextState, nextContext ) {
+        return this.context.isFarmConnected !== nextContext.isFarmConnected ||
+        this.context.config.processes !== nextContext.config.processes ||
+        this.context.processesStates !== nextContext.processesStates;
+    }
     static contextType = GlobalContext;
     render() {
         return (
