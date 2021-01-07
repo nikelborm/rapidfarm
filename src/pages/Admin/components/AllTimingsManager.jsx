@@ -3,9 +3,9 @@ import { GlobalContext } from "../../../components/GlobalContextBasedOnDataFromW
 import ProcessTimingsManager from "./ProcessTimingsManager";
 
 class AllTimingsManager extends Component {
-    shouldComponentUpdate( nextProps, nextState, nextContext ) {
-        return this.context.config.processes !== nextContext.config.processes;
-    }
+    // shouldComponentUpdate( nextProps, nextState, nextContext ) {
+    //     return this.context.config.processes !== nextContext.config.processes;
+    // }
     static contextType = GlobalContext;
     render() {
         return this.context.config.processes.map(

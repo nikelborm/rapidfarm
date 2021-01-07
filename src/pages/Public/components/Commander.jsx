@@ -22,8 +22,6 @@ class Commander extends Component {
                 Введите команду:
                 <InputGroup>
                     <FormControl
-                        aria-label="Введите команду:"
-                        aria-describedby="basic-addon2"
                         name="command"
                         type="text"
                         placeholder="Не пишите, если не уверены"
