@@ -21,7 +21,7 @@ class TimingsRow extends Component {
         const [ from, to ] = this.props.oneTiming;
         return (
             <Form onSubmit={ (event)=>event.preventDefault() }>
-                <Row>
+                <Row xs={ 1 } sm={ 1 } md={ 1 } lg={ 1 } xl={ 1 } >
                     <Col>
                         <ButtonToolbar className="justify-content-between mb-3">
                             <InputGroup size="sm">
