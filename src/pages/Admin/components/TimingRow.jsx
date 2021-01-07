@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
 import OneTimeChanger from "./OneTimeChanger";
 
 class TimingsRow extends Component {

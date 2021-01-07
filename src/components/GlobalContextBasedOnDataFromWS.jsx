@@ -97,30 +97,30 @@ class GlobalContextBasedOnDataFromWS extends Component {
     }
     componentDidMount() {
         const loc = document.location;
-        const protocol = (loc.protocol[4] === "s" ? "wss://": "ws://");
-        const WSAdress = protocol + (loc.port === "3001" ? loc.hostname + ":3000" : loc.host);
+        const protocol = loc.protocol[ 4 ] === "s" ? "wss://" : "ws://";
+        const WSAdress = protocol + ( loc.port === "3001" ? loc.hostname + ":3000" : loc.host );
         this.ws = new SelfHealingWebSocket( this.messageParser, WSAdress );
     }
     messageParser = data => {
         // eslint-disable-next-line default-case
         switch ( data.class ) {
             case "configPackage":
-                this.setState( ps => ({
-                    ...ps,
-                    config: data.package
-                }) );
+                this.setState( ps => {
+                    ps.config = data.package;
+                    return ps;
+                } );
                 break;
             case "activitySyncPackage":
-                this.setState( ps => ( {
-                    ...ps,
-                    processesStates: data.package
-                } ) );
+                this.setState( ps => {
+                    ps.processesStates = data.package;
+                    return ps;
+                } );
                 break;
             case "recordsPackage":
-                this.setState( ps => ( {
-                    ...ps,
-                    records: data.package
-                } ) );
+                this.setState( ps => {
+                    ps.records = data.package;
+                    return ps;
+                } );
                 break;
             case "event":
                 this.setState( ps => ( {
@@ -164,10 +164,33 @@ class GlobalContextBasedOnDataFromWS extends Component {
                 alert( "Ошибка, сообщите программисту этот текст: " + data.message );
                 break;
             case "warning":
-                break;
             case "records":
                 break;
             case "farmState":
+                this.setState( ps => {
+                    ps.isFarmConnected = data.isFarmConnected;
+                    return ps;
+                } );
+                break;
+            case "timings":
+                this.setState( ps => {
+                    for ( const proc of ps.config.processes ) {
+                        if ( proc.long === data.process ) {
+                            proc.timings = data.timings;
+                            break;
+                        }
+                    }
+                    ps.config.processes = { ...ps.config.processes };
+                    return ps;
+                } );
+                break;
+            case "criticalBorders":
+                this.setState( ps => ( {
+                    ...ps,
+                    isFarmConnected: data.isFarmConnected
+                } ) );
+                break;
+            case "config":
                 this.setState( ps => ( {
                     ...ps,
                     isFarmConnected: data.isFarmConnected
@@ -182,16 +205,18 @@ class GlobalContextBasedOnDataFromWS extends Component {
         // запрос на выход чтобы сервер стёр сессию
         if ( this.state.isLogoutInProcess || this.state.isAuthInProcess ) return;
         this.ws.send( { class : "logout" } );
-        this.setState( {
+        this.setState( ps => ( {
+            ...ps,
             isLogoutInProcess: true
-        } );
+        } ) );
     };
     authorize = query => {
         if ( this.state.isLogoutInProcess || this.state.isAuthInProcess ) return;
         this.ws.send( query );
-        this.setState( {
+        this.setState( ps => ( {
+            ...ps,
             isAuthInProcess: true
-        } );
+        } ) );
     };
     login = ( email, password ) => this.authorize(
         {

@@ -1,8 +1,11 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
 import Badge from "react-bootstrap/Badge";
 import { GlobalContext } from "./GlobalContextBasedOnDataFromWS";
 
 class FarmStatus extends Component {
+    shouldComponentUpdate( nextProps, nextState, nextContext ) {
+        return this.context.isFarmConnected !== nextContext.isFarmConnected;
+    }
     static contextType = GlobalContext;
     getVariant = (
         ifAvailable,
