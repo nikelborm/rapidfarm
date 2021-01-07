@@ -15,16 +15,24 @@ class TimingsRow extends Component {
         console.log('to: ', to);
         console.log('from: ', from);
         return (
-            <Form onSubmit={ (event)=>event.preventDefault() }>
-                <Row xs={ 1 } sm={ 1 } md={ 2 } lg={ 2 } xl={ 2 } >
-                    <StyledCol>
-                        <OneTimeChanger changerIndex={ 0 } role="От" time={ from }/>
-                    </StyledCol>
-                    <StyledCol>
-                        <OneTimeChanger changerIndex={ 1 } role="До" time={ to }/>
-                    </StyledCol>
-                </Row>
-            </Form>
+            <Row xs={ 1 } sm={ 1 } md={ 2 } lg={ 2 } xl={ 2 } >
+                <StyledCol>
+                    <OneTimeChanger
+                        isEditMode={ this.props.isEditMode }
+                        changerIndex={ 0 }
+                        role="От"
+                        time={ from }
+                    />
+                </StyledCol>
+                <StyledCol>
+                    <OneTimeChanger
+                        isEditMode={ this.props.isEditMode }
+                        changerIndex={ 1 }
+                        role="До"
+                        time={ to }
+                    />
+                </StyledCol>
+            </Row>
         );
     }
 }

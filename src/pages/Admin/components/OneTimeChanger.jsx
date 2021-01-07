@@ -24,7 +24,7 @@ const StyledInput = styled( FormControl )`
 class OneTimeChanger extends Component {
     letters = [ "Ч", "М", "С" ];
     render() {
-        const { role, time } = this.props;
+        const { role, time, isEditMode } = this.props;
         return (
             <ButtonToolbar className="justify-content-between mb-3">
                 <InputGroup size="sm">
@@ -46,14 +46,16 @@ class OneTimeChanger extends Component {
                         />
                     </InputGroup>
                 ) ) }
-                <ButtonGroup size="sm">
-                    <Button variant="success" type="submit">
-                        +
-                    </Button>
-                    <Button variant="danger" type="submit">
-                        -
-                    </Button>
-                </ButtonGroup>
+                { isEditMode && (
+                    <ButtonGroup size="sm">
+                        <Button variant="success" type="submit">
+                            +
+                        </Button>
+                        <Button variant="danger" type="submit">
+                            -
+                        </Button>
+                    </ButtonGroup>
+                ) }
             </ButtonToolbar>
         );
     }
