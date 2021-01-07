@@ -9,7 +9,7 @@ class AllTimingsManager extends Component {
     static contextType = GlobalContext;
     render() {
         return this.context.config.processes.map(
-            process => <ProcessTimingsManager { ...process }/>
+            process => process.isAvailable && <ProcessTimingsManager { ...process }/>
         );
     }
 }
