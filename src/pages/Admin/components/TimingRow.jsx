@@ -1,6 +1,17 @@
 import React, { Component } from "react";
 import { Button, ButtonGroup, ButtonToolbar, Form, FormControl, InputGroup } from "react-bootstrap";
+import styled from "styled-components";
 // import OneTimeChanger from "./OneTimeChanger";
+const StyledText = styled( InputGroup.Text )`
+    padding: .25rem .5rem;
+    font-size: .875rem;
+    line-height: 1.5;
+    border-radius: .2rem;
+    width: 40px;
+`;
+const StyledInput = styled( FormControl )`
+    width: 40px;
+`;
 
 class TimingsRow extends Component {
     render() {
@@ -9,19 +20,17 @@ class TimingsRow extends Component {
             <Form onSubmit={ (event)=>event.preventDefault() }>
                 <ButtonToolbar className="justify-content-between">
                     <InputGroup size="sm">
-                        <InputGroup.Prepend>
-                            <InputGroup.Text>
-                                От
-                            </InputGroup.Text>
-                        </InputGroup.Prepend>
+                        <StyledText>
+                            От
+                        </StyledText>
                     </InputGroup>
                     <InputGroup size="sm">
                         <InputGroup.Prepend>
-                            <InputGroup.Text>
-                                Часы:
-                            </InputGroup.Text>
+                            <StyledText>
+                                Ч
+                            </StyledText>
                         </InputGroup.Prepend>
-                        <FormControl
+                        <StyledInput
                             name="fromHours"
                             type="text"
                             value={~~from[0]}
@@ -29,11 +38,11 @@ class TimingsRow extends Component {
                     </InputGroup>
                     <InputGroup size="sm">
                         <InputGroup.Prepend>
-                            <InputGroup.Text>
-                                Минуты:
-                            </InputGroup.Text>
+                            <StyledText>
+                                М
+                            </StyledText>
                         </InputGroup.Prepend>
-                        <FormControl
+                        <StyledInput
                             name="fromMinutes"
                             type="text"
                             value={~~from[1]}
@@ -46,19 +55,17 @@ class TimingsRow extends Component {
                     </ButtonGroup>
                     {/* --------------------------------------- */}
                     <InputGroup size="sm">
-                        <InputGroup.Prepend>
-                            <InputGroup.Text>
-                                До
-                            </InputGroup.Text>
-                        </InputGroup.Prepend>
+                        <StyledText>
+                            Да
+                        </StyledText>
                     </InputGroup>
                     <InputGroup size="sm">
                         <InputGroup.Prepend>
-                            <InputGroup.Text>
-                                Часы:
-                            </InputGroup.Text>
+                            <StyledText>
+                                Ч
+                            </StyledText>
                         </InputGroup.Prepend>
-                        <FormControl
+                        <StyledInput
                             name="fromHours"
                             type="text"
                             value={~~to[0]}
@@ -66,11 +73,11 @@ class TimingsRow extends Component {
                     </InputGroup>
                     <InputGroup size="sm">
                         <InputGroup.Prepend>
-                            <InputGroup.Text>
-                                Минуты:
-                            </InputGroup.Text>
+                            <StyledText>
+                                М
+                            </StyledText>
                         </InputGroup.Prepend>
-                        <FormControl
+                        <StyledInput
                             name="fromMinutes"
                             type="text"
                             value={~~to[1]}
