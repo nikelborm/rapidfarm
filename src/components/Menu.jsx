@@ -43,7 +43,7 @@ class Menu extends Component {
             <Nav
                 className="justify-content-center"
                 children={ React.createElement(
-                    sets[ path ],
+                    path in sets ? sets[ path ] : "",
                     { isReg: this.context.isRegistrationAllowed }
                 ) }
             />
