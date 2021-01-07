@@ -1,13 +1,13 @@
 import React, { Component } from "react";
-import TimingsRow from "./TimingRow";
+import TimingRow from "./TimingRow";
 
 class ProcessTimingsManager extends Component {
-    // shouldComponentUpdate( nextProps, nextState ) {
-    //     return this.props.title !== nextProps.title ||
-    //     this.props.timings !== nextProps.timings ||
-    //     this.state.isEditMode !== nextState.isEditMode ||
-    //     this.props.onChangeTiming !== nextProps.onChangeTiming;
-    // }
+    shouldComponentUpdate( nextProps, nextState ) {
+        return this.props.title !== nextProps.title ||
+        this.props.timings !== nextProps.timings ||
+        this.state.isEditMode !== nextState.isEditMode ||
+        this.props.onChangeTiming !== nextProps.onChangeTiming;
+    }
     state = {
         isEditMode: false
     }
@@ -16,12 +16,12 @@ class ProcessTimingsManager extends Component {
         return (
             <div>
                 <h3>
-                    Тайминги процесса { title }
+                    { title }
                 </h3>
                 { this.state.isEditMode ? "Сохранить" : "Редактировать" }
                 { timings.map(
                     ( oneTiming, timingIndex ) => (
-                        <TimingsRow
+                        <TimingRow
                             oneTiming={ oneTiming }
                             timingIndex={ timingIndex }
                             isEditMode={ this.state.isEditMode }
