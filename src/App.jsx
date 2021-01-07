@@ -9,6 +9,7 @@ import Menu from "./components/Menu";
 import { BrowserRouter } from "react-router-dom";
 import GlobalContextBasedOnDataFromWS from "./components/GlobalContextBasedOnDataFromWS";
 import Container from "react-bootstrap/Container";
+import Divider from "./components/Divider";
 
 class App extends Component {
     render() {
@@ -18,6 +19,7 @@ class App extends Component {
                     <GlobalContextBasedOnDataFromWS>
                         <BrowserRouter>
                             <Menu/>
+                            <Divider/>
                             <Switch>
                                 <LoginRoute    path="/login"    exact/>
                                 <RegisterRoute path="/register" exact/>
