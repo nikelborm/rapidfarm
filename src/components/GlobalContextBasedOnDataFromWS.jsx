@@ -161,6 +161,11 @@ class GlobalContextBasedOnDataFromWS extends Component {
                 break;
             case "records":
                 break;
+            case "farmState":
+                this.setState( {
+                    isFarmConnected: data.isFarmConnected
+                } );
+                break;
             default:
                 alert( "Пришло нечто неожиданное, сообщите программисту этот текст: " + JSON.stringify( data ) );
         }
