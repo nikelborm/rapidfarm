@@ -4,6 +4,7 @@ import { GlobalContext } from "../../components/GlobalContextBasedOnDataFromWS";
 import Commander from "./components/Commander";
 import ProcessList from "./components/ProcessList";
 import FarmStatus from "../../components/FarmStatus";
+import Divider from "../../components/Divider";
 
 export class PublicContent extends Component {
     render() {
@@ -13,7 +14,7 @@ export class PublicContent extends Component {
                     Состояние процессов
                 </h2>
                 <ProcessList/>
-                <hr/>
+                <Divider/>
                 <h2>
                     Командный интерфейс
                 </h2>

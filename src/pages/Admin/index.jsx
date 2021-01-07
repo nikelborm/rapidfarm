@@ -3,6 +3,7 @@ import { PublicContent } from "../Public";
 import { withRouter, Redirect } from "react-router-dom";
 import { GlobalContext } from "../../components/GlobalContextBasedOnDataFromWS";
 import FarmStatus from "../../components/FarmStatus";
+import Divider from "../../components/Divider";
 
 class AdminContent extends Component {
     static contextType = GlobalContext;
@@ -10,11 +11,11 @@ class AdminContent extends Component {
         return (
             <>
                 <h2>
-                    Здравствуйте, { this.context.fullName }.
+                    Пользователь: { this.context.fullName }
                 </h2>
-                <hr/>
+                <Divider/>
                 <PublicContent/>
-                <hr/>
+                <Divider/>
                 <h2>
                     Какие-то Дополнительные кнопки для управления фермой на правах админа
                 </h2>
