@@ -10,7 +10,7 @@ class ProcessTimingsManager extends Component {
         this.props.onChangeTiming !== nextProps.onChangeTiming;
     }
     state = {
-        isEditMode: false
+        isEditMode: true
     }
     render() {
         const { timings, title } = this.props;
