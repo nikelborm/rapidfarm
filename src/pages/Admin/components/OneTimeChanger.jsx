@@ -16,10 +16,6 @@ const StyledText = styled( InputGroup.Text )`
     text-align: center;
     display: initial;
 `;
-const StyledInput = styled( FormControl )`
-    width: 40px !important;
-    text-align: center;
-`;
 class OneTimeChanger extends Component {
     letters = [ "Ч", "М", "С" ];
     render() {
@@ -38,7 +34,11 @@ class OneTimeChanger extends Component {
                                 { this.letters[ index ] }
                             </StyledText>
                         </InputGroup.Prepend>
-                        <StyledInput
+                        <FormControl
+                            style={ {
+                                width: "40px !important",
+                                textAlign: "center"
+                            } }
                             name="fromHours"
                             type="text"
                             value={ ~~elem }

@@ -9,7 +9,6 @@ const StyledCol = styled( FormControl )`
     max-width: 400px !important;
 `;
 class TimingsRow extends Component {
-    letters = [ "Ч", "М", "С" ];
     render() {
         const [ from, to ] = this.props.oneTiming;
         return (
