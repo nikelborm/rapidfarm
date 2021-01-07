@@ -393,7 +393,6 @@ WSServer.on("connection", (connection, request) => {
         }
     };
     const logout = (input) => {
-        console.log('logout called ');
         const data = prepare(input);
         if (data.class !== "logout") return;
         if (connection.isAuthAsFarm) {
