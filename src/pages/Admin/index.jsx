@@ -4,6 +4,7 @@ import { withRouter, Redirect } from "react-router-dom";
 import { GlobalContext } from "../../components/GlobalContextBasedOnDataFromWS";
 import Divider from "../../components/Divider";
 import AllTimingsManager from "./components/AllTimingsManager";
+import FarmStatus from "../../components/FarmStatus";
 
 class AdminContent extends Component {
     static contextType = GlobalContext;
@@ -32,7 +33,13 @@ class AdminPage extends Component {
         if ( !this.context.isAuthorized ) {
             return <Redirect to="/login" />;
         }
-        return this.context.isFarmConnected && <AdminContent/>;
+        return (
+            <>
+                <FarmStatus/>
+                <Divider/>
+                { this.context.isFarmConnected && <AdminContent/> }
+            </>
+        );
     }
 }
 
