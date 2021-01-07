@@ -19,9 +19,7 @@ class Commander extends Component {
     render() {
         return (
             <Form onSubmit={ this.onSubmit }>
-                <Row>
-                    Введите команду:
-                </Row>
+                Введите команду:
                 <InputGroup>
                     <FormControl
                         aria-label="Введите команду:"
