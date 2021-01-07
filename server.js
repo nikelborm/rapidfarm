@@ -60,12 +60,6 @@ app.use(function(request, response, next){
     next();
 });
 app.use(express.static(path.join(__dirname, "build")));
-app.get("/sitemap.xml", (request, response) => {
-    response.sendFile(path.join(__dirname, "build", "sitemap.xml"));
-});
-app.get("/api_description.md", (request, response) => {
-    response.sendFile(path.join(__dirname, "build", "api_description.md"));
-});
 app.get("/*", (request, response) => {
     response.sendFile(path.join(__dirname, "build", "index.html"));
 });
