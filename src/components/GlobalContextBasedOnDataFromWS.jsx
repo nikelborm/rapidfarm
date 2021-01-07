@@ -66,6 +66,7 @@ export const GlobalContext = React.createContext( {
     processesStates: {},
     records: [],
     sendRawQuery: () => {},
+    isFarmConnected: null,
 });
 
 class GlobalContextBasedOnDataFromWS extends Component {
@@ -81,6 +82,7 @@ class GlobalContextBasedOnDataFromWS extends Component {
         },
         processesStates: {},
         records: [],
+        isFarmConnected: null,
     }
     constructor( props ) {
         super( props );
