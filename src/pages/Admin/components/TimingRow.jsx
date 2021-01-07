@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Button, Form, FormControl, InputGroup } from "react-bootstrap";
+import { Button, ButtonGroup, ButtonToolbar, Form, FormControl, InputGroup } from "react-bootstrap";
 // import OneTimeChanger from "./OneTimeChanger";
 
 class TimingsRow extends Component {
@@ -7,60 +7,77 @@ class TimingsRow extends Component {
         const [ from, to ] = this.props.oneTiming;
         return (
             <Form onSubmit={ (event)=>event.preventDefault() }>
-                <InputGroup>
-                    <InputGroup.Prepend>
+                <ButtonToolbar className="mb-3" aria-label="Toolbar with Button groups">
+                    <InputGroup>
                         <InputGroup.Text>
-                            { "от" }
+                            от
                         </InputGroup.Text>
-                    </InputGroup.Prepend>
-                    <FormControl
-                        name="fromHours"
-                        type="text"
-                        placeholder="ч"
-                        value={~~from[0]}
-                    />
-                    <FormControl
-                        name="fromMinutes"
-                        type="text"
-                        placeholder="м"
-                        value={~~from[1]}
-                    />
-                    <FormControl
-                        name="fromSeconds"
-                        type="text"
-                        placeholder="с"
-                        value={~~from[2]}
-                    />
-                    <Button variant="primary" type="submit">
-                        +
-                    </Button>
-                    <InputGroup.Text>
-                        { "до" }
-                    </InputGroup.Text>
-                    <FormControl
-                        name="fromHours"
-                        type="text"
-                        placeholder="ч"
-                        value={~~to[0]}
-                    />
-                    <FormControl
-                        name="fromMinutes"
-                        type="text"
-                        placeholder="м"
-                        value={~~to[1]}
+                    </InputGroup>
+                    <InputGroup>
+                        <InputGroup.Prepend>
+                            <InputGroup.Text>
+                                Часы:
+                            </InputGroup.Text>
+                        </InputGroup.Prepend>
+                        <FormControl
+                            name="fromHours"
+                            type="text"
+                            value={~~from[0]}
                         />
-                    <FormControl
-                        name="fromSeconds"
-                        type="text"
-                        placeholder="с"
-                        value={~~to[2]}
-                    />
-                    <InputGroup.Append>
+                    </InputGroup>
+                    <InputGroup>
+                        <InputGroup.Prepend>
+                            <InputGroup.Text>
+                                Минуты:
+                            </InputGroup.Text>
+                        </InputGroup.Prepend>
+                        <FormControl
+                            name="fromMinutes"
+                            type="text"
+                            value={~~from[1]}
+                        />
+                    </InputGroup>
+                    <ButtonGroup className="mr-2" aria-label="First group">
                         <Button variant="primary" type="submit">
                             +
                         </Button>
-                    </InputGroup.Append>
-                </InputGroup>
+                    </ButtonGroup>
+                    {/* --------------------------------------- */}
+                    <InputGroup>
+                        <InputGroup.Text>
+                            До
+                        </InputGroup.Text>
+                    </InputGroup>
+                    <InputGroup>
+                        <InputGroup.Prepend>
+                            <InputGroup.Text>
+                                Часы:
+                            </InputGroup.Text>
+                        </InputGroup.Prepend>
+                        <FormControl
+                            name="fromHours"
+                            type="text"
+                            value={~~from[0]}
+                        />
+                    </InputGroup>
+                    <InputGroup>
+                        <InputGroup.Prepend>
+                            <InputGroup.Text>
+                                Минуты:
+                            </InputGroup.Text>
+                        </InputGroup.Prepend>
+                        <FormControl
+                            name="fromMinutes"
+                            type="text"
+                            value={~~from[1]}
+                        />
+                    </InputGroup>
+                    <ButtonGroup className="mr-2" aria-label="First group">
+                        <Button variant="primary" type="submit">
+                            +
+                        </Button>
+                    </ButtonGroup>
+                </ButtonToolbar>
             </Form>
             // <div>
 
