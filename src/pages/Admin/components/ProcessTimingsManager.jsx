@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import TimingRow from "./TimingRow";
+import Button from "react-bootstrap/Button";
 
 class ProcessTimingsManager extends Component {
     shouldComponentUpdate( nextProps, nextState ) {
@@ -18,7 +19,10 @@ class ProcessTimingsManager extends Component {
                 <h3>
                     { title }
                 </h3>
-                { this.state.isEditMode ? "Сохранить" : "Редактировать" }
+                { this.state.isEditMode
+                    ? <Button>Сохранить</Button>
+                    : <Button>Редактировать</Button>
+                }
                 { timings.map(
                     ( oneTiming, timingIndex ) => (
                         <TimingRow
