@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Button, Form, FormControl, InputGroup } from "react-bootstrap";
-import OneTimeChanger from "./OneTimeChanger";
+// import OneTimeChanger from "./OneTimeChanger";
 
 class TimingsRow extends Component {
     render() {
