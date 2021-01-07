@@ -1,15 +1,17 @@
 import React, { Component } from "react";
-import { Route, Switch, Redirect } from "react-router-dom";
+import Container from "react-bootstrap/Container";
+import { Route, Switch, Redirect, BrowserRouter } from "react-router-dom";
+
 import AdminRoute from "./pages/Admin";
 import LogoutRoute from "./pages/Logout";
 import PublicRoute from "./pages/Public";
 import LoginRoute from "./pages/Login";
 import RegisterRoute from "./pages/Register";
+
 import Menu from "./components/Menu";
-import { BrowserRouter } from "react-router-dom";
-import GlobalContextBasedOnDataFromWS from "./components/GlobalContextBasedOnDataFromWS";
-import Container from "react-bootstrap/Container";
 import Divider from "./components/Divider";
+import FarmStatus from "./components/FarmStatus";
+import GlobalContextBasedOnDataFromWS from "./components/GlobalContextBasedOnDataFromWS";
 
 class App extends Component {
     render() {
@@ -19,6 +21,8 @@ class App extends Component {
                     <GlobalContextBasedOnDataFromWS>
                         <BrowserRouter>
                             <Menu/>
+                            <Divider/>
+                            <FarmStatus/>
                             <Divider/>
                             <Switch>
                                 <LoginRoute    path="/login"    exact/>

@@ -22,8 +22,8 @@ const login =    <MenuPoint to="/login"    text="Войти в аккаунт...
 const main =     <MenuPoint to="/"         text="На главную..."       />;
 
 const sets = {
-    "/":         class extends PureComponent { render = () => <> { login } { this.props.isReg && register } </>},
-    "/login":    class extends PureComponent { render = () => <> { main } { this.props.isReg && register } </>},
+    "/":         class extends PureComponent { render = () => <> { login } { this.props.isReg ? register : "Регистрация отключена" } </>},
+    "/login":    class extends PureComponent { render = () => <> { main } { this.props.isReg ? register : "Регистрация отключена" } </>},
     "/register": class extends PureComponent { render = () => <> { main } { login } </> },
     "/admin":    class extends PureComponent { render = () => <> { logout } </> }
 }

@@ -3,7 +3,6 @@ import { Redirect, withRouter } from "react-router-dom";
 import { GlobalContext } from "../../components/GlobalContextBasedOnDataFromWS";
 import Commander from "./components/Commander";
 import ProcessList from "./components/ProcessList";
-import FarmStatus from "../../components/FarmStatus";
 import Divider from "../../components/Divider";
 
 export class PublicContent extends Component {
@@ -29,11 +28,7 @@ class PublicPage extends Component {
         if ( this.context.isAuthorized ) {
             return <Redirect to="/admin"/>;
         }
-        return <>
-            <FarmStatus/>
-            <Divider/>
-            { this.context.isFarmConnected && <PublicContent/> }
-        </>;
+        return this.context.isFarmConnected && <PublicContent/>;
     }
 }
 
