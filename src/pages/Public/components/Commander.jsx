@@ -19,12 +19,8 @@ class Commander extends Component {
     render() {
         return (
             <Form onSubmit={ this.onSubmit }>
-                <InputGroup className="mb-3">
-                    <InputGroup.Prepend>
-                        <InputGroup.Text>
-                            Введите команду:
-                        </InputGroup.Text>
-                    </InputGroup.Prepend>
+                Введите команду:
+                <InputGroup>
                     <FormControl
                         aria-label="Введите команду:"
                         aria-describedby="basic-addon2"
@@ -32,9 +28,6 @@ class Commander extends Component {
                         type="text"
                         placeholder="Не пишите, если не уверены"
                     />
-                    {/* <Form.Label>
-                        Введите команду:
-                    </Form.Label> */}
                     <InputGroup.Append>
                         <Button variant="primary" type="submit">
                             Отправить
