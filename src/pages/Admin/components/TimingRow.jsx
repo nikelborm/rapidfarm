@@ -14,7 +14,14 @@ class TimingsRow extends Component {
         const [ from, to ] = this.props.oneTiming;
         return (
             <Row xs={ 1 } sm={ 1 } md={ 2 } lg={ 2 } xl={ 2 } >
-                <Button>Удалить { " -> " }</Button>
+                { this.props.isEditMode && (
+                    <Button
+                        data-timing-index={ this.props.timingIndex }
+                        variant="danger"
+                    >
+                        Удалить
+                    </Button>
+                ) }
                 <StyledCol>
                     <OneTimeChanger
                         isEditMode={ this.props.isEditMode }
