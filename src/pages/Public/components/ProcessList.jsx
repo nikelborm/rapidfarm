@@ -7,7 +7,7 @@ class ProcessList extends Component {
     render() {
         return (
             <>
-                { this.context.config.processes.length /* this.context.isfarmConnected */
+                { this.context.isFarmConnected
                     ? this.context.config.processes.map(
                         ( { long, isAvailable, title } ) => (
                             <Process

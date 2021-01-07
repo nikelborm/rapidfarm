@@ -3,8 +3,6 @@ import Form from "react-bootstrap/Form";
 import Input from "../../../components/Input";
 import { GlobalContext } from "../../../components/GlobalContextBasedOnDataFromWS";
 import Button from "react-bootstrap/Button";
-import Row from "react-bootstrap/Row";
-import Container from "react-bootstrap/Container";
 
 
 class Commander extends Component {
