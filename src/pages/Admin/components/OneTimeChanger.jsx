@@ -38,13 +38,13 @@ class OneTimeChanger extends Component {
                                 </StyledText>
                             </InputGroup.Prepend>
                             <FormControl
-                                style={ {
-                                    width: "40px !important",
-                                    textAlign: "center"
-                                } }
+                                // style={ {
+                                //     width: "40px !important",
+                                //     textAlign: "center"
+                                // } }
                                 name="fromHours"
                                 type="text"
-                                value={ "" + elem }
+                                // value={ "" + elem }
                             />
                         </InputGroup>
                     )
