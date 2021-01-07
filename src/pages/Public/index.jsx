@@ -31,6 +31,7 @@ class PublicPage extends Component {
         }
         return <>
             <FarmStatus/>
+            <Divider/>
             { this.context.isFarmConnected && <PublicContent/> }
         </>;
     }
