@@ -9,6 +9,7 @@ const StyledText = styled( InputGroup.Text )`
     border-radius: .2rem;
     width: 40px;
     text-align: center;
+    display: initial;
 `;
 const StyledInput = styled( FormControl )`
     width: 40px !important;
