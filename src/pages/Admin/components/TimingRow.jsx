@@ -1,11 +1,11 @@
 import React, { Component } from "react";
 import Row from "react-bootstrap/Row";
 import Form from "react-bootstrap/Form";
-import FormControl from "react-bootstrap/FormControl";
+import Col from "react-bootstrap/Col";
 import styled from "styled-components";
 import OneTimeChanger from "./OneTimeChanger";
 
-const StyledCol = styled( FormControl )`
+const StyledCol = styled( Col )`
     max-width: 400px !important;
 `;
 class TimingsRow extends Component {

@@ -16,6 +16,11 @@ const StyledText = styled( InputGroup.Text )`
     text-align: center;
     display: initial;
 `;
+const StyledInput = styled( FormControl )`
+    width: 40px !important;
+    text-align: center;
+`;
+
 class OneTimeChanger extends Component {
     letters = [ "Ч", "М", "С" ];
     render() {
@@ -27,31 +32,26 @@ class OneTimeChanger extends Component {
                         { role }
                     </StyledText>
                 </InputGroup>
-                { time.map( ( elem, index ) => {
-                    console.log('time.map( ( elem, index ): ', elem, index);
-                    console.log('this.letters[ index ]: ', this.letters[ index ]);
-                    return (
-                        <InputGroup size="sm">
-                            <InputGroup.Prepend>
-                                <StyledText>
-                                    { this.letters[ index ] }
-                                </StyledText>
-                            </InputGroup.Prepend>
-                            <FormControl
-                                // style={ {
-                                //     width: "40px !important",
-                                //     textAlign: "center"
-                                // } }
-                                name="fromHours"
-                                type="text"
-                                // value={ "" + elem }
-                            />
-                        </InputGroup>
-                    )
-                } ) }
+                { time.map( ( elem, index ) => (
+                    <InputGroup size="sm">
+                        <InputGroup.Prepend>
+                            <StyledText>
+                                { this.letters[ index ] }
+                            </StyledText>
+                        </InputGroup.Prepend>
+                        <StyledInput
+                            name="fromHours"
+                            type="text"
+                            value={ elem }
+                        />
+                    </InputGroup>
+                ) ) }
                 <ButtonGroup size="sm">
-                    <Button variant="primary" type="submit">
+                    <Button variant="success" type="submit">
                         +
+                    </Button>
+                    <Button variant="danger" type="submit">
+                        -
                     </Button>
                 </ButtonGroup>
             </ButtonToolbar>
