@@ -7,13 +7,13 @@ class TimingsRow extends Component {
         const [ from, to ] = this.props.oneTiming;
         return (
             <Form onSubmit={ (event)=>event.preventDefault() }>
-                <ButtonToolbar className="mb-3" aria-label="Toolbar with Button groups">
-                    <InputGroup>
+                <ButtonToolbar className="justify-content-between">
+                    <InputGroup size="sm">
                         <InputGroup.Text>
-                            от
+                            От
                         </InputGroup.Text>
                     </InputGroup>
-                    <InputGroup>
+                    <InputGroup size="sm">
                         <InputGroup.Prepend>
                             <InputGroup.Text>
                                 Часы:
@@ -25,7 +25,7 @@ class TimingsRow extends Component {
                             value={~~from[0]}
                         />
                     </InputGroup>
-                    <InputGroup>
+                    <InputGroup size="sm">
                         <InputGroup.Prepend>
                             <InputGroup.Text>
                                 Минуты:
@@ -37,18 +37,18 @@ class TimingsRow extends Component {
                             value={~~from[1]}
                         />
                     </InputGroup>
-                    <ButtonGroup className="mr-2" aria-label="First group">
+                    <ButtonGroup size="sm">
                         <Button variant="primary" type="submit">
                             +
                         </Button>
                     </ButtonGroup>
                     {/* --------------------------------------- */}
-                    <InputGroup>
+                    <InputGroup size="sm">
                         <InputGroup.Text>
                             До
                         </InputGroup.Text>
                     </InputGroup>
-                    <InputGroup>
+                    <InputGroup size="sm">
                         <InputGroup.Prepend>
                             <InputGroup.Text>
                                 Часы:
@@ -60,7 +60,7 @@ class TimingsRow extends Component {
                             value={~~from[0]}
                         />
                     </InputGroup>
-                    <InputGroup>
+                    <InputGroup size="sm">
                         <InputGroup.Prepend>
                             <InputGroup.Text>
                                 Минуты:
@@ -72,7 +72,7 @@ class TimingsRow extends Component {
                             value={~~from[1]}
                         />
                     </InputGroup>
-                    <ButtonGroup className="mr-2" aria-label="First group">
+                    <ButtonGroup size="sm">
                         <Button variant="primary" type="submit">
                             +
                         </Button>
