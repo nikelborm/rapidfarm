@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import Form from "react-bootstrap/Form";
-import Input from "../../../components/Input";
+import Row from "react-bootstrap/Row";
 import { GlobalContext } from "../../../components/GlobalContextBasedOnDataFromWS";
 import Button from "react-bootstrap/Button";
 import InputGroup from "react-bootstrap/InputGroup";
@@ -19,7 +19,9 @@ class Commander extends Component {
     render() {
         return (
             <Form onSubmit={ this.onSubmit }>
-                Введите команду:
+                <Row>
+                    Введите команду:
+                </Row>
                 <InputGroup>
                     <FormControl
                         aria-label="Введите команду:"
