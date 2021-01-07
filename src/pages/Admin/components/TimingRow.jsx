@@ -11,6 +11,9 @@ const StyledCol = styled( FormControl )`
 class TimingsRow extends Component {
     render() {
         const [ from, to ] = this.props.oneTiming;
+        console.log('TimingsRow ');
+        console.log('to: ', to);
+        console.log('from: ', from);
         return (
             <Form onSubmit={ (event)=>event.preventDefault() }>
                 <Row xs={ 1 } sm={ 1 } md={ 2 } lg={ 2 } xl={ 2 } >
