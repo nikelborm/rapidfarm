@@ -29,7 +29,7 @@ const cookieSecretKey = process.env.COOKIE_SECRET || "wHaTeVeR123";
 const farmSecrets = JSON.parse(process.env.FARM_SECRETS || `{}`);
 
 let dbClient;
-let mainFarm = null;
+let farmConnection = null;
 let cachedProcessStates = {};
 let cachedConfig = {
     processes: [],
@@ -197,6 +197,12 @@ function logProfile( event, WSclient ) {
 function sendActivityPackage( connection ) {
     sendMessage( connection, { class: "activitySyncPackage", package: cachedProcessStates } );
 }
+function sendFarmState( connection ) {
+    sendMessage( connection, { class: "farmState", isFarmConnected: !!farmConnection } );
+}
+function newFarmStateNotifier() {
+    sendToUsers( { class: "farmState", isFarmConnected: !!farmConnection } );
+}
 function sendConfigPackage( connection ) {
     sendMessage( connection, { class: "configPackage", package: cachedConfig } );
 }
@@ -275,7 +281,8 @@ WSServer.on("connection", (connection, request) => {
             class: data.class
         });
         if (connection.isAuthAsFarm) {
-            if ( !mainFarm ) mainFarm = connection;
+            if ( !farmConnection ) farmConnection = connection;
+            newFarmStateNotifier();
             connection.removeListener("message", authorizationStep);
             connection.addListener("message", farmQueriesHandler);
             connection.addListener("message", logout);
@@ -321,19 +328,19 @@ WSServer.on("connection", (connection, request) => {
         switch ( data.class ) {
             case "event":
                 // просто переслать всем онлайн пользователям
-                // if ( connection.name === mainFarm.name ) sendToUsers(data); // и ещё имя фермы
+                // if ( connection.name === farmConnection.name ) sendToUsers(data); // и ещё имя фермы
                 sendToUsers( data );
                 cachedProcessStates[ data.process ] = data.isActive;
                 break;
             case "warning":
                 // переслать всем онлайн пользователям и уведомить их ещё как-то
                 // по почте, через пуш уведомления, в слак, в вк, в телегу, в дискорд
-                // if ( connection.name === mainFarm.name ) sendToUsers(data);
+                // if ( connection.name === farmConnection.name ) sendToUsers(data);
                 sendToUsers(data);
                 break;
             case "records":
                 // переслать всем онлайн пользователям и сохранить в бд с датой
-                // if ( connection.name === mainFarm.name ) sendToUsers(data);
+                // if ( connection.name === farmConnection.name ) sendToUsers(data);
                 sendToUsers(data);
                 sensorsLogs.insertOne({
                     sensor: data.sensor,
@@ -389,7 +396,8 @@ WSServer.on("connection", (connection, request) => {
         const data = prepare(input);
         if (data.class !== "logout") return;
         if (connection.isAuthAsFarm) {
-            if ( mainFarm === connection ) mainFarm = null;
+            farmConnection = null;
+            newFarmStateNotifier();
             connection.isAuthAsFarm = false;
             connection.name = "";
             connection.addListener("message", authorizationStep);
@@ -409,7 +417,8 @@ WSServer.on("connection", (connection, request) => {
     });
     connection.addListener("message", authorizationStep);
     connection.addListener("message", publicQueriesHandler);
-    if ( mainFarm ) {
+    sendFarmState( connection );
+    if ( farmConnection ) {
         sendActivityPackage( connection );
         sendConfigPackage( connection );
         sendRecordsPackage( connection );
@@ -428,13 +437,8 @@ const cleaner = setInterval(() => {
                 // Это либо отключение интернета либо электричества блять либо пожар нахуй и ферма
                 // горит либо залило водой плату или короткое замыкание от этого. Что бы ни было
                 // причиной - это пиздец. А на ферме кстати нужно сделать чтобы автоподключение происходило
-                mainFarm = null;
-                for (const client of WSServer.clients) {
-                    if ( client.isAuthAsFarm ) {
-                        mainFarm = client;
-                        break;
-                    }
-                }
+                farmConnection = null;
+                newFarmStateNotifier();
                 cachedConfig = {
                     processes: [],
                     sensors: []
