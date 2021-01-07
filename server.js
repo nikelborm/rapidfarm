@@ -294,6 +294,7 @@ WSServer.on("connection", (connection, request) => {
         }
     }
     const publicQueriesHandler = (input) => {
+        console.log('publicQueriesHandler called ');
         // TODO: Подумать над обработкой и защитой от ошибок в JSON.parse
         const data = prepare(input);
         //* Пользовательские запросы которые можно обработать и без авторизации
@@ -324,6 +325,7 @@ WSServer.on("connection", (connection, request) => {
         }
     };
     const farmQueriesHandler = (input) => {
+        console.log('farmQueriesHandler called ');
         const data = prepare(input);
         switch ( data.class ) {
             case "event":
@@ -362,6 +364,7 @@ WSServer.on("connection", (connection, request) => {
         }
     };
     const userQueriesHandler = (input) => {
+        console.log('userQueriesHandler called ');
         const data = prepare(input);
         switch ( data.class ) {
             case "set":
@@ -393,6 +396,7 @@ WSServer.on("connection", (connection, request) => {
         }
     };
     const logout = (input) => {
+        console.log('logout called ');
         const data = prepare(input);
         if (data.class !== "logout") return;
         if (connection.isAuthAsFarm) {

@@ -39,7 +39,7 @@ class SelfHealingWebSocket {
     };
     isAvailable = () => this.connection?.readyState === 1;
     sendRaw = data => {
-        console.log( "data: ", data );
+        console.log( " sendRaw data: ", data );
         if( this.isAvailable() ) {
             this.connection.send( data );
         } else {
@@ -105,54 +105,60 @@ class GlobalContextBasedOnDataFromWS extends Component {
         // eslint-disable-next-line default-case
         switch ( data.class ) {
             case "configPackage":
-                this.setState( prevState => {
-                    prevState.config = data.package;
-                    return prevState;
-                } );
+                this.setState( ps => ({
+                    ...ps,
+                    config: data.package
+                }) );
                 break;
             case "activitySyncPackage":
-                this.setState( prevState => {
-                    prevState.processesStates = data.package;
-                    return prevState;
-                } );
+                this.setState( ps => ( {
+                    ...ps,
+                    processesStates: data.package
+                } ) );
                 break;
             case "recordsPackage":
-                this.setState( prevState => {
-                    prevState.records = data.package;
-                    return prevState;
-                } );
+                this.setState( ps => ( {
+                    ...ps,
+                    records: data.package
+                } ) );
                 break;
             case "event":
-                this.setState( prevState => {
-                    prevState.processesStates[ data.process ] = data.isActive;
-                    return prevState;
-                } );
+                this.setState( ps => ( {
+                    ...ps,
+                    processesStates: {
+                        ...ps.processesStates,
+                        [ data.process ]: data.isActive
+                    }
+                } ) );
                 break;
             case "loginAsUser":
             case "registerAsUser":
-                this.setState( {
+                this.setState( ps => ( {
+                    ...ps,
                     isAuthInProcess: false
-                } );
+                } ) );
                 if ( data.report.isError ) {
                     alert( data.report.errorField + "   " + data.report.info );
                     return;
                 }
                 localStorage.setItem( "isAuthorized", "true" );
                 localStorage.setItem( "fullName", data.reply.fullName );
-                this.setState( {
+                this.setState( ps => ( {
+                    ...ps,
                     isAuthorized: true,
                     fullName: data.reply.fullName,
                     isRegistrationAllowed: false
-                } );
+                } ) );
                 break;
             case "logout":
                 localStorage.setItem( "isAuthorized", "" + false );
                 localStorage.setItem( "fullName", "" );
-                this.setState( {
+                this.setState( ps => ( {
+                    ...ps,
                     isAuthorized: false,
                     fullName: "",
                     isLogoutInProcess: false
-                } );
+                } ) );
                 break;
             case "error":
                 alert( "Ошибка, сообщите программисту этот текст: " + data.message );
@@ -162,9 +168,10 @@ class GlobalContextBasedOnDataFromWS extends Component {
             case "records":
                 break;
             case "farmState":
-                this.setState( {
+                this.setState( ps => ( {
+                    ...ps,
                     isFarmConnected: data.isFarmConnected
-                } );
+                } ) );
                 break;
             default:
                 alert( "Пришло нечто неожиданное, сообщите программисту этот текст: " + JSON.stringify( data ) );
