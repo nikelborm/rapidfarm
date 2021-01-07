@@ -9,7 +9,23 @@
 
 <url>
   <loc>https://rapidfarm2team.herokuapp.com/</loc>
-  <lastmod>2021-01-07T19:20:05+00:00</lastmod>
+  <changefreq>hourly</changefreq>
+</url>
+<url>
+  <loc>https://rapidfarm2team.herokuapp.com/admin/</loc>
+  <changefreq>hourly</changefreq>
+</url>
+<url>
+  <loc>https://rapidfarm2team.herokuapp.com/login/</loc>
+  <changefreq>hourly</changefreq>
+</url>
+<url>
+  <loc>https://rapidfarm2team.herokuapp.com/register/</loc>
+  <changefreq>hourly</changefreq>
+</url>
+<url>
+  <loc>https://rapidfarm2team.herokuapp.com/logout/</loc>
+  <changefreq>hourly</changefreq>
 </url>
 
 
