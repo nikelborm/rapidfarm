@@ -213,7 +213,6 @@ function sendRecordsPackage( connection ) {
     ).limit( 20 ).forEach(
         (doc) => {
             pkg.push( doc );
-            console.log('doc: ', doc);
         },
         function (err) {
             if (err) {
