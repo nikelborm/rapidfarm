@@ -39,7 +39,7 @@ class SelfHealingWebSocket {
     };
     isAvailable = () => this.connection?.readyState === 1;
     sendRaw = data => {
-        console.log( " sendRaw data: ", data );
+        console.log( "[sendRaw] Данные: ", data );
         if( this.isAvailable() ) {
             this.connection.send( data );
         } else {
