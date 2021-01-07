@@ -12,11 +12,13 @@ export class PublicContent extends Component {
                 <h2>
                     Состояние процессов
                 </h2>
+                <br/>
                 <ProcessList/>
                 <Divider/>
                 <h2>
                     Командный интерфейс
                 </h2>
+                <br/>
                 <Commander/>
             </>
         );
