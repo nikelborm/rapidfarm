@@ -20,10 +20,11 @@ const logout =   <MenuPoint to="/logout"   text="Выйти из аккаунт�
 const register = <MenuPoint to="/register" text="Создать аккаунт..."  />;
 const login =    <MenuPoint to="/login"    text="Войти в аккаунт..."  />;
 const main =     <MenuPoint to="/"         text="На главную..."       />;
+const blockedReg = <div style={ { padding: ".5rem 1rem" } }>Регистрация отключена</div>;
 
 const sets = {
-    "/":         class extends PureComponent { render = () => <> { login } { this.props.isReg ? register : "Регистрация отключена" } </>},
-    "/login":    class extends PureComponent { render = () => <> { main } { this.props.isReg ? register : "Регистрация отключена" } </>},
+    "/":         class extends PureComponent { render = () => <> { login } { this.props.isReg ? register : blockedReg } </>},
+    "/login":    class extends PureComponent { render = () => <> { main } { this.props.isReg ? register : blockedReg } </>},
     "/register": class extends PureComponent { render = () => <> { main } { login } </> },
     "/admin":    class extends PureComponent { render = () => <> { logout } </> }
 }
