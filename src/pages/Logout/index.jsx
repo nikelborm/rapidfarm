@@ -8,6 +8,7 @@ class LogoutPage extends Component {
         if ( !this.context.isAuthorized ) {
             return <Redirect to="/" />;
         }
+        this.context.authorizationActions.logout();
         return "Выход из аккаунта...";
     }
 }
