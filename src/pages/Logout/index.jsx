@@ -4,11 +4,13 @@ import { GlobalContext } from "../../components/GlobalContextBasedOnDataFromWS";
 
 class LogoutPage extends Component {
     static contextType = GlobalContext;
+    componentDidMount() {
+        this.context.authorizationActions.logout();
+    }
     render() {
         if ( !this.context.isAuthorized ) {
             return <Redirect to="/" />;
         }
-        this.context.authorizationActions.logout();
         return "Выход из аккаунта...";
     }
 }
