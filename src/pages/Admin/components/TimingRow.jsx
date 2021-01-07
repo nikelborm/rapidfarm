@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Button, ButtonGroup, ButtonToolbar, Form, FormControl, InputGroup } from "react-bootstrap";
+import { Button, ButtonGroup, ButtonToolbar, Col, Form, FormControl, InputGroup, Row } from "react-bootstrap";
 import styled from "styled-components";
 // import OneTimeChanger from "./OneTimeChanger";
 const StyledText = styled( InputGroup.Text )`
@@ -21,77 +21,84 @@ class TimingsRow extends Component {
         const [ from, to ] = this.props.oneTiming;
         return (
             <Form onSubmit={ (event)=>event.preventDefault() }>
-                <ButtonToolbar className="justify-content-between">
-                    <InputGroup size="sm">
-                        <StyledText>
-                            От
-                        </StyledText>
-                    </InputGroup>
-                    <InputGroup size="sm">
-                        <InputGroup.Prepend>
-                            <StyledText>
-                                Ч
-                            </StyledText>
-                        </InputGroup.Prepend>
-                        <StyledInput
-                            name="fromHours"
-                            type="text"
-                            value={~~from[0]}
-                        />
-                    </InputGroup>
-                    <InputGroup size="sm">
-                        <InputGroup.Prepend>
-                            <StyledText>
-                                М
-                            </StyledText>
-                        </InputGroup.Prepend>
-                        <StyledInput
-                            name="fromMinutes"
-                            type="text"
-                            value={~~from[1]}
-                        />
-                    </InputGroup>
-                    <ButtonGroup size="sm">
-                        <Button variant="primary" type="submit">
-                            +
-                        </Button>
-                    </ButtonGroup>
-                    {/* --------------------------------------- */}
-                    <InputGroup size="sm">
-                        <StyledText>
-                            До
-                        </StyledText>
-                    </InputGroup>
-                    <InputGroup size="sm">
-                        <InputGroup.Prepend>
-                            <StyledText>
-                                Ч
-                            </StyledText>
-                        </InputGroup.Prepend>
-                        <StyledInput
-                            name="fromHours"
-                            type="text"
-                            value={~~to[0]}
-                        />
-                    </InputGroup>
-                    <InputGroup size="sm">
-                        <InputGroup.Prepend>
-                            <StyledText>
-                                М
-                            </StyledText>
-                        </InputGroup.Prepend>
-                        <StyledInput
-                            name="fromMinutes"
-                            type="text"
-                            value={~~to[1]}
-                        />
-                    </InputGroup>
-                    <ButtonGroup size="sm">
-                        <Button variant="primary" type="submit">
-                            +
-                        </Button>
-                    </ButtonGroup>
-                </ButtonToolbar>
+                <Row>
+                    <Col>
+                        <ButtonToolbar className="justify-content-between mb-3">
+                            <InputGroup size="sm">
+                                <StyledText>
+                                    От
+                                </StyledText>
+                            </InputGroup>
+                            <InputGroup size="sm">
+                                <InputGroup.Prepend>
+                                    <StyledText>
+                                        Ч
+                                    </StyledText>
+                                </InputGroup.Prepend>
+                                <StyledInput
+                                    name="fromHours"
+                                    type="text"
+                                    value={~~from[0]}
+                                />
+                            </InputGroup>
+                            <InputGroup size="sm">
+                                <InputGroup.Prepend>
+                                    <StyledText>
+                                        М
+                                    </StyledText>
+                                </InputGroup.Prepend>
+                                <StyledInput
+                                    name="fromMinutes"
+                                    type="text"
+                                    value={~~from[1]}
+                                />
+                            </InputGroup>
+                            <ButtonGroup size="sm">
+                                <Button variant="primary" type="submit">
+                                    +
+                                </Button>
+                            </ButtonGroup>
+                        </ButtonToolbar>
+                    </Col>
+                    <Col>
+                        <ButtonToolbar className="justify-content-between mb-3">
+                            <InputGroup size="sm">
+                                <StyledText>
+                                    До
+                                </StyledText>
+                            </InputGroup>
+                            <InputGroup size="sm">
+                                <InputGroup.Prepend>
+                                    <StyledText>
+                                        Ч
+                                    </StyledText>
+                                </InputGroup.Prepend>
+                                <StyledInput
+                                    name="fromHours"
+                                    type="text"
+                                    value={~~to[0]}
+                                />
+                            </InputGroup>
+                            <InputGroup size="sm">
+                                <InputGroup.Prepend>
+                                    <StyledText>
+                                        М
+                                    </StyledText>
+                                </InputGroup.Prepend>
+                                <StyledInput
+                                    name="fromMinutes"
+                                    type="text"
+                                    value={~~to[1]}
+                                />
+                            </InputGroup>
+                            <ButtonGroup size="sm">
+                                <Button variant="primary" type="submit">
+                                    +
+                                </Button>
+                            </ButtonGroup>
+                        </ButtonToolbar>
+                    </Col>
+                </Row>
             </Form>
             // <div>
 
