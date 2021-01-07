@@ -10,7 +10,6 @@ import RegisterRoute from "./pages/Register";
 
 import Menu from "./components/Menu";
 import Divider from "./components/Divider";
-import FarmStatus from "./components/FarmStatus";
 import GlobalContextBasedOnDataFromWS from "./components/GlobalContextBasedOnDataFromWS";
 
 class App extends Component {
@@ -21,8 +20,6 @@ class App extends Component {
                     <GlobalContextBasedOnDataFromWS>
                         <BrowserRouter>
                             <Menu/>
-                            <Divider/>
-                            <FarmStatus/>
                             <Divider/>
                             <Switch>
                                 <LoginRoute    path="/login"    exact/>

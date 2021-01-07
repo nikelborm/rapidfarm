@@ -4,6 +4,7 @@ import { GlobalContext } from "../../components/GlobalContextBasedOnDataFromWS";
 import Commander from "./components/Commander";
 import ProcessList from "./components/ProcessList";
 import Divider from "../../components/Divider";
+import FarmStatus from "../../components/FarmStatus";
 
 export class PublicContent extends Component {
     render() {
@@ -30,7 +31,13 @@ class PublicPage extends Component {
         if ( this.context.isAuthorized ) {
             return <Redirect to="/admin"/>;
         }
-        return this.context.isFarmConnected && <PublicContent/>;
+        return (
+            <>
+                <FarmStatus/>
+                <Divider/>
+                { this.context.isFarmConnected && <PublicContent/> }
+            </>
+        );
     }
 }
 
