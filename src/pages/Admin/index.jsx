@@ -19,6 +19,7 @@ class AdminContent extends Component {
                 <h2>
                     Управление таймингами
                 </h2>
+                <br/>
                 <AllTimingsManager/>
             </>
         );
