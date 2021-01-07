@@ -9,9 +9,11 @@ class TimingsRow extends Component {
             <Form onSubmit={ (event)=>event.preventDefault() }>
                 <ButtonToolbar className="justify-content-between">
                     <InputGroup size="sm">
-                        <InputGroup.Text>
-                            От
-                        </InputGroup.Text>
+                        <InputGroup.Prepend>
+                            <InputGroup.Text>
+                                От
+                            </InputGroup.Text>
+                        </InputGroup.Prepend>
                     </InputGroup>
                     <InputGroup size="sm">
                         <InputGroup.Prepend>
@@ -44,9 +46,11 @@ class TimingsRow extends Component {
                     </ButtonGroup>
                     {/* --------------------------------------- */}
                     <InputGroup size="sm">
-                        <InputGroup.Text>
-                            До
-                        </InputGroup.Text>
+                        <InputGroup.Prepend>
+                            <InputGroup.Text>
+                                До
+                            </InputGroup.Text>
+                        </InputGroup.Prepend>
                     </InputGroup>
                     <InputGroup size="sm">
                         <InputGroup.Prepend>
@@ -57,7 +61,7 @@ class TimingsRow extends Component {
                         <FormControl
                             name="fromHours"
                             type="text"
-                            value={~~from[0]}
+                            value={~~to[0]}
                         />
                     </InputGroup>
                     <InputGroup size="sm">
@@ -69,7 +73,7 @@ class TimingsRow extends Component {
                         <FormControl
                             name="fromMinutes"
                             type="text"
-                            value={~~from[1]}
+                            value={~~to[1]}
                         />
                     </InputGroup>
                     <ButtonGroup size="sm">
