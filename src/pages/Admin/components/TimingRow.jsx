@@ -8,9 +8,11 @@ const StyledText = styled( InputGroup.Text )`
     line-height: 1.5;
     border-radius: .2rem;
     width: 40px;
+    text-align: center;
 `;
 const StyledInput = styled( FormControl )`
-    width: 40px;
+    width: 40px !important;
+    text-align: center;
 `;
 
 class TimingsRow extends Component {
@@ -56,7 +58,7 @@ class TimingsRow extends Component {
                     {/* --------------------------------------- */}
                     <InputGroup size="sm">
                         <StyledText>
-                            Да
+                            До
                         </StyledText>
                     </InputGroup>
                     <InputGroup size="sm">
