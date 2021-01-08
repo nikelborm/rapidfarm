@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import ButtonToolbar from "react-bootstrap/ButtonToolbar";
 import InputGroup from "react-bootstrap/InputGroup";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 import Button from "react-bootstrap/Button";
@@ -26,7 +25,7 @@ class OneTimeChanger extends Component {
     render() {
         const { role, time, isEditMode } = this.props;
         return (
-            <ButtonToolbar className="justify-content-between mb-3">
+            <>
                 <InputGroup size="sm">
                     <StyledText>
                         { role }
@@ -56,7 +55,7 @@ class OneTimeChanger extends Component {
                         </Button>
                     </ButtonGroup>
                 ) }
-            </ButtonToolbar>
+            </>
         );
     }
 }
