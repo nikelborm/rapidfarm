@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { Form } from "react-bootstrap";
 import { GlobalContext } from "../../../components/GlobalContextBasedOnDataFromWS";
 import ProcessTimingsManager from "./ProcessTimingsManager";
 
