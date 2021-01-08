@@ -16,6 +16,7 @@ class ProcessList extends Component {
                     ? this.context.config.processes.map(
                         ( { long, isAvailable, title } ) => (
                             <Process
+                                key={ long }
                                 title={ title }
                                 isActive={ this.context.processesStates[ long ] }
                                 isAvailable={ isAvailable }

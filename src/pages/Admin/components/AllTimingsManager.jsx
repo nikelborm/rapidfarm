@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, Fragment } from "react";
 import { GlobalContext } from "../../../components/GlobalContextBasedOnDataFromWS";
 import ProcessTimingsManager from "./ProcessTimingsManager";
 
@@ -9,11 +9,13 @@ class AllTimingsManager extends Component {
     static contextType = GlobalContext;
     render() {
         return this.context.config.processes.map(
-            process => process.isAvailable && (
-                <>
-                    <ProcessTimingsManager onChange={ this.context.onSave } { ...process }/>
-                    <br/>
-                </>
+            process => (
+                <Fragment key={ process.long }>
+                    { process.isAvailable && <>
+                        <ProcessTimingsManager onChange={ this.context.onSave } { ...process }/>
+                        <br/>
+                    </> }
+                </Fragment>
             )
         );
     }
