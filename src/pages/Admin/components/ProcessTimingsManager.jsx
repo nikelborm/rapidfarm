@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import TimingRow from "./TimingRow";
 import Button from "react-bootstrap/Button";
 import ButtonToolbar from "react-bootstrap/ButtonToolbar";
+import ButtonGroup from "react-bootstrap/ButtonGroup";
 
 class ProcessTimingsManager extends Component {
     shouldComponentUpdate( nextProps, nextState ) {
@@ -27,13 +28,15 @@ class ProcessTimingsManager extends Component {
                 { timings.map(
                     ( oneTiming, timingIndex ) => (
                         <ButtonToolbar className="justify-content-between mb-3">
-                            { this.props.isEditMode && (
-                                <Button
-                                    data-timing-index={ this.props.timingIndex }
-                                    variant="danger"
-                                >
-                                    Удалить
-                                </Button>
+                            { this.state.isEditMode && (
+                                <ButtonGroup size="sm">
+                                    <Button
+                                        data-timing-index={ timingIndex }
+                                        variant="danger"
+                                    >
+                                        Удалить
+                                    </Button>
+                                </ButtonGroup>
                             ) }
                             <TimingRow
                                 oneTiming={ oneTiming }

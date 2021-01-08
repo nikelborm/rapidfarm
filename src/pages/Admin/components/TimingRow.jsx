@@ -11,8 +11,9 @@ class TimingsRow extends Component {
     render() {
         const [ from, to ] = this.props.oneTiming;
         return (
-            <Row xs={ 1 } sm={ 1 } md={ 2 } lg={ 2 } xl={ 2 } >
-                <StyledCol>
+            // <Row xs={ 1 } sm={ 1 } md={ 2 } lg={ 2 } xl={ 2 } >
+            <>
+                <StyledCol  xs={ 1 } sm={ 1 } md={ 2 } lg={ 2 } xl={ 2 }>
                     <OneTimeChanger
                         isEditMode={ this.props.isEditMode }
                         changerIndex={ 0 }
@@ -20,7 +21,7 @@ class TimingsRow extends Component {
                         time={ from }
                     />
                 </StyledCol>
-                <StyledCol>
+                <StyledCol  xs={ 1 } sm={ 1 } md={ 2 } lg={ 2 } xl={ 2 }>
                     <OneTimeChanger
                         isEditMode={ this.props.isEditMode }
                         changerIndex={ 1 }
@@ -28,7 +29,8 @@ class TimingsRow extends Component {
                         time={ to }
                     />
                 </StyledCol>
-            </Row>
+            </>
+            // </Row>
         );
     }
 }
