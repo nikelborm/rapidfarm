@@ -4,6 +4,8 @@ import ButtonGroup from "react-bootstrap/ButtonGroup";
 import Button from "react-bootstrap/Button";
 import FormControl from "react-bootstrap/FormControl";
 import styled from "styled-components";
+import ButtonToolbar from "react-bootstrap/ButtonToolbar";
+import Col from "react-bootstrap/Col";
 
 
 const StyledText = styled( InputGroup.Text )`
@@ -25,37 +27,39 @@ class OneTimeChanger extends Component {
     render() {
         const { role, time, isEditMode } = this.props;
         return (
-            <>
-                <InputGroup size="sm">
-                    <StyledText>
-                        { role }
-                    </StyledText>
-                </InputGroup>
-                { time.map( ( elem, index ) => (
+            <Col sm={ 9 } md={ 7 } lg={ 5 } xl={ 4 }>
+                <ButtonToolbar className="justify-content-between mb-3">
                     <InputGroup size="sm">
-                        <InputGroup.Prepend>
-                            <StyledText>
-                                { this.letters[ index ] }
-                            </StyledText>
-                        </InputGroup.Prepend>
-                        <StyledInput
-                            name="fromHours"
-                            type="text"
-                            value={ elem }
-                        />
+                        <StyledText>
+                            { role }
+                        </StyledText>
                     </InputGroup>
-                ) ) }
-                { isEditMode && (
-                    <ButtonGroup size="sm">
-                        <Button variant="success" type="submit">
-                            +
-                        </Button>
-                        <Button variant="danger" type="submit">
-                            -
-                        </Button>
-                    </ButtonGroup>
-                ) }
-            </>
+                    { time.map( ( elem, index ) => (
+                        <InputGroup size="sm">
+                            <InputGroup.Prepend>
+                                <StyledText>
+                                    { this.letters[ index ] }
+                                </StyledText>
+                            </InputGroup.Prepend>
+                            <StyledInput
+                                name="fromHours"
+                                type="text"
+                                defaultValue={ elem }
+                            />
+                        </InputGroup>
+                    ) ) }
+                    { isEditMode && (
+                        <ButtonGroup size="sm">
+                            <Button variant="success" type="submit">
+                                +
+                            </Button>
+                            <Button variant="danger" type="submit">
+                                -
+                            </Button>
+                        </ButtonGroup>
+                    ) }
+                </ButtonToolbar>
+            </Col>
         );
     }
 }

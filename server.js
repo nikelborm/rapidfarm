@@ -355,16 +355,30 @@ WSServer.on("connection", (connection, request) => {
             case "set":
                 switch ( data.what ) {
                     case "timings":
-                        sendToUsers();
-                        sendToFarm();
+                        // А, если нет соединения, то добавить в очередь отложенных запросов к ферме
+                        sendToUsers( data );
+                        !!farmConnection && sendMessage( farmConnection, data );
+                        for ( const proc of cachedConfig.processes ) {
+                            if ( proc.long === data.process ) {
+                                proc.timings = data.timings;
+                                break;
+                            }
+                        }
                         break;
                     case "criticalBorders":
-                        sendToUsers();
-                        sendToFarm();
+                        sendToUsers( data );
+                        !!farmConnection && sendMessage( farmConnection, data );
+                        for ( const sensor of cachedConfig.sensors ) {
+                            if ( sensor.long === data.sensor ) {
+                                sensor.criticalBorders = data.criticalBorders;
+                                break;
+                            }
+                        }
                         break;
                     case "config":
-                        sendToUsers();
-                        sendToFarm();
+                        sendToUsers( data );
+                        !!farmConnection && sendMessage( farmConnection, data );
+                        cachedConfig = data.config;
                         break;
                     default:
                         sendError(connection, `Обработчика what (${data.what}) для class (${data.class}) не существует`);
