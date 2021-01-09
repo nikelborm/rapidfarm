@@ -266,8 +266,6 @@ function handlerSwitcher( type ) {
         case "set":
         case "execute":
             return authError;
-        case "logout":
-            break;
         default:
             return targetError;
     }
@@ -282,6 +280,7 @@ WSServer.on("connection", (connection, request) => {
     } );
     const authorizationStep = async (input) => {
         const data = prepare( input );
+        if ( data.class === "logout" ) return;
         sendMessage(connection, {
             class: data.class,
             ...(await handlerSwitcher( data.class )( connection, data )),
@@ -421,14 +420,12 @@ WSServer.on("connection", (connection, request) => {
             connection.name = "";
             connection.addListener( "message", authorizationStep );
             connection.removeListener( "message", farmQueriesHandler );
-            connection.removeListener( "message", logout );
         }
         if ( connection.isAuthAsUser ) {
             connection.isAuthAsUser = false;
             connection.authInfo = null;
             connection.addListener( "message", authorizationStep );
             connection.removeListener( "message", userQueriesHandler );
-            connection.removeListener( "message", logout );
         }
         sendMessage( connection, { class: "logout" } );
     };
