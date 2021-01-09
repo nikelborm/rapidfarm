@@ -177,8 +177,8 @@ async function registerAsUser(connection, body) {
     return resdata;
 }
 
-function sendMessage( connection, message ) {
-    console.log("send message to connection: ", message);
+function sendMessage( connection, message, nolog ) {
+    nolog || console.log("send message to connection: ", message);
     connection.send(JSON.stringify(message));
 }
 function sendToUsers( message ) {
@@ -218,9 +218,9 @@ function sendRecordsPackage( connection ) {
         function (err) {
             if (err) {
                 console.log(err);
-                sendError( connection, "Произошла ошибка при пакета с показаниями датчиков" );
+                sendError( connection, "Произошла ошибка при загрузке пакета с показаниями датчиков" );
             } else {
-                sendMessage( connection, { class: "recordsPackage", package: pkg } );
+                sendMessage( connection, { class: "recordsPackage", package: pkg }, true );
             }
         }
     );
@@ -250,9 +250,10 @@ function sendError( connection, message ) {
     sendMessage( connection, { class: "error", message } );
 }
 async function targetError( connection, body ) {
-    const { resdata } = createEmptyResponseData();
-    resdata.report.info = "Некорректный запрос";
-    return resdata;
+    return { class: "error", message: "Некорректный запрос" };
+}
+async function authError( connection, body ) {
+    return { class: "error", message: "Вы не авторизованы, попробуйти выйти/зайти в аккаунт и повторить" };
 }
 function handlerSwitcher( type ) {
     switch (type) {
@@ -262,6 +263,10 @@ function handlerSwitcher( type ) {
             return loginAsUser;
         case "registerAsUser":
             return registerAsUser;
+        case "set":
+        case "execute":
+        case "logout":
+            return authError;
         default:
             return targetError;
     }
@@ -277,8 +282,8 @@ WSServer.on("connection", (connection, request) => {
     const authorizationStep = async (input) => {
         const data = prepare( input );
         sendMessage(connection, {
+            class: data.class,
             ...(await handlerSwitcher( data.class )( connection, data )),
-            class: data.class
         });
         if (connection.isAuthAsFarm) {
             if ( !farmConnection ) farmConnection = connection;
@@ -356,7 +361,11 @@ WSServer.on("connection", (connection, request) => {
                 switch ( data.what ) {
                     case "timings":
                         // А, если нет соединения, то добавить в очередь отложенных запросов к ферме
-                        sendToUsers( data );
+                        sendToUsers( {
+                            class : "timings",
+                            process: data.process,
+                            timings: data.timings
+                        } );
                         !!farmConnection && sendMessage( farmConnection, data );
                         for ( const proc of cachedConfig.processes ) {
                             if ( proc.long === data.process ) {
@@ -366,7 +375,11 @@ WSServer.on("connection", (connection, request) => {
                         }
                         break;
                     case "criticalBorders":
-                        sendToUsers( data );
+                        sendToUsers( {
+                            class : "criticalBorders",
+                            sensor: data.sensor,
+                            criticalBorders: data.criticalBorders
+                        } );
                         !!farmConnection && sendMessage( farmConnection, data );
                         for ( const sensor of cachedConfig.sensors ) {
                             if ( sensor.long === data.sensor ) {
@@ -412,11 +425,11 @@ WSServer.on("connection", (connection, request) => {
         if ( connection.isAuthAsUser ) {
             connection.isAuthAsUser = false;
             connection.authInfo = null;
-            sendMessage( connection, { class: "logout" } );
             connection.addListener( "message", authorizationStep );
             connection.removeListener( "message", userQueriesHandler );
             connection.removeListener( "message", logout );
         }
+        sendMessage( connection, { class: "logout" } );
     };
     connection.addListener("message", function (input) {
         console.log("Пришло в ws: ", prepare(input));

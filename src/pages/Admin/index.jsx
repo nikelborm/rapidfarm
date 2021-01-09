@@ -3,7 +3,6 @@ import { PublicContent } from "../Public";
 import { withRouter, Redirect } from "react-router-dom";
 import { GlobalContext } from "../../components/GlobalContextBasedOnDataFromWS";
 import Divider from "../../components/Divider";
-import AllTimingsManager from "./components/AllTimingsManager";
 import FarmStatus from "../../components/FarmStatus";
 
 class AdminContent extends Component {
@@ -16,12 +15,6 @@ class AdminContent extends Component {
                 </h2>
                 <Divider/>
                 <PublicContent/>
-                <Divider/>
-                <h2>
-                    Управление таймингами
-                </h2>
-                <br/>
-                <AllTimingsManager/>
             </>
         );
     }

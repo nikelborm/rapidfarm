@@ -5,7 +5,7 @@ import Process from "./Process";
 class ProcessList extends Component {
     shouldComponentUpdate( nextProps, nextState, nextContext ) {
         return this.context.isFarmConnected !== nextContext.isFarmConnected ||
-        this.context.config.processes !== nextContext.config.processes ||
+        this.context.processes !== nextContext.processes ||
         this.context.processesStates !== nextContext.processesStates;
     }
     static contextType = GlobalContext;
@@ -13,7 +13,7 @@ class ProcessList extends Component {
         return (
             <>
                 { this.context.isFarmConnected
-                    ? this.context.config.processes.map(
+                    ? this.context.processes.map(
                         ( { long, isAvailable, title } ) => (
                             <Process
                                 key={ long }

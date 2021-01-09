@@ -1,18 +1,24 @@
-import React, { Component } from "react";
+import React, { PureComponent } from "react";
 import OneTimeChanger from "./OneTimeChanger";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Button from "react-bootstrap/Button";
 
-class TimingsRow extends Component {
+class TimingsRow extends PureComponent {
     render() {
-        const [ from, to ] = this.props.oneTiming;
+        const {
+            oneTiming: [ from, to ],
+            isEditMode,
+            timingIndex,
+            processIndex
+        } = this.props;
         return (
             <Row xs={ 1 } sm={ 1 } md={ 1 } lg={ 1 } xl={ 1 }>
-                { this.props.isEditMode && (
+                { isEditMode && (
                     <Col xs={ 10 } sm={ 9 } md={ 7 } lg={ 1 } xl={ 1 }>
                         <Button
-                            data-timing-index={ this.props.timingIndex }
+                            data-action="removeTiming"
+                            data-location={ [ processIndex, timingIndex ].join("_") }
                             variant="danger"
                             size="sm"
                             className="mb-3"
@@ -22,15 +28,17 @@ class TimingsRow extends Component {
                     </Col>
                 ) }
                 <OneTimeChanger
-                    isEditMode={ this.props.isEditMode }
+                    processIndex={ processIndex }
+                    isEditMode={ isEditMode }
+                    timingIndex={ timingIndex }
                     changerIndex={ 0 }
-                    role="От"
                     time={ from }
                 />
                 <OneTimeChanger
-                    isEditMode={ this.props.isEditMode }
+                    processIndex={ processIndex }
+                    isEditMode={ isEditMode }
+                    timingIndex={ timingIndex }
                     changerIndex={ 1 }
-                    role="До"
                     time={ to }
                 />
             </Row>
