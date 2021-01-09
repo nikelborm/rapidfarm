@@ -266,6 +266,8 @@ function handlerSwitcher( type ) {
         case "set":
         case "execute":
             return authError;
+        case "logout":
+            break;
         default:
             return targetError;
     }
