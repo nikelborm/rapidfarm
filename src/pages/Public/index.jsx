@@ -5,6 +5,7 @@ import Commander from "./components/Commander";
 import ProcessList from "./components/ProcessList";
 import Divider from "../../components/Divider";
 import FarmStatus from "../../components/FarmStatus";
+import AllTimingsManager from "./components/AllTimingsManager";
 
 export class PublicContent extends Component {
     render() {
@@ -21,6 +22,12 @@ export class PublicContent extends Component {
                 </h2>
                 <br/>
                 <Commander/>
+                <Divider/>
+                <h2>
+                    Управление таймингами
+                </h2>
+                <br/>
+                <AllTimingsManager/>
             </>
         );
     }
