@@ -1,10 +1,11 @@
 import React, { Component } from "react";
 import getCookie from "../tools/getCookie";
 class SelfHealingWebSocket {
-    constructor( downCallback, allMessagesHandler, ...initializationArgs ) {
+    constructor( downCallback, upCallback, allMessagesHandler, ...initializationArgs ) {
         this.initializationArgs = initializationArgs;
         this.connection = null;
         this.downCallback = downCallback;
+        this.upCallback = upCallback;
         this.allMessagesHandler = function ( event ) {
             const data = JSON.parse( event.data );
             allMessagesHandler( data );
@@ -12,8 +13,8 @@ class SelfHealingWebSocket {
         this.respawnWebSocket();
     }
     closeEL = event => {
-        this.downCallback();
         console.log( "[close] Соединение закрыто. Отчёт: ", event );
+        this.downCallback();
         setTimeout( this.respawnWebSocket, 3000 );
         // TODO: Добавить нарастающую задержку перед следующим переподключением
     };
@@ -28,6 +29,7 @@ class SelfHealingWebSocket {
     };
     openEL = function() {
         console.log( "[open] Соединение установлено" );
+        this.upCallback();
     };
     respawnWebSocket = () => {
         this.connection = null;
@@ -92,12 +94,14 @@ class GlobalContextBasedOnDataFromWS extends Component {
     }
     constructor( props ) {
         super( props );
-        if ( this.isAuthSessionChanged() ) {
-            localStorage.setItem( "isAuthorized", "false" );
-            localStorage.setItem( "fullName", "" );
+        if ( sessionStorage.getItem( "isAuthorized") !== "true" ) {
+            sessionStorage.setItem( "isAuthorized", "false" );
+            sessionStorage.setItem( "fullName", "" );
+            sessionStorage.setItem( "lastEmail", "" );
+            sessionStorage.setItem( "lastPassword", "" );
         } else {
-            this.state.isAuthorized = localStorage.getItem( "isAuthorized" ) === "true" || false;
-            this.state.fullName = localStorage.getItem( "fullName" ) || "";
+            this.state.isAuthorized = true;
+            this.state.fullName = sessionStorage.getItem( "fullName" );
         }
         this.ws = null;
     }
@@ -105,11 +109,20 @@ class GlobalContextBasedOnDataFromWS extends Component {
         const loc = document.location;
         const protocol = loc.protocol[ 4 ] === "s" ? "wss://" : "ws://";
         const WSAdress = protocol + ( loc.port === "3001" ? loc.hostname + ":3000" : loc.host );
-        this.ws = new SelfHealingWebSocket( this.downWatcher, this.messageParser, WSAdress );
+        this.ws = new SelfHealingWebSocket( this.downWatcher, this.upWatcher, this.messageParser, WSAdress );
+    }
+    upWatcher = () => {
+        if( sessionStorage.getItem( "isAuthorized") !== "true" ) return;
+        this.login(
+            sessionStorage.getItem( "lastEmail" ),
+            sessionStorage.getItem( "lastPassword" )
+        );
     }
     downWatcher = () => {
         this.setState( ps => ( {
             ...ps,
+            isAuthorized: false,
+            fullName: "",
             isFarmConnected: null
         } ) );
     }
@@ -152,8 +165,8 @@ class GlobalContextBasedOnDataFromWS extends Component {
                     alert( data.report.errorField + "   " + data.report.info );
                     return;
                 }
-                localStorage.setItem( "isAuthorized", "true" );
-                localStorage.setItem( "fullName", data.reply.fullName );
+                sessionStorage.setItem( "isAuthorized", "true" );
+                sessionStorage.setItem( "fullName", data.reply.fullName );
                 this.setState( ps => ( {
                     ...ps,
                     isAuthorized: true,
@@ -162,8 +175,8 @@ class GlobalContextBasedOnDataFromWS extends Component {
                 } ) );
                 break;
             case "logout":
-                localStorage.setItem( "isAuthorized", "" + false );
-                localStorage.setItem( "fullName", "" );
+                sessionStorage.setItem( "isAuthorized", "" + false );
+                sessionStorage.setItem( "fullName", "" );
                 this.setState( ps => ( {
                     ...ps,
                     isAuthorized: false,
@@ -286,7 +299,7 @@ class GlobalContextBasedOnDataFromWS extends Component {
         time[ index ] = intValue > maxs[ index ] ? maxs[ index ] : intValue < 0 ? 0 : intValue;
         return time;
     });
-    isAuthSessionChanged = () => false && ( localStorage.getItem( "connect.sid" ) !== getCookie( "connect.sid" ) );
+    isAuthSessionChanged = () => false && ( sessionStorage.getItem( "connect.sid" ) !== getCookie( "connect.sid" ) );
     logout = () => {
         // запрос на выход чтобы сервер стёр сессию
         if ( this.state.isLogoutInProcess || this.state.isAuthInProcess ) return;
@@ -298,6 +311,8 @@ class GlobalContextBasedOnDataFromWS extends Component {
     };
     authorize = query => {
         if ( this.state.isLogoutInProcess || this.state.isAuthInProcess ) return;
+        sessionStorage.setItem( "lastEmail", query.email );
+        sessionStorage.setItem( "lastPassword", query.password );
         this.ws && this.ws.send( query );
         this.setState( ps => ( {
             ...ps,

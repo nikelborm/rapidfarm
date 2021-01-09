@@ -4,7 +4,6 @@ const express = require("express");
 const mongodb = require("mongodb");
 const favicon = require("express-favicon");
 const cookieParser = require("cookie-parser");
-const redis = require("redis");
 const http = require("http");
 const WebSocket = require("ws"); // jshint ignore:line
 const path = require("path");
@@ -24,9 +23,7 @@ function createEmptyResponseData() {
 
 const port = parseInt( process.env.PORT, 10 ) || 3000;
 const mongoLink = process.env.MONGODB_URI || "mongodb://Admin:0000@localhost:27017/admin";
-const redisLink = process.env.REDIS_URL || "redis://admin:foobared@127.0.0.1:6379";
 const isRegistrationAllowed = !!process.env.IS_REGISTRATION_ALLOWED;
-const cookieSecretKey = process.env.COOKIE_SECRET || "wHaTeVeR123";
 const farmSecrets = JSON.parse(process.env.FARM_SECRETS || `{}`);
 
 let dbClient;
@@ -42,7 +39,6 @@ let webCommandsLogs = {}; // collection
 let farmConfigs = {}; // collection
 
 const app = express();
-const redisClient = redis.createClient(redisLink);
 const mongoClient = new mongodb.MongoClient(mongoLink, {
     useNewUrlParser: true,
     useUnifiedTopology: true
@@ -52,7 +48,7 @@ const WSServer = new WebSocket.Server({
     server
 });
 
-app.use(cookieParser(cookieSecretKey));
+app.use(cookieParser());
 app.use(favicon(__dirname + "/build/favicon.ico"));
 
 app.use(function(request, response, next){
@@ -286,7 +282,11 @@ WSServer.on("connection", (connection, request) => {
             ...(await handlerSwitcher( data.class )( connection, data )),
         });
         if (connection.isAuthAsFarm) {
-            if ( !farmConnection ) farmConnection = connection;
+            // if ( !farmConnection ) farmConnection = connection;
+            // Потому что если новое соединение с фермой установилось до того, как старое порвалось, надо установить новое
+            farmConnection = connection;
+            // TODO: connection.addEventListener("close")
+            // Потому что cleaner обрабатывает только случайные обрывы связи
             newFarmStateNotifier();
             connection.removeListener("message", authorizationStep);
             connection.addListener("message", farmQueriesHandler);
@@ -440,9 +440,6 @@ WSServer.on("connection", (connection, request) => {
         sendConfigPackage( connection );
         sendRecordsPackage( connection );
     }
-    // const cookies = cookie.parse(request.headers.cookie);
-    // console.log("onconnection sid: ", sid);
-    // connection.sid = sid;
 });
 const cleaner = setInterval(() => {
     // Проверка на то, оставлять ли соединение активным
@@ -480,7 +477,9 @@ mongoClient.connect((err, client) => {
     dbClient = client;
     users = client.db().collection("users");
     sensorsLogs = client.db().collection("sensorsLogs");
+    // eslint-disable-next-line no-unused-vars
     webCommandsLogs = client.db().collection("webCommandsLogs");
+    // eslint-disable-next-line no-unused-vars
     farmConfigs = client.db().collection("farmConfigs");
     server.listen(port, function(){
         console.log("Сервер слушает");
@@ -493,30 +492,26 @@ function shutdown() {
     clearInterval(cleaner);
     WSServer.close((err) => {
         if (err) {console.log(err);haveErrors = true;}
-        console.log("WebSocket server closed.\n\nClosing Redis connection...");
-        redisClient.quit((err) => {
-            if (err) {console.log(err);haveErrors = true;}
-            console.log("Redis connection closed.\n\nClosing MongoDb connection...");
-            if (dbClient) {
-                dbClient.close(false, (err) => {
-                    if (err) {console.log(err);haveErrors = true;}
-                    console.log("MongoDb connection closed.\n\nClosing http server...");
-                    if (server.listening) {
-                        server.close((err) => {
-                            if (err) {console.log(err);haveErrors = true;}
-                            console.log("Http server closed.\n");
-                            process.exit(~~haveErrors);
-                        });
-                    } else {
-                        console.log("Http server not started.\n");
-                        process.exit(1);
-                    }
-                });
-            } else {
-                console.log("MongoDb not started.\n\nClosing http server...\nHttp server not started.");
-                process.exit(1);
-            }
-        });
+        console.log("WebSocket server closed.\n\nClosing MongoDb connection...");
+        if (dbClient) {
+            dbClient.close(false, (err) => {
+                if (err) {console.log(err);haveErrors = true;}
+                console.log("MongoDb connection closed.\n\nClosing http server...");
+                if (server.listening) {
+                    server.close((err) => {
+                        if (err) {console.log(err);haveErrors = true;}
+                        console.log("Http server closed.\n");
+                        process.exit(~~haveErrors);
+                    });
+                } else {
+                    console.log("Http server not started.\n");
+                    process.exit(1);
+                }
+            });
+        } else {
+            console.log("MongoDb not started.\n\nClosing http server...\nHttp server not started.");
+            process.exit(1);
+        }
     });
 }
 

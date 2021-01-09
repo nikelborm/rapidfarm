@@ -1,14 +1,6 @@
 import React, { Component, Fragment } from "react";
 import { GlobalContext } from "../../../components/GlobalContextBasedOnDataFromWS";
 import ProcessTimingsManager from "./ProcessTimingsManager";
-// const timings = [];
-// [ ...event.currentTarget.elements ].forEach( element => {
-//     if( element.tagName !== "INPUT" ) return;
-//     const [ timingIndex, changerIndex, index ] = element.dataset.location.split("_").map( e => parseInt( e ) );
-//     timingIndex in timings || ( timings[ timingIndex ] = [ [], [] ] );
-//     timings[ timingIndex ][ changerIndex ][ index ] = parseInt( element.value );
-// } );
-// console.log('timings: ', timings);
 
 class AllTimingsManager extends Component {
     shouldComponentUpdate( nextProps, nextState, nextContext ) {
