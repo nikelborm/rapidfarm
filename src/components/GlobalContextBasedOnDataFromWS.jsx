@@ -148,6 +148,55 @@ class GlobalContextBasedOnDataFromWS extends Component {
                     ...ps,
                     records: data.package
                 } ) );
+                // добавляем в state.records
+                // а чтобы понять какие последние, просто ждём newestRecordsPackage
+                break;
+            case "newestRecordsPackage":
+                // закидываем глубоко в структуру сенсоров
+                this.setState( ps => {
+                    const sensors = [ ...ps.sensors ];
+                    for( const record of data.package ) {
+                        ps.sensors.find( ( sensor, index ) => {
+                            if ( sensor.long === record.sensor ) {
+                                const newLastRecord = { ...ps.sensors[ index ].lastRecord };
+                                const newSensor = { ...ps.sensors[ index ] };
+                                newLastRecord.value = record.value;
+                                newLastRecord.date = record.date;
+                                newSensor.lastRecord = newLastRecord;
+                                sensors[ index ] = newSensor;
+                                return true;
+                            }
+                            return false;
+                        } );
+                    }
+                    return {
+                        ...ps,
+                        sensors
+                    }
+                } );
+                break;
+            case "warning":
+            case "records":
+                // добавляем в state.records и закидываем глубоко в структуру сенсоров
+                this.setState( ps => {
+                    const sensors = [ ...ps.sensors ];
+                    ps.sensors.find( ( sensor, index ) => {
+                        if ( sensor.long === data.record.sensor ) {
+                            const newLastRecord = { ...ps.sensors[ index ].lastRecord };
+                            const newSensor = { ...ps.sensors[ index ] };
+                            newLastRecord.value = data.record.value;
+                            newLastRecord.date = data.record.date;
+                            newSensor.lastRecord = newLastRecord;
+                            sensors[ index ] = newSensor;
+                            return true;
+                        }
+                        return false;
+                    } );
+                    return {
+                        ...ps,
+                        sensors
+                    }
+                } );
                 break;
             case "event":
                 this.setState( ps => ( {
@@ -193,9 +242,6 @@ class GlobalContextBasedOnDataFromWS extends Component {
                 break;
             case "error":
                 alert( "Ошибка, сообщите программисту этот текст: " + data.message );
-                break;
-            case "warning":
-            case "records":
                 break;
             case "farmState":
                 this.setState( ps => ( {
