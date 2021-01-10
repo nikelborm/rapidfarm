@@ -181,11 +181,11 @@ class GlobalContextBasedOnDataFromWS extends Component {
                 this.setState( ps => {
                     const sensors = [ ...ps.sensors ];
                     ps.sensors.find( ( sensor, index ) => {
-                        if ( sensor.long === data.record.sensor ) {
+                        if ( sensor.long === data.sensor ) {
                             const newLastRecord = { ...ps.sensors[ index ].lastRecord };
                             const newSensor = { ...ps.sensors[ index ] };
-                            newLastRecord.value = data.record.value;
-                            newLastRecord.date = data.record.date;
+                            newLastRecord.value = data.value;
+                            newLastRecord.date = data.date;
                             newSensor.lastRecord = newLastRecord;
                             sensors[ index ] = newSensor;
                             return true;
