@@ -106,9 +106,10 @@ async function loginAsUser(connection, body) {
         connection.isAuthAsUser = true;
         resdata.reply = {
             fullName: userSearchResult.fullName,
-            password: userSearchResult.password,
-            email: userSearchResult.email,
+            password,
+            email,
         };
+        console.log('resdata.reply: ', resdata.reply);
         rp.isError = false;
         rp.info = "Успешная авторизация";
     } catch (err) {
@@ -282,6 +283,7 @@ WSServer.on("connection", (connection, request) => {
     const authorizationStep = async (input) => {
         const data = prepare( input );
         if ( data.class === "logout" ) return;
+        if(!["loginAsFarm","loginAsUser","registerAsUser","set","execute"].includes( data.class )) return;
         sendMessage(connection, {
             class: data.class,
             ...(await handlerSwitcher( data.class )( connection, data )),
