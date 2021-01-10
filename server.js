@@ -105,7 +105,9 @@ async function loginAsUser(connection, body) {
         connection.authInfo = userSearchResult;
         connection.isAuthAsUser = true;
         resdata.reply = {
-            fullName: userSearchResult.fullName
+            fullName: userSearchResult.fullName,
+            password: userSearchResult.password,
+            email: userSearchResult.email,
         };
         rp.isError = false;
         rp.info = "Успешная авторизация";
@@ -162,7 +164,10 @@ async function registerAsUser(connection, body) {
         connection.isAuthAsUser = true;
         connection.authInfo = insertationResult.ops[0];
         resdata.reply = {
-            fullName: insertationResult.ops[ 0 ].fullName
+            fullName: insertationResult.ops[ 0 ].fullName,
+            password: insertationResult.ops[ 0 ].password,
+            email: insertationResult.ops[ 0 ].email,
+
         };
         rp.isError = false;
         rp.info = "Регистрация успешна";

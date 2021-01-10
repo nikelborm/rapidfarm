@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import TimingRow from "./TimingRow";
 import Button from "react-bootstrap/Button";
+import { BarWithOneKindOfTimings } from "./TimingsBars";
 
 class ProcessTimingsManager extends Component {
     shouldComponentUpdate( nextProps, nextState ) {
@@ -27,15 +28,28 @@ class ProcessTimingsManager extends Component {
                 <h3>
                     { title }
                 </h3>
+                <BarWithOneKindOfTimings
+                    timings={ timings }
+                />
                 { isAuthorized && ( this.state.isEditMode
                     ? (
-                        <Button
-                            data-action="syncProcessTimingsWithServer"
-                            data-location={ [ processIndex ].join("_") }
-                            onClick={ this.leaveEditMode }
-                        >
-                            Сохранить
-                        </Button>
+                        (<>
+                            <Button
+                                data-action="syncProcessTimingsWithServer"
+                                data-location={ [ processIndex ].join("_") }
+                                onClick={ this.leaveEditMode }
+                            >
+                                Сохранить
+                            </Button>
+                            {/* <Button
+                                data-action="restoreProcessTimingsBeforeEditing"
+                                data-location={ [ processIndex ].join("_") }
+                                variant="secondary"
+                                onClick={ this.leaveEditMode }
+                            >
+                                Отменить
+                            </Button> */}
+                        </>)
                     )
                     : (
                         <Button
