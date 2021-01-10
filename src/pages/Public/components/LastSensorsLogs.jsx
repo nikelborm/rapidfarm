@@ -6,10 +6,11 @@ class Record extends PureComponent {
         super(props);
         this.timeUpdater = null;
     }
-    componentDidMount = () => {
-        this.timeUpdater = setInterval( this.forceUpdate, 60000 );
+    recalcTime = () => this.forceUpdate();
+    componentDidMount() {
+        this.timeUpdater = setInterval( this.recalcTime, 60000 );
     }
-    componentWillUnmount = () => {
+    componentWillUnmount() {
         clearInterval( this.timeUpdater );
     }
     render() {
