@@ -227,8 +227,33 @@ function sendRecordsPackage( connection ) {
         }
     );
 }
-
-function sendExactSensorRecordsPackage( connection ) {
+function sendNewestRecordsPackage( connection ) {
+    const querys = [];
+    cachedConfig.sensors.forEach(
+        sensor => sensor.isConnected && querys.push( new Promise( ( resolve, reject ) => {
+            let oneLog;
+            sensorsLogs.find(
+                { sensor: sensor.long }, { projection: { farmName: 0 }}
+            ).sort( { _id: -1 } ).limit( 1 ).forEach(
+                doc => oneLog = doc,
+                function (err) {
+                    if (err) {
+                        reject( err );
+                    } else {
+                        resolve( oneLog );
+                    }
+                }
+            );
+        } ) )
+    );
+    Promise.all( querys ).then( pkg => {
+        sendMessage( connection, { class: "newestRecordsPackage", package: pkg } );
+    }).catch( err => {
+        console.log(err);
+        sendError( connection, "Произошла ошибка при загрузке пакета с последними показаниями датчиков" );
+    });
+}
+function sendExactSensorRecordsPackage( connection, sensor ) {
     // sensorsLogs.find({/* где дата больше дня, который месяц назад */})
     // .forEach(
     //     (doc) => {
@@ -318,10 +343,14 @@ WSServer.on("connection", (connection, request) => {
                 sendConfigPackage( connection );
                 break;
             case "recordsPackage":
-                sendRecordsPackage( connection );
+                // sendRecordsPackage( connection );
+                sendNewestRecordsPackage( connection );
                 break;
             case "exactSensorRecordsPackage":
-                sendExactSensorRecordsPackage( connection );
+                sendExactSensorRecordsPackage( connection, data.sensor );
+                break;
+            case "newestRecordsPackage":
+                sendNewestRecordsPackage( connection );
                 break;
             default:
                 sendError(connection, `Обработчика what (${data.what}) для class (${data.class}) не существует`);
@@ -445,7 +474,8 @@ WSServer.on("connection", (connection, request) => {
     if ( farmConnection ) {
         sendActivityPackage( connection );
         sendConfigPackage( connection );
-        sendRecordsPackage( connection );
+        // sendRecordsPackage( connection );
+        sendNewestRecordsPackage( connection );
     }
 });
 const cleaner = setInterval(() => {

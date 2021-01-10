@@ -6,6 +6,7 @@ import ProcessList from "./components/ProcessList";
 import Divider from "../../components/Divider";
 import FarmStatus from "../../components/FarmStatus";
 import AllTimingsManager from "./components/AllTimingsManager";
+import LastSensorsLogs from "./components/LastSensorsLogs";
 
 export class PublicContent extends Component {
     render() {
@@ -16,6 +17,12 @@ export class PublicContent extends Component {
                 </h2>
                 <br/>
                 <ProcessList/>
+                <Divider/>
+                <h2>
+                    Показания датчиков
+                </h2>
+                <br/>
+                <LastSensorsLogs/>
                 <Divider/>
                 <h2>
                     Командный интерфейс
