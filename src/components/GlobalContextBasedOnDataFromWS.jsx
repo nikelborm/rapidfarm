@@ -22,12 +22,16 @@ class SelfHealingWebSocket {
         console.error( "[error] Ошибка! Отчёт: " );
         console.log( error );
     };
-    messageEL = function( event ) {
+    messageEL = event => {
         console.log( "[message] Сервер отправил сообщение. Отчёт: ", event );
-        const data = JSON.parse( event.data );
-        console.log( "[message] Данные: ", data );
+        try {
+            const data = JSON.parse( event.data );
+            console.log( "[message] Данные: ", data );
+        } catch ( error ) {
+            this.errorEL( error );
+        }
     };
-    openEL = function() {
+    openEL = event => {
         console.log( "[open] Соединение установлено" );
         this.upCallback();
     };
@@ -68,6 +72,7 @@ export const GlobalContext = React.createContext( {
         increasePrecision: () => {},
         decreasePrecision: () => {},
         setExactTimingValue: () => {},
+        makeProcessesBackup: () => {},
     },
     isAuthInProcess: false,
     isRegistrationAllowed: false,
@@ -104,20 +109,18 @@ class GlobalContextBasedOnDataFromWS extends Component {
             this.state.fullName = sessionStorage.getItem( "fullName" );
         }
         this.ws = null;
+        this.processesBackup = null;
     }
-    componentDidMount() {
-        const loc = document.location;
-        const protocol = loc.protocol[ 4 ] === "s" ? "wss://" : "ws://";
-        const WSAdress = protocol + ( loc.port === "3001" ? loc.hostname + ":3000" : loc.host );
-        this.ws = new SelfHealingWebSocket( this.downWatcher, this.upWatcher, this.messageParser, WSAdress );
-    }
+    makeProcessesBackup = procIndex => {
+
+    };
     upWatcher = () => {
         if( sessionStorage.getItem( "isAuthorized") !== "true" ) return;
         this.login(
             sessionStorage.getItem( "lastEmail" ),
             sessionStorage.getItem( "lastPassword" )
         );
-    }
+    };
     downWatcher = () => {
         this.setState( ps => ( {
             ...ps,
@@ -125,7 +128,7 @@ class GlobalContextBasedOnDataFromWS extends Component {
             fullName: "",
             isFarmConnected: null
         } ) );
-    }
+    };
     messageParser = data => {
         switch ( data.class ) {
             case "configPackage":
@@ -167,6 +170,8 @@ class GlobalContextBasedOnDataFromWS extends Component {
                 }
                 sessionStorage.setItem( "isAuthorized", "true" );
                 sessionStorage.setItem( "fullName", data.reply.fullName );
+                sessionStorage.setItem( "lastEmail", data.reply.email );
+                sessionStorage.setItem( "lastPassword", data.reply.password );
                 this.setState( ps => ( {
                     ...ps,
                     isAuthorized: true,
@@ -177,6 +182,8 @@ class GlobalContextBasedOnDataFromWS extends Component {
             case "logout":
                 sessionStorage.setItem( "isAuthorized", "" + false );
                 sessionStorage.setItem( "fullName", "" );
+                sessionStorage.setItem( "lastEmail", "" );
+                sessionStorage.setItem( "lastPassword", "" );
                 this.setState( ps => ( {
                     ...ps,
                     isAuthorized: false,
@@ -249,6 +256,25 @@ class GlobalContextBasedOnDataFromWS extends Component {
             return { ...ps, processes };
         } );
     };
+    newTimeSetterer = timeChanger => ( { location, value } ) => {
+        const [ processIndex, timingIndex, changerIndex, index ] = location.split("_").map( e => parseInt( e ) );
+        this.setState( ps => {
+            const newTime = timeChanger( [ ...ps.processes[ processIndex ].timings[ timingIndex ][ changerIndex ] ], index, value );
+            const newTiming = [ ...ps.processes[ processIndex ].timings[ timingIndex ] ];
+            const newTimings = [ ...ps.processes[ processIndex ].timings ];
+            const newProcess = { ...ps.processes[ processIndex ] };
+            const processes = [ ...ps.processes ];
+
+            newTiming[ changerIndex ] = newTime;
+            newTimings[ timingIndex ] = newTiming;
+            newProcess.timings = newTimings;
+            processes[ processIndex ] = newProcess;
+            return {
+                ...ps,
+                processes
+            }
+        } );
+    };
     removeTiming = ( { location } ) => {
         this.setState( ps => {
             const [ processIndex, timingIndexForDeletion ] = location.split("_").map( e => parseInt( e ) );
@@ -295,8 +321,7 @@ class GlobalContextBasedOnDataFromWS extends Component {
     setExactTimingValue = this.newTimeSetter( ( time, index, value ) => {
         const maxs = [ 24, 60, 60 ];
         let intValue = parseInt( value );
-        if ( isNaN( intValue ) ) return time;
-        time[ index ] = intValue > maxs[ index ] ? maxs[ index ] : intValue < 0 ? 0 : intValue;
+        time[ index ] = isNaN( intValue ) || intValue < 0 ? 0 : intValue > maxs[ index ] ? maxs[ index ] : intValue;
         return time;
     });
     isAuthSessionChanged = () => false && ( sessionStorage.getItem( "connect.sid" ) !== getCookie( "connect.sid" ) );
@@ -311,8 +336,6 @@ class GlobalContextBasedOnDataFromWS extends Component {
     };
     authorize = query => {
         if ( this.state.isLogoutInProcess || this.state.isAuthInProcess ) return;
-        sessionStorage.setItem( "lastEmail", query.email );
-        sessionStorage.setItem( "lastPassword", query.password );
         this.ws && this.ws.send( query );
         this.setState( ps => ( {
             ...ps,
@@ -340,7 +363,22 @@ class GlobalContextBasedOnDataFromWS extends Component {
         register: this.register,
         login: this.login
     };
+    timingsActions = {
+        syncProcessTimingsWithServer: this.syncProcessTimingsWithServer,
+        addEmptyTiming: this.addEmptyTiming,
+        removeTiming: this.removeTiming,
+        increasePrecision: this.increasePrecision,
+        decreasePrecision: this.decreasePrecision,
+        setExactTimingValue: this.setExactTimingValue,
+        makeProcessesBackup: this.makeProcessesBackup,
+    };
     sendRawQuery = JSONString => this.ws && this.ws.sendRaw( JSONString );
+    componentDidMount() {
+        const loc = document.location;
+        const protocol = loc.protocol[ 4 ] === "s" ? "wss://" : "ws://";
+        const WSAdress = protocol + ( loc.port === "3001" ? loc.hostname + ":3000" : loc.host );
+        this.ws = new SelfHealingWebSocket( this.downWatcher, this.upWatcher, this.messageParser, WSAdress );
+    }
     render() {
         return (
             <GlobalContext.Provider
@@ -348,14 +386,7 @@ class GlobalContextBasedOnDataFromWS extends Component {
                     ...this.state,
                     authorizationActions: this.authorizationActions,
                     sendRawQuery: this.sendRawQuery,
-                    timingsActions: {
-                        syncProcessTimingsWithServer: this.syncProcessTimingsWithServer,
-                        addEmptyTiming: this.addEmptyTiming,
-                        removeTiming: this.removeTiming,
-                        increasePrecision: this.increasePrecision,
-                        decreasePrecision: this.decreasePrecision,
-                        setExactTimingValue: this.setExactTimingValue,
-                    }
+                    timingsActions: this.timingsActions
                 } }
                 children={ this.props.children }
             />
