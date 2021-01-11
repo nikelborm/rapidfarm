@@ -211,7 +211,7 @@ function sendConfigPackage( connection ) {
 function sendRecordsPackage( connection ) {
     let pkg = [];
     sensorsLogs.find(
-        {/* искать записи, где дата больше дня, который был месяц назад */}, {projection: { _id: 0 }}
+        {/* искать записи, где дата больше дня, который был месяц назад */value:{$ne:"nan"}}, {projection: { _id: 0 }}
     ).limit( 20 ).forEach(
         (doc) => {
             pkg.push( doc );
@@ -232,7 +232,7 @@ function sendNewestRecordsPackage( connection ) {
         sensor => sensor.isConnected && querys.push( new Promise( ( resolve, reject ) => {
             let oneLog;
             sensorsLogs.find(
-                { sensor: sensor.long }, { projection: { farmName: 0 }}
+                { sensor: sensor.long,value:{$ne:"nan"} }, { projection: { farmName: 0 }}
             ).sort( { _id: -1 } ).limit( 1 ).forEach(
                 doc => oneLog = doc,
                 function (err) {
@@ -253,7 +253,7 @@ function sendNewestRecordsPackage( connection ) {
     });
 }
 function sendExactSensorRecordsPackage( connection, sensor ) {
-    // sensorsLogs.find({/* где дата больше дня, который месяц назад */})
+    // sensorsLogs.find({/* где дата больше дня, который месяц назад */value:{$ne:"nan"}})
     // .forEach(
     //     (doc) => {
     //         console.log("doc: ", doc);
