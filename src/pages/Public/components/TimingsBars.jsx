@@ -192,7 +192,6 @@ class NowLine extends PureComponent {
 export class BarWithOneKindOfTimings extends Component {
     render() {
         const { timeLineBgColor, ...rest } = this.props;
-        console.log('timeLineBgColor, ...rest: ', timeLineBgColor, rest);
         return (
             <StyledTimingsBarsContainer
                 timeLineBgColor={ timeLineBgColor }

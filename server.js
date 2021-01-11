@@ -109,7 +109,6 @@ async function loginAsUser(connection, body) {
             password,
             email,
         };
-        console.log('resdata.reply: ', resdata.reply);
         rp.isError = false;
         rp.info = "Успешная авторизация";
     } catch (err) {

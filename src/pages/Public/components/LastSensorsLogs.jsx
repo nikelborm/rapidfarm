@@ -1,5 +1,5 @@
 import React, { Component, PureComponent } from "react";
-import { GlobalContext } from '../../../components/GlobalContextBasedOnDataFromWS';
+import { GlobalContext } from "../../../components/GlobalContextBasedOnDataFromWS";
 
 class Record extends PureComponent {
     constructor(props) {
@@ -29,8 +29,8 @@ class LastSensorsLogs extends Component {
     render() {
         return (
             <div>
-                { this.context.sensors.map( sensor => {
-                    return sensor.isConnected && !!sensor.lastRecord && <Record
+                { this.context.sensors.map( sensor => ( sensor.isConnected && !!sensor.lastRecord
+                    ? <Record
                         key={ sensor.lastRecord._id }
                         lastTime={ sensor.lastRecord.date }
                         value={ sensor.lastRecord.value }
@@ -39,7 +39,8 @@ class LastSensorsLogs extends Component {
                         upperBorder={ sensor.criticalBorders.upper }
                         lowerBorder={ sensor.criticalBorders.lower }
                     />
-                } ) }
+                    : <> { sensor.title } недоступна, потому что датчик не подключён </>
+                ) ) }
             </div>
         );
     }
