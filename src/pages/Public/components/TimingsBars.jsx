@@ -4,30 +4,37 @@ import calcSecondsFrom00_00 from "../../../tools/calcSecondsFrom00_00";
 
 const StyledOneTimingDiv = styled.div`
     margin: 0%;
-    width: ${ props => props.filledAreaPercentage }%;
-    margin-left: ${ props => props.marginFromLeftBorder }%;
-    height: ${ props => props.theme.height || "30px" };
-    background-color: ${ props => props.timingBgColor || "rgb(7, 172, 7)" };
+    width: ${ props => props.theme.filledAreaPercentage }%;
+    margin-left: ${ props => props.theme.marginFromLeftBorder }%;
+    height: 100%;
+    background-color: ${ props => props.theme.timingBgColor || "rgb(7, 172, 7)" };
     position: absolute;
-    opacity: ${ props => props.timingOpacityPercentage }%;
+    opacity: ${ props => props.theme.timingOpacityPercentage }%;
 `;
 const StyledTimingsBarsContainer = styled.div`
     width: 100%;
-    background-color: ${ props => props.timeLineBgColor || "rgb(240, 235, 235)" };
+    background-color: ${ props => props.theme.timeLineBgColor || "rgb(240, 235, 235)" };
     height: ${ props => props.theme.height || "30px" };
     position: relative;
 `;
 class OneTiming extends Component {
     segmentPercentage = 100 / ( 24 * 60 * 60 + 1 ); // Длина секунды, относительно суток
     render() {
-        const { timing, ...rest } = this.props;
+        const {
+            timing,
+            timingBgColor,
+            timingOpacityPercentage
+        } = this.props;
         const marginFromLeftBorder = calcSecondsFrom00_00( timing[ 0 ] ) * this.segmentPercentage;
         const filledAreaPercentage = calcSecondsFrom00_00( timing[ 1 ] ) * this.segmentPercentage - marginFromLeftBorder;
         return (
             <StyledOneTimingDiv
-                marginFromLeftBorder={ marginFromLeftBorder }
-                filledAreaPercentage={ filledAreaPercentage }
-                { ...rest }
+                theme={ {
+                    marginFromLeftBorder,
+                    filledAreaPercentage,
+                    timingBgColor,
+                    timingOpacityPercentage,
+                } }
             />
         );
     }
@@ -55,12 +62,10 @@ class TimingsBar extends PureComponent {
             timingBgColor,
             shouldCalcTimingOpacity,
             timingOpacityPercentage,
-            amountOfTimings,
-            theme
+            amountOfTimings
         } = this.props;
         return timings.map( timing => {
             return <OneTiming
-                theme={theme}
                 timing={ timing }
                 timingBgColor={ timingBgColor }
                 timingOpacityPercentage={
@@ -73,6 +78,50 @@ class TimingsBar extends PureComponent {
     }
 }
 
+class NowLine extends PureComponent {
+    state = {
+        msfrom00_00: Date.now() - (new Date((new Date()).toDateString())).getTime()
+    };
+    constructor(props) {
+        super(props);
+        this.timeUpdater = null;
+    }
+    setnewstate = ()=>this.setState({
+        msfrom00_00: Date.now() - (new Date((new Date()).toDateString())).getTime()
+    });
+    componentDidMount= ()=> {
+        this.timeUpdater = setInterval(this.setnewstate, 60000);
+    }
+    componentWillUnmount= ()=> {
+        clearInterval( this.timeUpdater );
+    }
+    render() {
+        return (
+            <OneTiming
+                timing={ [
+                    [ 0,0,this.state.msfrom00_00/1000],
+                    [ 0,0,this.state.msfrom00_00/1000+120 ]
+                ] }
+                timingBgColor="#FF3333"
+                timingOpacityPercentage="100"
+            />
+        )
+    }
+}
+
+export class BarWithOneKindOfTimings extends Component {
+    render() {
+        const { timeLineBgColor, height, ...rest } = this.props;
+        return (
+            <StyledTimingsBarsContainer
+                theme={ { height, timeLineBgColor } }
+            >
+                <TimingsBar { ...rest } />
+                <NowLine/>
+            </StyledTimingsBarsContainer>
+        );
+    }
+}
 export class BarWithMultipleKindsOfTimingsInOneLine extends Component {
     render() {
         const {
@@ -80,7 +129,8 @@ export class BarWithMultipleKindsOfTimingsInOneLine extends Component {
             colors,
             timeLineBgColor,
             opacitys,
-            processOrdering
+            processOrdering,
+            height
         } = this.props;
         const constructTimingsSet = process => (
             process?.isAvailable && <TimingsBar
@@ -95,7 +145,7 @@ export class BarWithMultipleKindsOfTimingsInOneLine extends Component {
         const allTimings = processes.reduce( ( sum, proc ) => sum + ~~proc.isAvailable, 0 );
         return (
             <StyledTimingsBarsContainer
-                timeLineBgColor={ timeLineBgColor }
+                theme={ { height, timeLineBgColor } }
             >
                 { processOrdering
                     ? this.props.processOrdering.map(
@@ -128,16 +178,17 @@ export class BarWithMultipleKindsOfTimingsInManyLines extends Component {
         const {
             processes,
             colors,
-            timeLineBgColor,
             opacitys,
-            processOrdering
+            processOrdering,
+            timeLineBgColor,
+            height
         } = this.props;
         // const allTimings = processes.reduce( ( sum, proc ) => sum + proc.timings.length, 0 );
         const allTimings = processes.reduce( ( sum, proc ) => sum + ~~proc.isAvailable, 0 );
         const constructTimingsSet = process => (
             process?.isAvailable && (
                 <StyledTimingsBarsContainer
-                    timeLineBgColor={ timeLineBgColor }
+                    theme={ { height, timeLineBgColor } }
                 >
                     <TimingsBar
                         timings={ process.timings }
@@ -158,48 +209,4 @@ export class BarWithMultipleKindsOfTimingsInManyLines extends Component {
     }
 }
 
-class NowLine extends PureComponent {
-    state = {
-        msfrom00_00: Date.now() - (new Date((new Date()).toDateString())).getTime()
-    };
-    constructor(props) {
-        super(props);
-        this.timeUpdater = null;
-    }
-    setnewstate = ()=>this.setState({
-        msfrom00_00: Date.now() - (new Date((new Date()).toDateString())).getTime()
-    });
-    componentDidMount= ()=> {
-        this.timeUpdater = setInterval(this.setnewstate, 60000);
-    }
-    componentWillUnmount= ()=> {
-        clearInterval( this.timeUpdater );
-    }
-    render() {
-        return (
-            <OneTiming
-                timing={ [
-                    [ 0,0,this.state.msfrom00_00/1000],
-                    [ 0,0,this.state.msfrom00_00/1000+120 ]
-                ] }
-                timingBgColor={ "#FF3333" }
-                timingOpacityPercentage={ 100 }
-            />
-        )
-    }
-}
-
-export class BarWithOneKindOfTimings extends Component {
-    render() {
-        const { timeLineBgColor, ...rest } = this.props;
-        return (
-            <StyledTimingsBarsContainer
-                timeLineBgColor={ timeLineBgColor }
-            >
-                <TimingsBar { ...rest } />
-                <NowLine/>
-            </StyledTimingsBarsContainer>
-        );
-    }
-}
 
