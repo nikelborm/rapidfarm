@@ -40,6 +40,7 @@ class LastSensorsLogs extends Component {
                         lowerBorder={ sensor.criticalBorders.lower }
                     />
                 ) ) }
+                <br/>
                 { this.context.sensors.map( sensor => ( !sensor.isConnected || !!sensor.lastRecord ) && (
                     <div> { sensor.title } недоступна, потому что датчик не подключён. </div>
                 ) ) }
