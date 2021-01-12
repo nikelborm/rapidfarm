@@ -27,7 +27,7 @@ const isRegistrationAllowed = !!process.env.IS_REGISTRATION_ALLOWED;
 const farmSecrets = JSON.parse(process.env.FARM_SECRETS || `{}`);
 
 let dbClient;
-let farmConnection = process.env.STAGE === "prod" ? {} : { send: (...args) => {console.log();} };
+let farmConnection = process.env.STAGE === "prod" ? null : { send: (...args) => {console.log();} };
 let cachedProcessStates = {};
 let cachedConfig = process.env.STAGE === "prod" ? {
     processes: [],

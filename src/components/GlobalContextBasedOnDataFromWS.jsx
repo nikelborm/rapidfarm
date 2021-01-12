@@ -177,14 +177,15 @@ class GlobalContextBasedOnDataFromWS extends Component {
                 this.setState( ps => {
                     const sensors = [ ...ps.sensors ];
                     for( const record of data.package ) {
-                        ps.sensors.find( ( sensor, index ) => {
+                        sensors.find( ( sensor, index ) => {
                             if ( sensor.long === record.sensor ) {
-                                const newLastRecord = { ...ps.sensors[ index ].lastRecord };
-                                const newSensor = { ...ps.sensors[ index ] };
-                                newLastRecord.value = record.value;
-                                newLastRecord.date = record.date;
-                                newSensor.lastRecord = newLastRecord;
-                                sensors[ index ] = newSensor;
+                                sensors[ index ] = {
+                                    ...ps.sensors[ index ],
+                                    lastRecord: {
+                                        value: record.value,
+                                        date: record.date
+                                    }
+                                };
                                 return true;
                             }
                             return false;
@@ -202,27 +203,28 @@ class GlobalContextBasedOnDataFromWS extends Component {
                 this.setState( ps => {
                     const sensors = [ ...ps.sensors ];
                     const records = { ...ps.records };
-                    ps.sensors.find( ( sensor, index ) => {
-                        if ( sensor.long === data.sensor ) {
-                            const newLastRecord = { ...ps.sensors[ index ].lastRecord };
-                            const newSensor = { ...ps.sensors[ index ] };
-                            newLastRecord.value = data.value;
-                            newLastRecord.date = data.date;
-                            newSensor.lastRecord = newLastRecord;
-                            sensors[ index ] = newSensor;
-                            const newRecord = {
-                                x: new Date(data.date),
-                                y: data.value,
+                    sensors.find( ( sensor, index ) => {
+                        if ( sensor.long !== data.sensor ) return false;
+                        sensors[ index ] = {
+                            ...sensors[ index ],
+                            lastRecord: {
+                                value: data.value,
+                                date: data.date
                             }
-                            if( !records[sensor.long] ) records[sensor.long] = [];
-                            const lastItem = records[sensor.long][records[sensor.long].length - 1];
-                            if (lastItem && dayjs(newRecord.x).diff(dayjs(lastItem.x), 'minutes') > 20) {
-                                records[sensor.long].push({y: NaN, x: lastItem.x});
-                            }
-                            records[ sensor.long ].push( newRecord );
-                            return true;
+                        };
+                        records[ sensor.long ] = [
+                            ...records[ sensor.long ]
+                        ];
+                        const newRecord = {
+                            x: new Date(data.date),
+                            y: data.value,
                         }
-                        return false;
+                        const lastItem = records[sensor.long][records[sensor.long].length - 1];
+                        if (lastItem && dayjs(newRecord.x).diff(dayjs(lastItem.x), 'minutes') > 20) {
+                            records[sensor.long].push({y: NaN, x: lastItem.x});
+                        }
+                        records[ sensor.long ].push( newRecord );
+                        return true;
                     } );
                     return {
                         ...ps,
