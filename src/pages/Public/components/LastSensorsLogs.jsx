@@ -35,8 +35,7 @@ const chartOptions = {
         ],
     },
 };
-
-class SensorVisualization extends PureComponent {
+class SensorText extends PureComponent {
     constructor(props) {
         super(props);
         this.timeUpdater = null;
@@ -48,6 +47,18 @@ class SensorVisualization extends PureComponent {
     componentWillUnmount() {
         clearInterval( this.timeUpdater );
     }
+    render() {
+        const { lastTime, title, value, point, upperBorder, lowerBorder } = this.props;
+        return (
+            <>
+                {/* @ts-ignore */}
+                { Math.round(((new Date()) - (new Date(lastTime)))/60000)} минут назад { title } была { value } { point }. Она входит в рамки допустимых значений: { lowerBorder } { point } ⩽ { value } { point } ⩽ { upperBorder } { point }
+                <br/><br/><br/>
+            </>
+        );
+    }
+}
+class SensorVisualization extends PureComponent {
     render() {
         const { lastTime, title, value, point, upperBorder, lowerBorder, data } = this.props;
         return (
@@ -69,9 +80,14 @@ class SensorVisualization extends PureComponent {
                     }
                     height={ 100 }
                 />
-                {/* @ts-ignore */}
-                { Math.round(((new Date()) - (new Date(lastTime)))/60000)} минут назад { title } была { value } { point }. Она входит в рамки допустимых значений: { lowerBorder } { point } ⩽ { value } { point } ⩽ { upperBorder } { point }
-                <br/><br/><br/>
+                <SensorText
+                    lastTime={ lastTime }
+                    title={ title }
+                    value={ value }
+                    point={ point }
+                    upperBorder={ upperBorder }
+                    lowerBorder={ lowerBorder }
+                />
             </div>
         );
     }
