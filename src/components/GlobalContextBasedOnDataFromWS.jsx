@@ -212,9 +212,9 @@ class GlobalContextBasedOnDataFromWS extends Component {
                                 date: data.date
                             }
                         };
-                        records[ sensor.long ] = [
+                        records[ sensor.long ] = records[ sensor.long ] ? [
                             ...records[ sensor.long ]
-                        ];
+                        ] : [];
                         const newRecord = {
                             x: new Date(data.date),
                             y: data.value,
