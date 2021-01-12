@@ -201,7 +201,7 @@ class GlobalContextBasedOnDataFromWS extends Component {
                 // добавляем в state.records и закидываем глубоко в структуру сенсоров
                 this.setState( ps => {
                     const sensors = [ ...ps.sensors ];
-                    const records = [ ...ps.records ];
+                    const records = { ...ps.records };
                     ps.sensors.find( ( sensor, index ) => {
                         if ( sensor.long === data.sensor ) {
                             const newLastRecord = { ...ps.sensors[ index ].lastRecord };
