@@ -56,7 +56,7 @@ class SensorVisualization extends PureComponent {
                     data={{
                         datasets: [
                             {
-                                label: `${ title } (${ point })`,
+                                label: `${ title }${ point ? " ( " + point + " )" : "" })`,
                                 borderColor: 'rgba(225, 75, 75, 1)',
                                 data,
                                 fill: false,
