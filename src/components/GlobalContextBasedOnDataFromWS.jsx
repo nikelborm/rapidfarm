@@ -80,7 +80,7 @@ export const GlobalContext = React.createContext( {
     processes: [],
     sensors: [],
     processesStates: {},
-    records: [],
+    records: {},
     sendRawQuery: () => {},
     isFarmConnected: null,
 });
@@ -95,7 +95,7 @@ class GlobalContextBasedOnDataFromWS extends Component {
         processes: [],
         sensors: [],
         processesStates: {},
-        records: [],
+        records: {},
         isFarmConnected: null,
     }
     constructor( props ) {
@@ -214,6 +214,7 @@ class GlobalContextBasedOnDataFromWS extends Component {
                                 x: new Date(data.date),
                                 y: data.value,
                             }
+                            if( !records[sensor.long] ) records[sensor.long] = [];
                             const lastItem = records[sensor.long][records[sensor.long].length - 1];
                             if (lastItem && dayjs(newRecord.x).diff(dayjs(lastItem.x), 'minutes') > 20) {
                                 records[sensor.long].push({y: NaN, x: lastItem.x});
