@@ -1,7 +1,42 @@
 import React, { Component, PureComponent } from "react";
 import { GlobalContext } from "../../../components/GlobalContextBasedOnDataFromWS";
+import { Line } from 'react-chartjs-2';
 
-class Record extends PureComponent {
+const chartOptions = {
+    legend: {
+        labels: {
+            usePointStyle: true,
+        },
+    },
+    elements: {
+        point: {
+            radius: 0,
+        },
+        line: {
+            tension: 1,
+            borderWidth: 1,
+            spanGaps: true,
+            showLine: false,
+        },
+    },
+    scales: {
+        xAxes: [
+            {
+                type: 'time',
+                distribution: 'linear',
+                spanGaps: true,
+                time: {
+                    displayFormats: {
+                        day: 'Do MMM',
+                        hour: 'Do MMM HH часов',
+                    }
+                }
+            },
+        ],
+    },
+};
+
+class SensorVisualization extends PureComponent {
     constructor(props) {
         super(props);
         this.timeUpdater = null;
@@ -14,12 +49,29 @@ class Record extends PureComponent {
         clearInterval( this.timeUpdater );
     }
     render() {
-        const { lastTime, title, value, point, upperBorder, lowerBorder } = this.props;
+        const { lastTime, title, value, point, upperBorder, lowerBorder, data } = this.props;
         return (
             <div>
-                { Math.round((
-// @ts-ignore
-                (new Date()) - (new Date(lastTime)))/60000)} минут назад { title } была { value } { point }. Она входит в рамки допустимых значений: { lowerBorder } { point } ⩽ { value } { point } ⩽ { upperBorder } { point }
+                <Line
+                    data={{
+                        datasets: [
+                            {
+                                label: `${ title } (${ point })`,
+                                borderColor: 'rgba(225, 75, 75, 1)',
+                                data,
+                                fill: false,
+                                pointBorderWidth: 0,
+                            }
+                        ],
+                    }}
+                    options={
+                        chartOptions
+                    }
+                    height={ 100 }
+                />
+                {/* @ts-ignore */}
+                { Math.round(((new Date()) - (new Date(lastTime)))/60000)} минут назад { title } была { value } { point }. Она входит в рамки допустимых значений: { lowerBorder } { point } ⩽ { value } { point } ⩽ { upperBorder } { point }
+                <br/><br/><br/>
             </div>
         );
     }
@@ -30,7 +82,7 @@ class LastSensorsLogs extends Component {
         return (
             <div>
                 { this.context.sensors.map( sensor => sensor.isConnected && !!sensor.lastRecord && (
-                    <Record
+                    <SensorVisualization
                         key={ sensor.lastRecord._id }
                         lastTime={ sensor.lastRecord.date }
                         value={ sensor.lastRecord.value }
@@ -38,6 +90,7 @@ class LastSensorsLogs extends Component {
                         point={ sensor.measurementPoint }
                         upperBorder={ sensor.criticalBorders.upper }
                         lowerBorder={ sensor.criticalBorders.lower }
+                        data={ this.context.records[ sensor.long ]}
                     />
                 ) ) }
                 <br/>

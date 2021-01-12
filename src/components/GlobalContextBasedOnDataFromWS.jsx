@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import getCookie from "../tools/getCookie";
+import dayjs from 'dayjs';
 class SelfHealingWebSocket {
     constructor( downCallback, upCallback, allMessagesHandler, ...initializationArgs ) {
         this.initializationArgs = initializationArgs;
@@ -144,10 +145,30 @@ class GlobalContextBasedOnDataFromWS extends Component {
                 } ) );
                 break;
             case "recordsPackage":
-                this.setState( ps => ( {
-                    ...ps,
-                    records: data.package
-                } ) );
+                this.setState( ps => {
+                    const records = {};
+                    Object.keys( data.package ).forEach( (key) => {
+                        const values = data.package[ key ].map((item) => {
+                            return {
+                                x: new Date(item.x),
+                                y: item.y,
+                            };
+                        });
+                        const reducedValues = values.reduce((acc, item) => {
+                            const lastItem = acc[acc.length - 1];
+                            if (lastItem && dayjs(item.x).diff(dayjs(lastItem.x), 'minutes') > 20) {
+                                acc.push({y: NaN, x: lastItem.x});
+                            }
+                            acc.push(item);
+                            return acc;
+                        }, []);
+                        records[ key ] = reducedValues;
+                    })
+                    return {
+                        ...ps,
+                        records
+                    }
+                } );
                 // добавляем в state.records
                 // а чтобы понять какие последние, просто ждём newestRecordsPackage
                 break;
@@ -180,6 +201,7 @@ class GlobalContextBasedOnDataFromWS extends Component {
                 // добавляем в state.records и закидываем глубоко в структуру сенсоров
                 this.setState( ps => {
                     const sensors = [ ...ps.sensors ];
+                    const records = [ ...ps.records ];
                     ps.sensors.find( ( sensor, index ) => {
                         if ( sensor.long === data.sensor ) {
                             const newLastRecord = { ...ps.sensors[ index ].lastRecord };
@@ -188,13 +210,23 @@ class GlobalContextBasedOnDataFromWS extends Component {
                             newLastRecord.date = data.date;
                             newSensor.lastRecord = newLastRecord;
                             sensors[ index ] = newSensor;
+                            const newRecord = {
+                                x: new Date(data.date),
+                                y: data.value,
+                            }
+                            const lastItem = records[sensor.long][records[sensor.long].length - 1];
+                            if (lastItem && dayjs(newRecord.x).diff(dayjs(lastItem.x), 'minutes') > 20) {
+                                records[sensor.long].push({y: NaN, x: lastItem.x});
+                            }
+                            records[ sensor.long ].push( newRecord );
                             return true;
                         }
                         return false;
                     } );
                     return {
                         ...ps,
-                        sensors
+                        sensors,
+                        records
                     }
                 } );
                 break;

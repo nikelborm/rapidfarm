@@ -27,12 +27,12 @@ const isRegistrationAllowed = !!process.env.IS_REGISTRATION_ALLOWED;
 const farmSecrets = JSON.parse(process.env.FARM_SECRETS || `{}`);
 
 let dbClient;
-let farmConnection = null;
+let farmConnection = process.env.STAGE === "prod" ? {} : { send: (...args) => {console.log();} };
 let cachedProcessStates = {};
-let cachedConfig = {
+let cachedConfig = process.env.STAGE === "prod" ? {
     processes: [],
     sensors: []
-};
+} : JSON.parse('{"processes":[{"short":"ww","long":"watering","title":"Поливной насос","isAvailable":true,"timings":[[[7],[7,15]],[[9,15],[9,30]],[[11,30],[11,45]],[[13,45],[14]],[[16],[16,15]],[[18,15],[18,30]],[[20,30],[20,45]],[[22,45],[23]]]},{"short":"ll","long":"lighting","title":"Освещение","isAvailable":true,"timings":[[[7],[23]]]},{"short":"oo","long":"oxidation","title":"Аэрация раствора","isAvailable":true,"timings":[[[6,45],[7,15]],[[9],[9,30]],[[11,15],[11,45]],[[13,30],[14]],[[15,45],[16,15]],[[18],[18,30]],[[20,15],[20,45]],[[22,30],[23]]]},{"short":"gh","long":"groundHeating","title":"Подогрев почвы","isAvailable":false,"timings":[]},{"short":"wh","long":"waterHeating","title":"Подогрев раствора","isAvailable":false,"timings":[]},{"short":"ah","long":"airHeating","title":"Подогрев воздуха","isAvailable":false,"timings":[]}],"sensors":[{"short":"gt","long":"groundTemperature","title":"Температура почвы","isConnected":false,"measurementPoint":"°C","criticalBorders":{}},{"short":"wt","long":"waterTemperature","title":"Температура воды","isConnected":false,"measurementPoint":"°C","criticalBorders":{}},{"short":"at","long":"airTemperature","title":"Температура воздуха","isConnected":true,"measurementPoint":"°C","criticalBorders":{"lower":10,"upper":30}},{"short":"gh","long":"groundHumidity","title":"Влажность почвы","isConnected":false,"measurementPoint":"%","criticalBorders":{}},{"short":"ah","long":"airHumidity","title":"Влажность воздуха","isConnected":true,"measurementPoint":"%","criticalBorders":{"lower":12,"upper":1000}},{"short":"go","long":"groundOxidation","title":"Кислотность почвы","isConnected":false,"measurementPoint":"","criticalBorders":{}},{"short":"wo","long":"waterOxidation","title":"Кислотность воды","isConnected":false,"measurementPoint":"","criticalBorders":{}},{"short":"gs","long":"groundSalt","title":"Солёность почвы","isConnected":false,"measurementPoint":"","criticalBorders":{}},{"short":"ws","long":"waterSalt","title":"Солёность воды","isConnected":false,"measurementPoint":"","criticalBorders":{}}]}');
 let users = {}; // collection
 let sensorsLogs = {}; // collection
 let webCommandsLogs = {}; // collection
@@ -209,24 +209,45 @@ function sendConfigPackage( connection ) {
     sendMessage( connection, { class: "configPackage", package: cachedConfig } );
 }
 function sendRecordsPackage( connection ) {
-    let pkg = [];
-    sensorsLogs.find(
-        {/* искать записи, где дата больше дня, который был месяц назад */value:{$ne:"nan"}}, {projection: { _id: 0 }}
-    ).limit( 20 ).forEach(
-        (doc) => {
-            pkg.push( doc );
-        },
-        function (err) {
-            if (err) {
-                console.log(err);
-                sendError( connection, "Произошла ошибка при загрузке пакета с показаниями датчиков" );
-            } else {
-                sendMessage( connection, { class: "recordsPackage", package: pkg }, true );
-            }
-        }
+    let d = new Date();
+    d.setMonth(d.getMonth() - 1);
+    const querys = [];
+    const dots = {};
+    cachedConfig.sensors.forEach(
+        sensor => sensor.isConnected && querys.push( new Promise( ( resolve, reject ) => {
+            dots[ sensor.long ] = [];
+            sensorsLogs.find({
+                sensor: sensor.long,
+                date:{ $gte: d },
+                value:{ $ne: "nan" }
+            }, {
+                projection: {
+                    _id: 0,
+                    sensor: 0,
+                    farmName: 0
+                }
+            }).forEach(
+                doc => dots[ sensor.long ].push({ x: doc.date, y:doc.value }),
+                function (err) {
+                    if (err) {
+                        reject( err );
+                    } else {
+                        resolve();
+                    }
+                }
+            );
+        } ) )
     );
+    Promise.all( querys ).then( pkg => {
+        sendMessage( connection, { class: "recordsPackage", package: dots } );
+    }).catch( err => {
+        console.log(err);
+        sendError( connection, "Произошла ошибка при загрузке пакета со всеми показаниями датчиков" );
+    });
 }
 function sendNewestRecordsPackage( connection ) {
+    let d = new Date();
+    d.setMonth(d.getMonth() - 1);
     const querys = [];
     cachedConfig.sensors.forEach(
         sensor => sensor.isConnected && querys.push( new Promise( ( resolve, reject ) => {
@@ -342,8 +363,7 @@ WSServer.on("connection", (connection, request) => {
                 sendConfigPackage( connection );
                 break;
             case "recordsPackage":
-                // sendRecordsPackage( connection );
-                sendNewestRecordsPackage( connection );
+                sendRecordsPackage( connection );
                 break;
             case "exactSensorRecordsPackage":
                 sendExactSensorRecordsPackage( connection, data.sensor );
@@ -473,8 +493,8 @@ WSServer.on("connection", (connection, request) => {
     if ( farmConnection ) {
         sendActivityPackage( connection );
         sendConfigPackage( connection );
-        // sendRecordsPackage( connection );
         sendNewestRecordsPackage( connection );
+        sendRecordsPackage( connection );
     }
 });
 const cleaner = setInterval(() => {
