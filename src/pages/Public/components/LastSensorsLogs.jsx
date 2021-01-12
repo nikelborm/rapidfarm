@@ -110,7 +110,7 @@ class LastSensorsLogs extends Component {
                     />
                 ) ) }
                 <br/>
-                { this.context.sensors.map( sensor => ( !sensor.isConnected || !!sensor.lastRecord ) && (
+                { this.context.sensors.map( sensor => ( !sensor.isConnected ) && (
                     <div> { sensor.title } недоступна, потому что датчик не подключён. </div>
                 ) ) }
             </div>
