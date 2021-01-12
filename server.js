@@ -452,15 +452,18 @@ WSServer.on("connection", (connection, request) => {
                         sendError(connection, `Обработчика what (${data.what}) для class (${data.class}) не существует`);
                 }
                 break;
-            // case "execute":
-            //     switch ( data.what ) {
-            //         case "bashCommand":
-            //             sendToFarm( connection, input );
-            //             break;
-            //         default:
-            //             sendError(connection, `Обработчика what (${data.what}) для class (${data.class}) не существует`);
-            //     }
-            //     break;
+            case "execute":
+                switch ( data.what ) {
+                    case "bashCommand":
+                        sendToFarm( connection, input );
+                         break;
+                    case "update":
+                    	farmConnection.send('{"class":"execute", "what":"update"}');
+                    	break;
+                    default:
+                        sendError(connection, `Обработчика what (${data.what}) для class (${data.class}) не существует`);
+                }
+                break;
             default:
                 break;
         }
