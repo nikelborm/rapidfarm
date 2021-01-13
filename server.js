@@ -167,7 +167,6 @@ async function registerAsUser(connection, body) {
             fullName: insertationResult.ops[ 0 ].fullName,
             password: insertationResult.ops[ 0 ].password,
             email: insertationResult.ops[ 0 ].email,
-
         };
         rp.isError = false;
         rp.info = "Регистрация успешна";
@@ -253,7 +252,7 @@ function sendNewestRecordsPackage( connection ) {
         sensor => sensor.isConnected && querys.push( new Promise( ( resolve, reject ) => {
             let oneLog;
             sensorsLogs.find(
-                { sensor: sensor.long,value:{$ne:"nan"} }, { projection: { farmName: 0 }}
+                { sensor: sensor.long,value:{$ne:"nan"} }, { projection: { farmName: 0, _id:0 }}
             ).sort( { _id: -1 } ).limit( 1 ).forEach(
                 doc => oneLog = doc,
                 function (err) {

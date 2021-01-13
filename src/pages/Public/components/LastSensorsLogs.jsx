@@ -8,6 +8,8 @@ const chartOptions = {
             usePointStyle: true,
         },
     },
+    // aspectRatio: 1,
+    maintainAspectRatio: false,
     elements: {
         point: {
             radius: 0,
@@ -63,23 +65,24 @@ class SensorVisualization extends PureComponent {
         const { lastTime, title, value, point, upperBorder, lowerBorder, data } = this.props;
         return (
             <div>
-                <Line
-                    data={{
-                        datasets: [
-                            {
-                                label: `${ title }${ point ? " ( " + point + " )" : "" }`,
-                                borderColor: 'rgba(225, 75, 75, 1)',
-                                data,
-                                fill: false,
-                                pointBorderWidth: 0,
-                            }
-                        ],
-                    }}
-                    options={
-                        chartOptions
-                    }
-                    height={ 150 }
-                />
+                <div className="chart-container" style={{height:"70vh"}}>
+                    <Line
+                        data={{
+                            datasets: [
+                                {
+                                    label: `${ title }${ point ? " ( " + point + " )" : "" }`,
+                                    borderColor: 'rgba(225, 75, 75, 1)',
+                                    data,
+                                    fill: false,
+                                    pointBorderWidth: 0,
+                                }
+                            ],
+                        }}
+                        options={
+                            chartOptions
+                        }
+                    />
+                </div>
                 <SensorText
                     lastTime={ lastTime }
                     title={ title }
@@ -93,13 +96,17 @@ class SensorVisualization extends PureComponent {
     }
 }
 class LastSensorsLogs extends Component {
+    shouldComponentUpdate( nextProps, nextState, nextContext ) {
+        return this.context.sensors !== nextContext.sensors ||
+        this.context.records !== nextContext.records;
+    }
     static contextType = GlobalContext;
     render() {
         return (
             <div>
                 { this.context.sensors.map( sensor => sensor.isConnected && !!sensor.lastRecord && (
                     <SensorVisualization
-                        key={ sensor.lastRecord._id }
+                        key={ sensor.long }
                         lastTime={ sensor.lastRecord.date }
                         value={ sensor.lastRecord.value }
                         title={ sensor.title }
@@ -111,7 +118,7 @@ class LastSensorsLogs extends Component {
                 ) ) }
                 <br/>
                 { this.context.sensors.map( sensor => ( !sensor.isConnected ) && (
-                    <div> { sensor.title } недоступна, потому что датчик не подключён. </div>
+                    <div key={ sensor.long }> { sensor.title } недоступна, потому что датчик не подключён. </div>
                 ) ) }
             </div>
         );

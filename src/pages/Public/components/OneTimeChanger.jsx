@@ -49,7 +49,7 @@ class OneTimeChanger extends PureComponent {
                         </StyledText>
                     </InputGroup>
                     { time.map( ( elem, index ) => (
-                        <InputGroup size="sm">
+                        <InputGroup size="sm" key={ index }>
                             <InputGroup.Prepend>
                                 <StyledText>
                                     { this.letters[ index ] }

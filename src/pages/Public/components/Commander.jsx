@@ -14,6 +14,7 @@ class Commander extends Component {
     onSubmit = event => {
         event.preventDefault();
         this.context.sendRawQuery( event.target.elements.command.value );
+        event.target.elements.command.value = "";
     };
     render() {
         return (
