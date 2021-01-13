@@ -31,6 +31,7 @@ class ProcessTimingsManager extends Component {
                 <BarWithOneKindOfTimings
                     timings={ timings }
                 />
+                <br/>
                 { isAuthorized && ( this.state.isEditMode
                     ? (
                         (<>
@@ -59,6 +60,7 @@ class ProcessTimingsManager extends Component {
                         </Button>
                     )
                 )}
+                <br/>
                 { timings.map(
                     ( oneTiming, timingIndex ) => (
                         <TimingRow
