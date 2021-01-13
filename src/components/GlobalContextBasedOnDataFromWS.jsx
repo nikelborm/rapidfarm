@@ -283,6 +283,11 @@ class GlobalContextBasedOnDataFromWS extends Component {
                     ...ps,
                     isFarmConnected: data.isFarmConnected
                 } ) );
+                if( !data.isFarmConnected ) return;
+                this.ws.send( { class: "get", what: "configPackage" } );
+                this.ws.send( { class: "get", what: "activitySyncPackage" } );
+                this.ws.send( { class: "get", what: "recordsPackage" } );
+                this.ws.send( { class: "get", what: "newestRecordsPackage" } );
                 break;
             case "timings":
                 this.setState( ps => {

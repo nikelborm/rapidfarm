@@ -317,8 +317,18 @@ function handlerSwitcher( type ) {
             return targetError;
     }
 }
-function prepare(input) {
-    return JSON.parse(input.toString());
+function prepare( input , connection ) {
+    let data;
+    let isError = true;
+    try {
+        data = JSON.parse( input.toString() );
+        isError = false;
+    } catch ( err ) {
+        connection.send();
+        sendError( connection, "Ошибка при парсинге запроса:" + input.toString() );
+        console.log('err: ', err);
+    }
+    return isError || data;
 }
 WSServer.on("connection", (connection, request) => {
     connection.isAlive = true;
@@ -326,7 +336,8 @@ WSServer.on("connection", (connection, request) => {
         connection.isAlive = true;
     } );
     const authorizationStep = async (input) => {
-        const data = prepare( input );
+        const data = prepare( input , connection );
+        if( !data ) return;
         if ( data.class === "logout" ) return;
         if(!["loginAsFarm","loginAsUser","registerAsUser","set","execute"].includes( data.class )) return;
         sendMessage(connection, {
@@ -352,7 +363,8 @@ WSServer.on("connection", (connection, request) => {
     }
     const publicQueriesHandler = (input) => {
         // TODO: Подумать над обработкой и защитой от ошибок в JSON.parse
-        const data = prepare( input );
+        const data = prepare( input , connection );
+        if( !data ) return;
         //* Пользовательские запросы которые можно обработать и без авторизации
         if ( data.class !== "get" ) return;
         switch ( data.what ) {
@@ -376,7 +388,8 @@ WSServer.on("connection", (connection, request) => {
         }
     };
     const farmQueriesHandler = (input) => {
-        const data = prepare( input );
+        const data = prepare( input , connection );
+        if( !data ) return;
         switch ( data.class ) {
             case "event":
                 // просто переслать всем онлайн пользователям
@@ -410,7 +423,8 @@ WSServer.on("connection", (connection, request) => {
         }
     };
     const userQueriesHandler = (input) => {
-        const data = prepare( input );
+        const data = prepare( input , connection );
+        if( !data ) return;
         switch ( data.class ) {
             case "set":
                 switch ( data.what ) {
@@ -455,10 +469,17 @@ WSServer.on("connection", (connection, request) => {
             case "execute":
                 switch ( data.what ) {
                     case "bashCommand":
-                        sendToFarm( connection, input );
+                        sendMessage( farmConnection, {
+                            class: "execute",
+                            what: "bashCommand",
+                            bashCommand: data.command,
+                            replyTo: connection.authInfo.email
+                        } );
                         break;
                     case "update":
-                        farmConnection.send('{"class":"execute", "what":"update"}');
+                    case "shutDownFarm":
+                    case "updateArduino":
+                        farmConnection.send( input );
                         break;
                     default:
                         sendError(connection, `Обработчика what (${data.what}) для class (${data.class}) не существует`);
@@ -469,7 +490,8 @@ WSServer.on("connection", (connection, request) => {
         }
     };
     const logout = (input) => {
-        const data = prepare( input );
+        const data = prepare( input , connection );
+        if( !data ) return;
         if ( data.class !== "logout" ) return;
         if ( connection.isAuthAsFarm ) {
             farmConnection = null;
@@ -488,17 +510,15 @@ WSServer.on("connection", (connection, request) => {
         sendMessage( connection, { class: "logout" } );
     };
     connection.addListener("message", function (input) {
-        console.log("Пришло в ws: ", prepare(input));
+        try {
+            console.log("Пришло в ws: ", JSON.parse( input.toString() ));
+        } catch (error) {
+            console.log("Ошибка при парсинге в JSON, ws on message : ", input);
+        }
     });
     connection.addListener("message", authorizationStep);
     connection.addListener("message", publicQueriesHandler);
     sendFarmState( connection );
-    if ( farmConnection ) {
-        sendActivityPackage( connection );
-        sendConfigPackage( connection );
-        sendNewestRecordsPackage( connection );
-        sendRecordsPackage( connection );
-    }
 });
 const cleaner = setInterval(() => {
     // Проверка на то, оставлять ли соединение активным
