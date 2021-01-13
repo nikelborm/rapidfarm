@@ -29,8 +29,8 @@ const chartOptions = {
                 spanGaps: true,
                 time: {
                     displayFormats: {
-                        day: 'Do MMM',
-                        hour: 'Do MMM HH часов',
+                        day: 'D.MM',
+                        hour: 'D.MM - HH ч',
                     }
                 }
             },
@@ -65,7 +65,7 @@ class SensorVisualization extends PureComponent {
         const { lastTime, title, value, point, upperBorder, lowerBorder, data } = this.props;
         return (
             <div>
-                <div className="chart-container" style={{height:"70vh"}}>
+                <div className="chart-container" style={{height:"60vh"}}>
                     <Line
                         data={{
                             datasets: [
