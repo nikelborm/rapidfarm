@@ -456,10 +456,10 @@ WSServer.on("connection", (connection, request) => {
                 switch ( data.what ) {
                     case "bashCommand":
                         sendToFarm( connection, input );
-                         break;
+                        break;
                     case "update":
-                    	farmConnection.send('{"class":"execute", "what":"update"}');
-                    	break;
+                        farmConnection.send('{"class":"execute", "what":"update"}');
+                        break;
                     default:
                         sendError(connection, `Обработчика what (${data.what}) для class (${data.class}) не существует`);
                 }
