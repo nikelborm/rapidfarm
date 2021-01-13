@@ -78,7 +78,7 @@ class SensorVisualization extends PureComponent {
                     options={
                         chartOptions
                     }
-                    height={ 120 }
+                    height={ 150 }
                 />
                 <SensorText
                     lastTime={ lastTime }
