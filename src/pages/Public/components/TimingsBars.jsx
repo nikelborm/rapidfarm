@@ -134,6 +134,7 @@ export class BarWithMultipleKindsOfTimingsInOneLine extends Component {
         } = this.props;
         const constructTimingsSet = process => (
             process?.isAvailable && <TimingsBar
+                key={ process.long }
                 timings={ process.timings }
                 shouldCalcTimingOpacity={ !opacitys }
                 amountOfTimings={ allTimings }
@@ -189,6 +190,7 @@ export class BarWithMultipleKindsOfTimingsInManyLines extends Component {
             process?.isAvailable && (
                 <StyledTimingsBarsContainer
                     theme={ { height, timeLineBgColor } }
+                    key={ process.long }
                 >
                     <TimingsBar
                         timings={ process.timings }
