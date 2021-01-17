@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import getCookie from "../tools/getCookie";
-import dayjs from 'dayjs';
+import dayjs from "dayjs";
 class SelfHealingWebSocket {
     constructor( downCallback, upCallback, allMessagesHandler, ...initializationArgs ) {
         this.initializationArgs = initializationArgs;
@@ -137,6 +137,8 @@ class GlobalContextBasedOnDataFromWS extends Component {
                     ...ps,
                     ...data.package
                 } ) );
+                this.ws.send( { class: "get", what: "recordsPackage" } );
+                this.ws.send( { class: "get", what: "newestRecordsPackage" } );
                 break;
             case "activitySyncPackage":
                 this.setState( ps => ( {
@@ -156,7 +158,7 @@ class GlobalContextBasedOnDataFromWS extends Component {
                         });
                         const reducedValues = values.reduce((acc, item) => {
                             const lastItem = acc[acc.length - 1];
-                            if (lastItem && dayjs(item.x).diff(dayjs(lastItem.x), 'minutes') > 20) {
+                            if (lastItem && dayjs(item.x).diff(dayjs(lastItem.x), "minutes") > 20) {
                                 acc.push({y: NaN, x: lastItem.x});
                             }
                             acc.push(item);
@@ -220,7 +222,7 @@ class GlobalContextBasedOnDataFromWS extends Component {
                             y: data.value,
                         }
                         const lastItem = records[sensor.long][records[sensor.long].length - 1];
-                        if (lastItem && dayjs(newRecord.x).diff(dayjs(lastItem.x), 'minutes') > 20) {
+                        if (lastItem && dayjs(newRecord.x).diff(dayjs(lastItem.x), "minutes") > 20) {
                             records[sensor.long].push({y: NaN, x: lastItem.x});
                         }
                         records[ sensor.long ].push( newRecord );
@@ -286,8 +288,6 @@ class GlobalContextBasedOnDataFromWS extends Component {
                 if( !data.isFarmConnected ) return;
                 this.ws.send( { class: "get", what: "configPackage" } );
                 this.ws.send( { class: "get", what: "activitySyncPackage" } );
-                this.ws.send( { class: "get", what: "recordsPackage" } );
-                this.ws.send( { class: "get", what: "newestRecordsPackage" } );
                 break;
             case "timings":
                 this.setState( ps => {
