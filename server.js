@@ -325,7 +325,7 @@ function prepare( input , connection ) {
     } catch ( err ) {
         connection.send();
         sendError( connection, "Ошибка при парсинге запроса:" + input.toString() );
-        console.log('err: ', err);
+        console.log("err: ", err);
     }
     return isError || data;
 }

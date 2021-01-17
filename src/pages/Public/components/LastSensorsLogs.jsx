@@ -1,6 +1,6 @@
 import React, { Component, PureComponent } from "react";
 import { GlobalContext } from "../../../components/GlobalContextBasedOnDataFromWS";
-import { Line } from 'react-chartjs-2';
+import { Line } from "react-chartjs-2";
 
 const chartOptions = {
     legend: {
@@ -24,13 +24,13 @@ const chartOptions = {
     scales: {
         xAxes: [
             {
-                type: 'time',
-                distribution: 'linear',
+                type: "time",
+                distribution: "linear",
                 spanGaps: true,
                 time: {
                     displayFormats: {
-                        day: 'D.MM',
-                        hour: 'D.MM - HH ч',
+                        day: "D.MM",
+                        hour: "D.MM - HH ч",
                     }
                 }
             },
@@ -71,7 +71,7 @@ class SensorVisualization extends PureComponent {
                             datasets: [
                                 {
                                     label: `${ title }${ point ? " ( " + point + " )" : "" }`,
-                                    borderColor: 'rgba(225, 75, 75, 1)',
+                                    borderColor: "rgba(225, 75, 75, 1)",
                                     data,
                                     fill: false,
                                     pointBorderWidth: 0,
